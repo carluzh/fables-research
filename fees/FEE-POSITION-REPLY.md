@@ -79,9 +79,25 @@ Daily probe-TVL check at $50k, for the duration of every GLD window. Added to op
    the keeper series, res.json), `fees/adjudication/` (both syntheses, the rebuttal, raw verdicts),
    and the three documents. Yahoo bar files are not committed; allvar.py expects them beside it.
    R's pulls and the review-pass journal go in the same repo.
-2. **The census fix is done.** `ur_now.mjs` now reads the USDG leg per pool (token0 on NVDA, GLD and
-   META; token1 on ETH and SPY). A fresh 24h run is in progress; its output replaces
-   `fees/data/ur_now.json` and is the first dollar-share baseline for the three flipped pools.
+2. **The census fix is done and rerun.** `ur_now.mjs` now reads the USDG leg per pool (token0 on
+   NVDA, GLD and META; token1 on ETH and SPY). The 24h window to 27 Aug 23:43 UTC, which is the
+   baseline every raise window is measured against:
+
+   | pool | swaps | UR by count | UR by dollars | top non-UR sender |
+   |---|---|---|---|---|
+   | ETH/USDG | 3,006 | 51.7% | 21.5% ($256k) | 0x8f10 14.2% |
+   | SPY/USDG | 2,253 | 21.0% | 27.5% ($145k) | 0x39b3 21.9% |
+   | NVDA/USDG | 1,068 | 14.7% | 16.7% ($26k) | 0x8f10 13.8% |
+   | GLD/USDG | 409 | 16.1% | 15.2% ($20k) | 0x1521 33.7% |
+   | META/USDG | 211 | 9.5% | 5.2% ($2k) | 0xc491 23.9% |
+   | rival ETH 0x54f7 | 19,208 | 19.8% | 22.5% | 0x520e 32.9% |
+   | rival SPY 0xe592 (625) | 9,121 | 13.7% | 21.9% | 0x6505 32.6% |
+   | rival SPY 0xfe2a (3499) | 11,116 | 56.3% | 62.9% | 0x4a86 14.6% |
+
+   Two things this settles. The router's dollar share of our raised pools is 15 to 28%, so the
+   revert trigger has a real quantity to move on all four; and the 35 bps SPY pool still takes 63%
+   of its dollars from the router, so the anomaly in open item 7 is current, not a one-day artefact.
+   `fees/data/ur_now.json` holds the per-sender breakdown.
 3. **Division of labour.** R takes the per-window ETH markouts (open item 1) and the six sender labels
    (open item 3). V keeps the census (done), the Sunday-override resolver test (open item 5), and
    the rewrite of the four stale review sections (open item 9). Monitoring per window as R listed:
