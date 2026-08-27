@@ -1,0 +1,893 @@
+[
+ {
+  "lens": "LP economics and microstructure: loss-versus-rebalancing per session tier, break-even fees, markouts, fee-band and block-time effects. Every ruling is judged by what it does to a passive LP's expected P&L, using tiervar_all(_gc).json, be_all.json, kall.json, now.json buckets and the keeper series, all re-run locally.",
+  "rulings": [
+   {
+    "id": "C1",
+    "verdict": "ACCEPT",
+    "confidence": 0.85,
+    "reasoning": "The concession reproduces exactly. Running be2.py prints SPY 1.00/0.24/0.28 and NVDA 1.00/0.23/0.05; be_all.json gives the same ratios (173/759, 717/2751). The 0.47/0.66 in the addendum and in R_01's SHAPE CHECK comment has no source. Putting SPY overnight back to 350 is right for LPs: the 7d overnight break-even is 1.6-1.7 bps (0.9 on 48h), so 350 is a 2x margin on the tier that carries most of SPY's dollars. NVDA overnight 750 is also right, but the rebuttal should say why in LP terms: NVDA's overnight tier carries 2x the open's volume per hour (2,964 vs 1,409 $/hr over 7d) and a 6.3 bps break-even, so the overnight tier is the load-bearing change for NVDA LP P&L, not a footnote. The one wrinkle is that this justification is break-even based, which contradicts the rebuttal's own P4 rule (see P4).",
+    "evidence": [
+     "be2.py output: SPY shape 1.00/0.24/0.28, NVDA 1.00/0.23/0.05; NVDA LOSING TO LVR (34.2% LVR APR vs 20.8% fee APR)",
+     "be_all.json SPY OVERNIGHT_7d 172.5, OVERNIGHT_48h 92.3; NVDA OVERNIGHT_7d 717.1, OVERNIGHT_48h 390.5",
+     "Recomputed from now.json with kall.json k: NVDA overnight vol/hr 2,964 vs open 1,409; overnight BE 6.3 bps (7d), 3.3 (48h)",
+     "script/recal/R_01_RecalibrateNvdaSpy.s.sol:54-56 (the unreproducible 0.47/0.66 targets)"
+    ],
+    "would_change_my_mind": "A per-tier markout showing NVDA overnight LP loss per dollar traded is well below the sigma^2/8 figure, which would make 480-500 (the variance-shape number) sufficient."
+   },
+   {
+    "id": "C2",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.75,
+    "reasoning": "Verified hour by hour. allvar.py's beta scales ES by the GLD/ES pre-market ratio (1.96); allvar_gc.py uses GC with beta 0.74. With GC filling the deep night, GLD overnight/open variance is 1.04 and closed/open 0.19; using the GC future alone for all hours gives 0.89 and 0.18. Gold's Asia (GC hour 20 ET is the highest-variance hour of the day at 9.7e-6) and London hours are real price discovery, so a flat weekday is the right shape for LPs. Two corrections to how it is stated: (1) the OVERNIGHT tier includes GLD ETF post-market prints at 16:00-18:00 ET (6.95e-6, 4.06e-6) which cover the 17:00-18:00 CME break where there is no reference price, so the 1.04 is slightly inflated by thin-print noise; (2) the CLOSED figure still assumes zero variance on Saturday and Sunday daytime, so it is a lower bound. Break-even recomputed with the GC fill and measured k (75.5): open 9.5 bps (7d) / 3.9 (48h), overnight 4.3 / 2.3, matching the rebuttal's 968/460 to within TVL rounding.",
+    "evidence": [
+     "allvar.py:37-40 (beta2 uses ES_F for every asset); allvar_gc.py REF lambda; tiervar_all_gc.json GLD OPEN 4.085e-6, OVERNIGHT 4.254e-6, CLOSED 7.73e-7",
+     "Local re-run: GLD/GC pre-market beta 0.742, GLD/ES 1.962; GC-only tiers ON/OPEN 0.89, CL/OPEN 0.18",
+     "Per-hour table: GLD ETF hour 16 var 6.95e-6, hour 17 4.06e-6 (CME daily break); GC hour 20 9.73e-6",
+     "Recomputed break-evens: GLD OPEN 7d 9.5 bps, 48h 3.9; OVERNIGHT 7d 4.3, 48h 2.3"
+    ],
+    "would_change_my_mind": "A weekend variance series from a 24/7 gold proxy (PAXG/XAUt) showing Saturday-Sunday variance comparable to weekday, which would move the closed tier up."
+   },
+   {
+    "id": "C3",
+    "verdict": "ACCEPT",
+    "confidence": 0.95,
+    "reasoning": "ur_now.json: ETH/USDG 1,426 of 2,772 swaps (51.4%) but $211k of $929k (22.7%) from the UniversalRouter. SPY is 17.3% by count and 22.8% by dollars. The wording change is required; for LP economics the dollar share is the one that matters because LVR and fees are both dollar-weighted.",
+    "evidence": [
+     "ur_now.json FABLES ETH/USDG swaps 2772, urC 1426, urV 211,135, totV 929k",
+     "ur_now.json FABLES SPY/USDG urC 287/1659, UR$ 22.8%"
+    ],
+    "would_change_my_mind": "Nothing; this is arithmetic."
+   },
+   {
+    "id": "C4",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.75,
+    "reasoning": "The direction of the concession is right: on the naive sigma^2/8 test the keeper does not clear LVR on any window (my recomputation: 7d fees $1,847 vs LVR $7.5-9.1k at 50-55% sigma, ratio 0.20-0.25; 24h realised 9.4 bps vs 11.6 bps break-even). But the rebuttal mislabels its number: the 1.55% vs 3.81% figure is DATA-PACK section 5 with no stated window; the 7d figure from res.json is 0.73% and 48h is 2.11%. More important for the wording: the naive test is an upper bound that ignores the fee band and block time. ETH hourly sigma is ~59 bps; a 9-23 bps fee is a wide no-trade band on a sub-second chain, so realised arb loss is likely a fraction of sigma^2/8 (this is exactly the arXiv 2404.05803 mechanism R cites). So 'has not been shown to clear LVR' should read 'cannot be assessed on the naive test; realised loss is bounded above by it and markouts are the only measurement'.",
+    "evidence": [
+     "res.json F-ETH a7 32.5%, a24 118.9%, k 44.3 -> 0.73% / 2.68% fee APR/k",
+     "DATA-PACK.md sec 5: ETH 1.55% (k 44.8) vs break-even 3.81%, window unstated",
+     "Recomputed from now.json F-ETH: 7d fees $1,847, vol $2.08M, realised 8.87 bps; naive LVR/week $7,504 (sigma 0.5) to $9,079 (0.55)",
+     "lvr7d.json: f/s^2 median 0.40 pips per pct^2, range 0.17-0.68; 19% of readings at the 450 floor"
+    ],
+    "would_change_my_mind": "Per-window markouts; if realised LP loss in flat-450 windows exceeds fees collected, the keeper is genuinely failing and C4's stronger wording stands."
+   },
+   {
+    "id": "C5",
+    "verdict": "ACCEPT",
+    "confidence": 0.9,
+    "reasoning": "All four stale sections are confirmed stale by local data: overnight-92% is contradicted by tiervar (0.26x open); closedSpike-inert is withdrawn by the addendum and the validator imposes no such relation (FablesRWA.setPoolConfig requires both spikes exceed openFloor, nothing about overnightFloor*spikeMult vs closedSpike); the quoter-exclusion hypothesis is falsified by the census; nothing has shipped (DATA-PACK sec 3 and 9). The GLD share line is window-dependent: res.json 24h has Fables $144k vs the 3000-pip pool's $66k.",
+    "evidence": [
+     "tiervar_all.json SPY OVERNIGHT/OPEN 0.26",
+     "src/FablesRWA.sol setPoolConfig validator (lines 55-95): no overnightFloor*spikeMult vs closedSpike ordering",
+     "ur_now.json UR counts; DATA-PACK.md sec 3 'NOTHING BELOW HAS BEEN CHANGED'",
+     "res.json F-GLD v24 144,390 vs R-GLD-v3-3000 v24 66,052"
+    ],
+    "would_change_my_mind": "Nothing; these are inspection facts."
+   },
+   {
+    "id": "C6",
+    "verdict": "ACCEPT",
+    "confidence": 0.85,
+    "reasoning": "Confirmed: SessionLib.classify:91-94 returns CLOSED from Friday close through Sunday, MarketCalendar.MAX_SESSION_LENGTH is 12 hours (line 112), and the holiday table is NYSE. For LPs the material exposure is Sunday 18:00-24:00 ET: GC reopens then and its 20:00 ET hour is the highest-variance hour of the gold day, yet the hook prices it at closedFloor. At V2's 300 that is roughly $29/week of LVR on today's TVL (about 9% of GLD's weekly LVR), which is real but small, and today's weekend volume in the 7d window is zero, so the closed tier is currently moot for P&L. The concession's sequencing (contracts change ahead of any calendar re-spec) is right; it should add that the exposure grows the moment weekend gold flow arrives.",
+    "evidence": [
+     "src/libraries/SessionLib.sol:91-94 (Friday after close, Saturday, Sunday -> CLOSED)",
+     "src/base/MarketCalendar.sol:112 MAX_SESSION_LENGTH = 12 hours",
+     "Recomputed: GLD CLOSED 7d vol/hr 0; GC hour-20 variance 9.73e-6; Sunday-evening LVR ~ (8e-6/8)*75.5*$64k*6h ~ $29/wk vs weekly LVR $311"
+    ],
+    "would_change_my_mind": "Evidence of meaningful Sunday-evening GLD volume, which would justify an interim higher closed tier for GLD before the contracts fix."
+   },
+   {
+    "id": "C7",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.8,
+    "reasoning": "A dated window, count and dollar share, and a revert trigger are necessary. From an LP lens they are not sufficient: share is a flow metric and can rise while LPs lose (arb flow) or fall while LPs gain (arb leaving). Add per-tier realised fee and a per-tier LP markout (fees collected minus mark-to-reference loss over the window) as the success metric, and define the revert trigger on routed-dollar share rather than total share, because total share on these pools is dominated by a handful of contract senders.",
+    "evidence": [
+     "ur_now.json top non-UR senders: SPY 0x39b3 20.6%, GLD 0x6505 34.9%, NVDA 0x6ddb 31.7% of dollars",
+     "FEE_BENCHMARKING_REPORT.md:87, 112 (R's two-week, >20% share revert protocol)"
+    ],
+    "would_change_my_mind": "A demonstration that share and LP markout move together on these pools, which would make the simpler metric adequate."
+   },
+   {
+    "id": "C8",
+    "verdict": "ACCEPT",
+    "confidence": 0.7,
+    "reasoning": "At $1.0-2.6k TVL the dollar P&L is cents per day, and k is measured on 16-66 swaps, so break-even numbers for these pools are noise. Correct to leave them out of a fee batch. One guard worth adding at zero cost: the current 500/350/300 configs would apply to any future seed, and AAPL's variance-based open break-even is 12.5-22.6 bps, so pre-setting a variance-shaped ladder before capital arrives would prevent seeding at a losing price. That is a process note, not a reason to reject.",
+    "evidence": [
+     "kall.json n: AAPL 33, TSLA 66, NVDA/SPY 98, SPY/GLD 16 swaps; TVL $1.0-2.3k",
+     "be_all.json AAPL OPEN_7d 2259, OPEN_48h 1251; res.json f24 for these pools $0.07-1.15"
+    ],
+    "would_change_my_mind": "A planned reseed date for any of the four, which would move them back into the batch."
+   },
+   {
+    "id": "P1",
+    "verdict": "UPHELD",
+    "confidence": 0.7,
+    "reasoning": "The rebuttal is right that the sign of any C change is an output of markouts. The naive test says the keeper is 4-5x under LVR on 7d and ~0.8x on 24h; the fast-block plus fee-band argument says that test overstates realised loss by an unknown factor on a sub-second chain with a 9-23 bps band. Neither supports 'down 30%' as a prior, and R's own list already puts markouts first. The effective C is not even a single number (f/s^2 spans 0.17-0.68 around a 0.40 median in the keeper series), so there is no defined baseline to cut from. Where R keeps some ground: at the top of the curve (fee pinned at 3000) the band is so wide relative to per-block sigma that arb loss is near zero while retail is taxed, so if markouts show anything it is most likely to be at the cap; the rebuttal should say the top of the curve is where the markout is most informative rather than 'sign open' everywhere.",
+    "evidence": [
+     "lvr7d.json / lvr24h.json: f/s^2 median 0.40, min 0.168, max 0.68; f range 450-3000",
+     "Recomputed 7d fee/LVR 0.20-0.25 at sigma 0.50-0.55; 24h realised 9.39 bps vs naive BE 11.6",
+     "FEE_BENCHMARKING_REPORT.md:115 (markouts first, then recalibrate)"
+    ],
+    "would_change_my_mind": "A measured block-time-adjusted LVR for Robinhood Chain (or per-window markouts) showing poked-high windows lose less than fees collected while volume is not depressed, which would justify leaving C alone or raising it, or the reverse for R's cut."
+   },
+   {
+    "id": "P2",
+    "verdict": "UPHELD",
+    "confidence": 0.6,
+    "reasoning": "The pushback survives. The intra-SPY evidence J3 cited is a 625 vs 3499 comparison, and even there the 3499 pool takes 70% of the 625 pool's dollar volume at 5.6x the fee with 74.8% of its dollars from the UniversalRouter, which is evidence of low elasticity, not high. Nobody has measured elasticity between 5 and 7.5 bps. For LP P&L the asymmetry favours the raise: at SPY's current 1.19x weekly coverage on a surge week, V2 lifts coverage to about 1.39x if volume holds and needs a volume loss above ~28% to leave LPs worse than today, while the 22.8% of dollars that arrive via the router are the only flow plausibly fee-sensitive at this band. The unresolved question, which C7's test answers, is why the router prefers a 35 bps pool on $105 tickets.",
+    "evidence": [
+     "ur_now.json rival SPY 0xfe2a: 4,951 swaps, UR 74.8% of dollars; rival 0xe592 UR 20.1%",
+     "res.json R-SPY-v4-3499 v24 $1.88M vs R-SPY-v4-625 $2.72M",
+     "Recomputed SPY weekly: LVR $335, fees $397 (1.19x); V2 fees ~$464 (1.39x) at held volume"
+    ],
+    "would_change_my_mind": "A controlled before/after on SPY showing routed-dollar share falls by more than the fee ratio rises, which would put the band inside the elastic region."
+   },
+   {
+    "id": "P3",
+    "verdict": "PARTLY",
+    "confidence": 0.65,
+    "reasoning": "The conclusion (do not wait) survives; the mechanism does not. Points 'follow the swap fees your liquidity actually earns', so an LP washing its own pool pays f*(1-s) per dollar and earns points proportional to f*s: both scale with f and the wash economics are invariant to the fee level. What is true for LPs is different: wash is non-toxic volume, so its fees offset LVR while it lasts, which makes the surge-window break-evens honestly lower; but it ends 5 October, so pricing to the 48h numbers is wrong and pricing to the 7d numbers (the higher ones) is right. That supports moving now on SPY and NVDA. Wash also makes C7's total-share metric unreliable, which is a second reason to define the trigger on routed dollars. Labelling the contract senders is worth doing and is not a gate.",
+    "evidence": [
+     "DATA-PACK.md sec 7: points paid pro rata on swap fees earned by liquidity, 24 Aug to 5 Oct",
+     "be_all.json: every pool's 48h break-even is roughly half its 7d break-even (SPY 418 vs 759, NVDA 2280 vs 2751, GLD 408 vs 998)",
+     "ur_now.json contract senders 0xb055, 0x8f10, 0x1521 on ETH; 0x6505 on GLD"
+    ],
+    "would_change_my_mind": "Evidence that the points formula rewards volume rather than fees earned, in which case a higher fee would indeed price out wash."
+   },
+   {
+    "id": "P4",
+    "verdict": "PARTLY",
+    "confidence": 0.7,
+    "reasoning": "The premise is right: per-tier break-even in pips folds in this week's volume mix and the variance ratios come from 730 days of bars. But the rule as stated ('break-even sets the open tier's level only') is wrong for LPs and V2 itself does not follow it. LP P&L is additive across tiers, so a tier under its own break-even loses money regardless of how pretty the shape is. V2's SPY overnight is 0.47x open against a 0.26 variance ratio, NVDA 0.75x against 0.48, META 0.78x against 0.44, and the NVDA/SPY suggestion is 1.0x against 0.66; only GLD follows the variance shape. In every one of those cases V2 picked the higher, break-even-based number, and for NVDA that choice is what carries LP P&L (the overnight tier holds 70% of NVDA's weekly volume; at the variance-shape 480 it would sit under its 630 pip 7d break-even). The defensible rule is: each tier at or above its own break-even with margin, and the variance shape as the prior where a tier's volume is too thin to measure (closed tiers, dust pools).",
+    "evidence": [
+     "tiervar_all_gc.json ratios: SPY ON/OPEN 0.26, NVDA 0.48, META 0.44, GLD 1.04, NVDA/SPY 0.66",
+     "fee-adjudication-rebuttal.md V2 table: SPY 750/350, NVDA 1000/750, META 900/700, GLD 1500/1500",
+     "Recomputed NVDA: overnight volume 225k of 320k weekly; overnight BE 6.3 bps (7d)"
+    ],
+    "would_change_my_mind": "A showing that the per-tier volume mix is stable across surge and non-surge weeks, which would let variance shape stand in for break-even everywhere."
+   },
+   {
+    "id": "P5",
+    "verdict": "UPHELD",
+    "confidence": 0.65,
+    "reasoning": "Correct that at $1.0k TVL the cross is evidence of nothing and that 'already the cheapest quote' is not a reason to preserve 5 bps; the depth law means being cheapest at $1k buys none of the $1.1M/day. Out of the batch is right. The suggested 700/700/250 is not supported by anything stable: be_all's 561/742 rest on 45-62 $/hr of volume and a k measured on 98 swaps, and a flat overnight contradicts the cross's 0.66 variance ratio. When seeded, price it to its variance (roughly 700/450/250 as a starting shape) and re-measure break-even once volume exists.",
+    "evidence": [
+     "be_all.json NVDA/SPY OPEN_7d 561, OVERNIGHT_7d 742; kall.json NVDA/SPY k 12.4 on n 98, TVL $1,030",
+     "Recomputed: NVDA/SPY open vol/hr $62, overnight $32",
+     "tiervar_all.json NVDA/SPY ON/OPEN 0.66, CL/OPEN 0.04",
+     "test/scratch/ProposedFees.t.sol:37 (900/650/250) vs rebuttal 700/700/250"
+    ],
+    "would_change_my_mind": "A funded reseed of the cross, which would make its break-even measurable and the number worth arguing about."
+   },
+   {
+    "id": "P6",
+    "verdict": "UPHELD",
+    "confidence": 0.7,
+    "reasoning": "From an LP's seat 1500 at the open is the robust choice, not the aggressive one. GLD LPs currently cover 0.65x of naive weekly LVR (fees $203 vs LVR $311 on 7d). Tripling the fee means LPs are better off than today unless volume falls by more than two thirds, and they reach break-even as long as volume holds above ~half. A widened fee band also cuts the arb loss itself. At 1000 the open tier would sit exactly on the 7d break-even with no margin for the surge fading. The 3000-pip venue holds 54% of 7d volume, so demand at 30 bps exists. J3's objection is pacing, and C7's revert trigger is the answer to it. The 48h break-even of 3.9 bps is the surge number and should not anchor the level.",
+    "evidence": [
+     "Recomputed GLD 7d: OPEN BE 9.5 bps, OVERNIGHT 4.3; weekly LVR $311, fees $203",
+     "be_all.json GLD OPEN_7d 998, OPEN_48h 408",
+     "DATA-PACK.md sec 6 and 13: 3000-pip v3 $155k TVL; 7d split 53.9% / 29.8%",
+     "ur_now.json GLD top sender 0x6505 34.9% of dollars (also 26.8% of rival SPY 0xe592): arb flow"
+    ],
+    "would_change_my_mind": "A per-tier GLD markout showing LPs are already net positive at 3.9 bps realised (the naive LVR overstating loss by 2x or more), or Fables' routed-dollar GLD share collapsing after the step."
+   },
+   {
+    "id": "L1",
+    "verdict": "MODIFY",
+    "confidence": 0.6,
+    "proposed_value": "SPY/USDG 750 / 350 / 250 with bells: spikeMult 6 (2100 at the bell), closedSpike 2100, descentWindow 7200, closeFloor 1500, closeBefore 1800, closeAfter 0; cap 8000",
+    "reasoning": "The three floors are acceptable: 750 sits at the 7d open break-even (7.7 bps recomputed, 4.3 on 48h), 350 is 2x the overnight break-even, 250 is 1.4x the closed break-even measured on a pre-routing weekend. Weekly LP coverage moves from 1.19x to about 1.39x at held volume. What V2 drops is the bells, which the V addendum and R_01 both established from 60 sessions of 5-minute bars: SPY 09:30-10:00 runs 3.40x mid-session variance and 15:30-16:00 1.77x. Those half-hours are where SPY's LVR is concentrated and a flat 750 charges them at the session average. ProposedFees.t.sol:31 has spikeMult 0. The validator accepts 350*6 = 2100 > 750 and closedSpike 2100 > 750. If the panel wants a single-step level, 900 (R_01) is defensible on LP grounds but 750 with bells captures more of the toxic minutes than 900 without them.",
+    "evidence": [
+     "Recomputed SPY: OPEN BE 7d 7.7 bps / 48h 4.3; OVERNIGHT 1.6 / 0.9; CLOSED 1.8; weekly LVR $335 vs fees $397",
+     "DATA-PACK.md sec 4 bells table: SPY 3.40x / 1.77x / 0.57x",
+     "test/scratch/ProposedFees.t.sol:31 (750/450/250, no bells); R_01 spyConfig (900/450/250, spikeMult 6, closeFloor 2200)",
+     "src/FablesRWA.sol setPoolConfig: overnightFloor*spikeMult and closedSpike must exceed openFloor"
+    ],
+    "would_change_my_mind": "An on-chain SPY swap sample large enough to show the first 30 minutes carry no more volume-weighted loss than mid-session, which would make the bells unnecessary."
+   },
+   {
+    "id": "L2",
+    "verdict": "MODIFY",
+    "confidence": 0.5,
+    "proposed_value": "NVDA/USDG 1400 / 750 / 300, spikeMult 5 (3750 at the bell), closedSpike 3750, descentWindow 7200, closeFloor 3000, closeBefore 1800, closeAfter 0; cap 8000. 1000 is acceptable only as stage 1 with a dated stage 2.",
+    "reasoning": "NVDA is the one pool where V2 leaves LPs underwater by its own numbers. Recomputed weekly: LVR $287 against fees $171 today (0.60x). At 1000/750/300 with the bells, fees reach roughly $265-270, still about 0.93x, and that is on surge-week volume. The overnight tier at 750 does most of the work (overnight holds 225k of 320k weekly dollars, break-even 6.3 bps), which is why it must not drop to the variance-shape 480. The open tier at 1000 stays 2.3-2.8x under its 22.9-27.6 bps break-even; 1400 is the level V's own script chose and justified as the largest step inside the range where same-chain NVDA pools already trade (3499 and 10990 pips), and it lifts weekly coverage to about 1.0x. NVDA has 0.1-0.3% of the pair and 6.3% of its dollars from the router, so there is no routed flow to protect; the flow at the open is arb (0x6ddb 31.7%, 0xb055 12.0%). closeAfter 0 is right: 16:00-16:15 measures 0.51x mid-session.",
+    "evidence": [
+     "Recomputed NVDA: OPEN BE 27.6 (7d) / 22.9 (48h) bps; OVERNIGHT 6.3 / 3.3; CLOSED 1.6; weekly LVR $287, fees $171",
+     "be2.py: NVDA LVR APR 34.2% vs fee APR 20.8%, LOSING TO LVR",
+     "ur_now.json NVDA: UR 84 of 835 swaps, 6.3% of dollars; 0x6ddb 31.7%, 0xb055 12.0%",
+     "script/recal/R_01_RecalibrateNvdaSpy.s.sol nvdaConfig and LEVEL comment (14 bps as the largest in-range step); test/scratch/ProposedFees.t.sol:32"
+    ],
+    "would_change_my_mind": "A markout showing NVDA's open-session arb flow already stops being profitable for the arb below 10 bps (so LP loss at 1000 is much smaller than the formula), or evidence the 5 bps v3 venue's routed flow would reach Fables at 10 but not 14."
+   },
+   {
+    "id": "L3",
+    "verdict": "ACCEPT",
+    "confidence": 0.65,
+    "proposed_value": "GLD/USDG 1500 / 1500 / 300, no bells, cap 8000",
+    "reasoning": "Flat weekday is what the GC-filled variance says (1.04, or 0.89 on GC alone), and the equity bells do not map to gold so leaving them off is correct. 1500 is 1.55x the 7d open break-even and 3.3x the overnight; the overnight margin looks large but the overnight flow is the arb channel (0x6505), which is the flow LPs want priced. 300 closed is 0.2x, matching the 0.19 closed variance ratio, and is moot until weekend volume exists (zero in the 7d window). Two caveats stay attached: Sunday 18:00-24:00 ET prices live gold at 300 until C6's contracts fix, and the weekend variance is a lower bound.",
+    "evidence": [
+     "tiervar_all_gc.json GLD: ON/OPEN 1.04, CL/OPEN 0.19; GC-only 0.89 / 0.18",
+     "Recomputed GLD: OPEN BE 9.5 bps (7d), OVERNIGHT 4.3, CLOSED vol/hr 0; weekly LVR $311, fees $203",
+     "src/libraries/SessionLib.sol:91-94; ur_now.json GLD 0x6505 34.9% of dollars"
+    ],
+    "would_change_my_mind": "Weekend on-chain gold flow appearing at meaningful size, which would push the closed tier up before the calendar fix lands."
+   },
+   {
+    "id": "L4",
+    "verdict": "ACCEPT",
+    "confidence": 0.65,
+    "proposed_value": "META/USDG 900 / 700 / 250 inside R's two-week protocol, cap 8000",
+    "reasoning": "META's overnight break-even (6.5 bps recomputed, 7.1 in be_all) sits above its open (5.7) because overnight volume per hour is a third of the open's, so 700 overnight is the LP-correct choice even though it breaks the variance shape (0.44). Weekly coverage goes from 0.67x to about 1.3x at held volume. 250 closed matches a 0.03 closed variance ratio; R's 500 would tax a window with no reference price. k is only 13.6 on META (wide ranges) so its LVR per dollar is the lowest of the equity pools, which is why a modest raise clears it. The protocol should measure per-tier realised fee and markout, not share alone, since UR is 1.5% of META swaps and the share trigger would mostly register arb departure.",
+    "evidence": [
+     "Recomputed META: OPEN BE 5.7 (7d) / 2.4 (48h); OVERNIGHT 6.5 / 3.4; weekly LVR $57, fees $38",
+     "tiervar_all.json META ON/OPEN 0.44, CL/OPEN 0.032; kall.json META k 13.6",
+     "ur_now.json META UR 11 of 736 swaps"
+    ],
+    "would_change_my_mind": "Identification of META's 30-35 bps rivals' flow as routed retail that Fables could win at 5 but not 9 bps."
+   },
+   {
+    "id": "L5",
+    "verdict": "ACCEPT",
+    "confidence": 0.7,
+    "proposed_value": "ETH/USDG: no config change; per-window LP markouts first; sign of any C change is an output",
+    "reasoning": "On the naive test the keeper is under LVR on every window (0.20-0.25x on 7d, ~0.8x on 24h), but the naive test is an upper bound that ignores a 9-23 bps band on a sub-second chain. Neither cutting nor raising C is supported until markouts exist. The markout design should split windows by fee level (450 floor, mid, 3000 cap), measure whether volume times itself into floor windows given the public poke value and TTL, and look hardest at the cap, where the band is widest relative to per-block sigma and over-taxing retail is most likely.",
+    "evidence": [
+     "Recomputed ETH 7d: fees $1,847 vs naive LVR $7.5-9.1k; 24h realised 9.39 bps vs BE 11.6",
+     "lvr7d.json f/s^2 median 0.40, range 0.17-0.68; fee pinned at 3000 repeatedly",
+     "DATA-PACK.md sec 14-16: realised 9.63 bps to LPs, 0% zero-fee swaps"
+    ],
+    "would_change_my_mind": "Markouts by fee window; a finding that floor windows lose more than they collect while poked windows are net positive would justify raising the floor rather than touching C."
+   },
+   {
+    "id": "L6",
+    "verdict": "ACCEPT",
+    "confidence": 0.6,
+    "proposed_value": "AAPL, TSLA, SPY/GLD, NVDA/SPY: out of the batch; price to own variance when reseeded (starting shapes roughly AAPL 1000/400/250, TSLA 1200/500/300 with existing bells, NVDA/SPY 700/450/250, SPY/GLD 700/450/250)",
+    "reasoning": "At $1.0-2.6k TVL the LP P&L is cents a day and every break-even is built on a k from 16-98 swaps and volume of $6-62 per hour, so no number is stable. Leaving them alone is right. The one thing the batch should not do is copy SPY's ladder onto them: AAPL's open variance is 2.8x SPY's, TSLA's 11.5x, and their overnight/open ratios (0.36, 0.30) are deeper discounts than SPY's. Pre-setting variance-shaped ladders costs one transaction each and guards against seeding at a losing price; it is optional, not a condition.",
+    "evidence": [
+     "kall.json n and TVL for the four pools; res.json f24 $0.07-1.15",
+     "tiervar_all.json AAPL OPEN 1.20e-5 (ON/OPEN 0.36), TSLA 5.02e-5 (0.30), NVDA/SPY 0.66, SPY/GLD 0.65",
+     "be_all.json AAPL OPEN_7d 2259, TSLA OPEN_7d 2877, SPY/GLD OPEN_7d 1220"
+    ],
+    "would_change_my_mind": "A funded reseed of any of them, which would make its own break-even measurable."
+   }
+  ],
+  "rebuttal_errors": [
+   {
+    "claim": "C4: 'Fee APR / k is 1.55% against a sigma squared over eight of 3.81% on the 7d window'",
+    "correction": "The 1.55% is DATA-PACK section 5's figure with no stated window. The 7d figure from res.json is 0.73% (32.5% / 44.3); 48h is 2.11%; 24h is 2.68%. No local window produces 1.55%.",
+    "evidence": "res.json F-ETH a7 32.5, a24 118.9; DATA-PACK.md sec 5 (measured 2026-08-26, window unstated)"
+   },
+   {
+    "claim": "P4: 'the tier shape should follow variance ... which is what C1 now does' and the V2 ladder is presented as following that rule",
+    "correction": "V2 follows the variance shape only on GLD. SPY overnight is 0.47x open against a 0.26 variance ratio, NVDA 0.75x against 0.48, META 0.78x against 0.44, and P5's cross suggestion is 1.0x against 0.66. In each case V2 chose the higher break-even-based number, which is the right choice for LPs but is the opposite of the rule P4 states.",
+    "evidence": "tiervar_all_gc.json ratios; rebuttal V2 table"
+   },
+   {
+    "claim": "P3: 'a higher fee makes the wash dearer and shrinks it'",
+    "correction": "Points are paid pro rata on swap fees earned by liquidity, so an LP washing its own pool pays f*(1-s) and earns points on f*s per dollar; both scale with the fee, so the wash's cost-per-point is invariant to the fee level. The valid argument is that wash volume ends 5 October and so the 48h break-evens should not anchor the level.",
+    "evidence": "DATA-PACK.md sec 7 (points follow swap fees your liquidity earns, 24 Aug to 5 Oct)"
+   },
+   {
+    "claim": "C1: 'NVDA overnight 750 stands ... its 7d break-even is 717 pips' offered as consistent with the rebuttal's framework",
+    "correction": "Correct number (be_all.json 717; 630 when recomputed with kall.json's k 20.7 and now.json TVL) but the justification is break-even based on a non-open tier, which contradicts P4's 'break-even should set the open tier's level only'. The rebuttal's own rule would put NVDA overnight near 480, under its break-even.",
+    "evidence": "be_all.json NVDA OVERNIGHT_7d 717.1; tiervar NVDA ON/OPEN 0.48"
+   },
+   {
+    "claim": "P5: when seeded the cross 'should be priced around 700 / 700 / 250'",
+    "correction": "A flat overnight contradicts the cross's measured overnight/open variance ratio of 0.66, and the 561/742 break-evens rest on $32-62 per hour of volume and a k from 98 swaps at $1,030 TVL, so no level is supportable today. ProposedFees.t.sol:37 carries a third number (900/650/250).",
+    "evidence": "tiervar_all.json NVDA/SPY; kall.json NVDA/SPY; be_all.json NVDA/SPY"
+   },
+   {
+    "claim": "C2: 'Gold's weekday overnight is as volatile as its US session' (1.04)",
+    "correction": "Directionally right, but the OVERNIGHT average includes GLD ETF post-market prints for 16:00-18:00 ET (6.95e-6 and 4.06e-6 per hour), the second of which is the CME daily break with no reference price; those are thin-print variances. Using the GC future for every hour gives 0.89, still flat enough to justify a flat weekday.",
+    "evidence": "Local per-hour table from y_GLD_1h.json and y_GC_F_1h.json; GC-only tiers ON/OPEN 0.89"
+   },
+   {
+    "claim": "V2 SPY row: '750 / 350 / 250' presented as the full SPY proposal",
+    "correction": "Omits the opening and closing bells that the V addendum and R_01 established for SPY (09:30-10:00 at 3.40x and 15:30-16:00 at 1.77x mid-session variance). ProposedFees.t.sol:31 has spikeMult 0 while R_01's spyConfig has spikeMult 6 and closeFloor 2200; the rebuttal does not say which shape V2 intends.",
+    "evidence": "DATA-PACK.md sec 4 bells table; test/scratch/ProposedFees.t.sol:31; script/recal/R_01_RecalibrateNvdaSpy.s.sol spyConfig"
+   }
+  ]
+ },
+ {
+  "lens": "Competitive positioning and flow: who routes where and why, elasticity of routed retail versus arbitrage flow, and what a raise of this size does to volume and share. Every ruling is judged by what the move does to Fables' share of each pair and to the composition (routed retail vs arb) of the volume that remains.",
+  "rulings": [
+   {
+    "id": "C1",
+    "verdict": "ACCEPT",
+    "confidence": 0.65,
+    "reasoning": "The concession is correct: no local artefact reproduces the 0.47/0.66 overnight shape. be_all.json gives SPY 1.00/0.23/0.24 and NVDA 1.00/0.26/0.06 (7d), be2.py with the older k gives 0.24/0.23. SPY overnight back to 350 is right on the flow lens as well: overnight SPY volume per hour exceeds in-session volume and is ES-driven arb, the static rivals charge 500/625/3499 around the clock, so 350 remains the cheapest non-dust venue overnight and nothing routed is at stake; 350 also keeps a 2x margin over the 173-pip 7d break-even. NVDA overnight 750 is defensible but the rebuttal's stated reason changed: it now rests on the 7d break-even (717) rather than on shape, and the 48h figure is 390, so 750 is at the top of the evidenced band. Fables holds 0.1-0.3% of NVDA, UR is 10.1% of its swaps and 6.3% of its dollars, so 750 costs no share; it just is not the number P4's rule would produce (1000 x 0.48 = 480). I accept it because the overnight tier also prices the 09:00-09:30 pre-market and NVDA has real extended-hours discovery, and because the pool has no routed share to lose.",
+    "evidence": [
+     "scratchpad/be_all.json SPY OPEN_7d 759 / OVERNIGHT_7d 173 / CLOSED_7d 178; NVDA OPEN_7d 2751 / OVERNIGHT_7d 717 / OVERNIGHT_48h 390",
+     "scratchpad/tiervar_all.json computed ratios: SPY overnight/open 0.261, NVDA 0.478",
+     "scratchpad/ur_now.json: FABLES NVDA urC 84/835 (10.1%), urV 6.3%; FABLES SPY UR 22.8% of dollars",
+     "now.json daily share table: F-NVDA 0.1-0.3% of the pair every day 08-20 to 08-27",
+     "be3.py: SPY OVERNIGHT vol/hr exceeds OPEN vol/hr (arb channel)"
+    ],
+    "would_change_my_mind": "A per-window markout on NVDA overnight showing LPs net positive at 400 (then 750 is a pure volume cut), or evidence that NVDA overnight flow contains routed retail rather than arb."
+   },
+   {
+    "id": "C2",
+    "verdict": "ACCEPT",
+    "confidence": 0.8,
+    "reasoning": "Verified exactly. allvar.py loads GC_F and never uses it; allvar_gc.py keys the fill on GC_F for GLD. tiervar_all_gc.json gives overnight/open 1.041 (was 0.827) and closed/open 0.189 (was 0.068). Scaling be_all's GLD break-evens by the variance change reproduces the rebuttal's 968 open and 460 overnight to the pip. The flow consequence is the important part: gold's weekday overnight is as toxic as its US session, so an equity-style overnight discount would price the hours the arb channel (0x6505, 35% of GLD dollars, 1084 swaps) is most active. Flat weekday is right. One thing the concession does not say and should: on the GC fill every unit of CLOSED-tier variance sits in Sunday 18:00-24:00 ET (the script fills the rest of the weekend with zero), which makes those six hours 1.77x the OPEN hourly variance. That drives the L3 modification.",
+    "evidence": [
+     "scratchpad/allvar.py:8,35 (GC_F loaded, never used in tiervar); allvar_gc.py REF lambda",
+     "scratchpad/tiervar_all_gc.json GLD OPEN 4.09e-6, OVERNIGHT 4.25e-6, CLOSED 7.73e-7",
+     "computed: 998 x 0.970 = 968; 377 x 1.221 = 460",
+     "computed: CLOSED 7.73e-7 x 56/6 = 7.21e-6 per hour on Sunday evening = 1.77x OPEN",
+     "ur_now.json FABLES GLD: 0x65050a9b 34.9% of dollars, 1084 swaps; same sender 26.8% of rival SPY 0xe592"
+    ],
+    "would_change_my_mind": "A weekend GLD fill from an on-chain gold proxy showing Saturday variance is not near zero, which would raise the closed tier rather than just the Sunday evening."
+   },
+   {
+    "id": "C3",
+    "verdict": "ACCEPT",
+    "confidence": 0.95,
+    "reasoning": "ur_now.json: 1,426 of 2,772 ETH swaps (51.4%) but $211k of $929k (22.7%). Counts and dollars diverge because UR tickets are small. For a flow decision the dollar share is the one that matters and 22.7% is the routed share at stake on ETH; it is also roughly the same on SPY (22.8%) and GLD (22.6%). Note the same script's dollar figures for NVDA, GLD and META use the wrong decimals leg (totV ~1e14) so only their percentages within the pool are usable, not absolute dollars.",
+    "evidence": [
+     "scratchpad/ur_now.json FABLES ETH/USDG swaps 2772, urC 1426, urV 211135, totV 9.29e5",
+     "scratchpad/ur_now.mjs line: const v=Math.abs(Number(l.args.amount1))/1e6 (assumes amount1 is USDG)"
+    ],
+    "would_change_my_mind": "Nothing; this is arithmetic."
+   },
+   {
+    "id": "C4",
+    "verdict": "ACCEPT",
+    "confidence": 0.8,
+    "reasoning": "DATA-PACK section 5 puts Fables ETH at 1.55% fee yield / k against a 3.81% sigma^2/8 break-even; the 24h surge days reach 2.7-3.1%. So 'the keeper works' is only a revenue-capture claim (9.63 bps realised to LPs, highest on the pair, 0% zero-fee swaps). On the flow lens the keeper is not losing routed flow: ETH turns over 4.37x TVL per day against the dominant native venue's 3.19x at a higher fee, and UR is 51% of swaps. So there is no competitive reason to touch C in either direction before markouts.",
+    "evidence": [
+     "Writing/content-plan/DATA-PACK.md section 5 table (ETH 55% sigma, 3.81% break-even, Fables 1.55% at k 44.8)",
+     "DATA-PACK.md section 6 (4.37x vs 3.19x turnover) and section 16 (9.63 bps to LPs, 0% zero-fee)",
+     "res.json F-ETH a24 118.9 / a7 32.5"
+    ],
+    "would_change_my_mind": "Per-window markouts showing poked-high windows are net positive for LPs, which would make 'works' true in the LP sense."
+   },
+   {
+    "id": "C5",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.75,
+    "reasoning": "All four stale passages are real and the census falsifies the hook-exclusion hypothesis (UR now sends 51% of ETH swaps and 17% of SPY swaps to hooked Fables pools). The GLD share correction is right on the 7d window (v3-3000 53.9%, Fables 29.8%). The change: 'on 27 Aug Fables out-traded the incumbent' is a partial day (now.json fetched 11:20 UTC, $46.8k vs $21.7k); the honest sentence is the trailing 24h ($135k vs $54k) and it should carry DATA-PACK's own caveat that the incumbent's volume had collapsed from $292k to $66k that day. Both documents should stop quoting GLD share from single windows; the daily series swings from 1.3% to 66.9% in four days.",
+    "evidence": [
+     "now.json daily table: F-GLD 08-24 $4.2k / 08-25 $285k / 08-26 $208k / 08-27 (partial) $46.8k; R-GLD-v3-3000 $244k / $564k / $132k / $21.7k",
+     "now.json 7d: R-GLD-v3-3000 $984k, F-GLD $544k, R-GLD-v3-10000 $298k",
+     "DATA-PACK.md section 2 (11 UR swaps pre-approval) and section 13 (incumbent collapsed 292k to 66k)",
+     "FEE-AND-APR-REVIEW.md lines 107-119, 319-333, 410-412, 520-524"
+    ],
+    "would_change_my_mind": "Nothing on the concession itself; the change is a wording precision."
+   },
+   {
+    "id": "C6",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.7,
+    "reasoning": "The mismatch is real: SessionLib.classify returns CLOSED from Friday 16:00 ET through Sunday, MAX_SESSION_LENGTH is 12h, the baked table is NYSE. But 'it is a contracts change, not a config' is wrong on inspection for the part that matters most. CalendarLib._classify passes force = (override bits == 2) into SessionLib.classify, which then skips the weekend rule, so a FORCE_OPEN bit on each Sunday makes that day price OPEN 09:30-16:00 and OVERNIGHT otherwise. With a flat 1500/1500 weekday that puts the whole of Sunday at 1500, which captures the Sunday 18:00 ET reopen (the only non-zero variance in the CLOSED tier, 1.77x OPEN per hour) at the cost of over-pricing Sunday 00:00-18:00 when nothing trades against a reference. setDayOverrides takes a monthly bitmap and the closure cap does not count force-opens, so it is four or five bits a month. NYSE holidays COMEX trades on are the same mechanism. Only the daily 17:00-18:00 break and a session longer than 12h need bytecode. So: accept the finding, change the action to 'Sunday FORCE_OPEN overrides now, contracts change later'.",
+    "evidence": [
+     "fables-contracts/src/libraries/CalendarLib.sol _classify: bool force = bits == 2; SessionLib.classify(..., closedDay, force)",
+     "fables-contracts/src/libraries/SessionLib.sol classify: Friday-after-close CLOSED unconditionally; weekend rule inside if (!forceTradingDay)",
+     "fables-contracts/src/base/MarketCalendar.sol setDayOverrides (per-month bitmap, MAX_FORCED_CLOSURES counts bit0 only), MAX_SESSION_LENGTH = 12 hours",
+     "tiervar_all_gc.json GLD CLOSED 7.73e-7 over 56h, all of it from allvar_gc.py's Sunday >= 18:00 fill"
+    ],
+    "would_change_my_mind": "A test showing FORCE_OPEN on a Sunday still resolves CLOSED somewhere in the fee path (I read CalendarLib and SessionLib, not the full FablesRWA resolver), or measured Sunday-daytime GLD retail volume large enough that pricing it at 15 bps costs real flow."
+   },
+   {
+    "id": "C7",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.75,
+    "reasoning": "Right, and it is the concession that makes every other raise safe from the flow side. Two changes so it can actually run. First, fix ur_now.mjs before the window opens: it divides amount1 by 1e6 on every pool, so the dollar shares for NVDA, GLD and META are garbage (totV ~1e14) and the protocol's dollar metric cannot be computed for three of the four pools being raised. Second, the share metric should split UR dollars from non-UR dollars, not just counts from dollars: on META UR is 1.5% of swaps and on NVDA 10%, so a total-share trigger on those pools measures arb departure, which is the intended effect, and would fire a revert on success. The revert trigger should apply to UR-dollar share only; total volume is expected to fall.",
+    "evidence": [
+     "scratchpad/ur_now.mjs: /1e6 on amount1 for every pool; ur_now.json totV 6.25e14 (NVDA), 5.17e14 (GLD), 1.2e14 (META)",
+     "ur_now.json: FABLES META urC 11/736 (1.5%); FABLES NVDA 84/835 (10.1%)",
+     "FEE_BENCHMARKING_REPORT.md lines 87, 112 (two-week window, >20% share-loss revert)"
+    ],
+    "would_change_my_mind": "Nothing on the principle; the changes are what makes it executable."
+   },
+   {
+    "id": "C8",
+    "verdict": "ACCEPT",
+    "confidence": 0.9,
+    "reasoning": "AAPL $2.3k, SPY/GLD $1.6k, TSLA $1.1k, NVDA/SPY $1.0k of TVL, with $0.2k-$2.9k a day of volume. There is no share to win or lose at any fee; k is measured on 16-98 swaps. Leave them, and when reseeded price to each pool's own variance (AAPL open sigma 32.5% vs SPY 19.5%; TSLA 66.3%).",
+    "evidence": [
+     "res.json / DATA-PACK.md section 1: TSLA 1,081 / AAPL 2,320 / SPY-GLD 1,590 / NVDA-SPY 1,030 TVL",
+     "kall.json n: AAPL 33, TSLA 66, NVDA/SPY 98, SPY/GLD 16",
+     "DATA-PACK.md section 4 sigma table"
+    ],
+    "would_change_my_mind": "A seeding commitment for any of them, at which point its ladder needs its own ruling."
+   },
+   {
+    "id": "P1",
+    "verdict": "UPHELD",
+    "confidence": 0.75,
+    "reasoning": "The synthesis ruled R on sequencing (markouts first), which is not in dispute; the rebuttal attacks the word 'down', and it is right. The only local LVR evidence says the keeper is under sigma^2/8 on the 7d window (1.55% vs 3.81%), so the naive test points up, and if the naive test overstates LVR on a fast chain there is no measured deficit either way. 'Down ~30%' is a mainnet literature prior with no local artefact. From the flow side there is no pressure to cut: the ETH pool realises the highest fee per dollar on the chain and still turns over faster than the dominant venue, and UR volume grew through the days the fee sat at 15-23 bps. R's action item 5 should read 'recalibrate C, sign from markouts'.",
+    "evidence": [
+     "DATA-PACK.md section 5 (1.55% vs 3.81%) and section 14 fee-path table (23.24 bps peak while UR volume kept growing)",
+     "lvr7d.json / lvr24h.json: effective fee 450 to 3000, no measured C baseline",
+     "FEE_BENCHMARKING_REPORT.md lines 64-75, 115",
+     "round1 synthesis I9: all three judges say the 30% is a literature prior"
+    ],
+    "would_change_my_mind": "A markout study showing LPs lose in the poked-high windows and not in the floor windows, which would be the empirical case for lowering C."
+   },
+   {
+    "id": "P2",
+    "verdict": "UPHELD",
+    "confidence": 0.7,
+    "reasoning": "The decisive flow fact is not just that the 34.99 bps SPY pool takes 74.8% of its own dollars from the UniversalRouter; it is that the UR sends 61% of all the SPY dollars it routes to that pool, 32% to the 6.25 bps pool and 7% to Fables at 5 bps. Routed retail on this pair is demonstrably not choosing by fee anywhere in the 5-35 bps band. J3's counter (625 holds 70% vs 20% for 3499) is about the total volume split, and the 625 pool's biggest sender is the arb address 0x6505 (26.8%), so the fee-sensitive component of that split is arb, which is what V wants to shed. A move from 500 to 750 stays below the 625 pool's level by less than one tier gap and cannot be what loses routed flow. The one open question all judges named still stands: nobody has explained why the UR prefers a 35 bps pool on $100 tickets. If that is a routing-API quirk it can change; hence C7.",
+    "evidence": [
+     "ur_now.json: rival SPY 0xfe2a urV 603,167 of 806k (74.8%); rival SPY 0xe592 urV 314,145 (20.1%); FABLES SPY urV 72,383",
+     "computed UR SPY dollar split: 0xfe2a 60.9%, 0xe592 31.7%, Fables 7.3%",
+     "ur_now.json rival SPY 0xe592 top non-UR sender 0x65050a9b 26.8%",
+     "now.json daily: F-SPY share of the four SPY pools 10.5% / 10.7% / 8.7% on 08-25 / 26 / 27"
+    ],
+    "would_change_my_mind": "A controlled two-week window after the SPY raise showing UR-dollar share to Fables falling more than 20% while the 625 and 3499 pools' UR share is flat."
+   },
+   {
+    "id": "P3",
+    "verdict": "PARTLY",
+    "confidence": 0.6,
+    "reasoning": "The 'not a gate' half is right: labelling 0xb055, 0x8f10, 0x1521, 0x39b3, 0x6ddb and 0x6505 is a short task and the direction of the raise does not depend on it. The 'argues for the raise' half is weaker than stated. Points follow fees earned pro rata, so a washer's points share is roughly W s / (V + W), independent of the fee, while the cost per dollar washed is f (1 - s). Raising f does raise the cost, but only in proportion to (1 - s): for a dominant concentrated LP washing through its own range the cost is near zero at any fee, and a higher fee makes each washed dollar worth more in points-eligible fees. So the raise deters small-share washers and does nothing to a dominant one. The bigger consequence of wash, which the rebuttal skips, is that it inflates the per-tier volume in every break-even, so the break-evens are understated and the case for raising is stronger, not weaker. Labelling the senders therefore changes the level, even if not the direction.",
+    "evidence": [
+     "DATA-PACK.md section 7 (points follow swap fees your liquidity earns, pro rata, 24 Aug 02:00 UTC start)",
+     "computed wash cost table: at 7.5 bps cost/$ is 6.0 bps at s=0.2 and 0.75 bps at s=0.9",
+     "board.json: top LP 7.3M points on $79k deposits and $397 fees; no per-sender labels exist locally",
+     "ur_now.json non-UR contract senders: ETH 0xb055 22.3%, 0x8f10 13.9%; SPY 0x39b3 20.6% (721 swaps, ~$91 average), 0x0000 12.9%"
+    ],
+    "would_change_my_mind": "Sender labels showing the large contract senders are aggregator routes carrying retail (then the raise risks real flow) or wash from a dominant LP (then the raise does not deter it and the break-evens are badly understated)."
+   },
+   {
+    "id": "P4",
+    "verdict": "PARTLY",
+    "confidence": 0.6,
+    "reasoning": "As a tie-break rule it is sound: the variance ratios come from 730 days and do not move with a good week, while per-tier volume is the unstable surge-window quantity. But the V2 ladder does not follow it. The rule gives SPY overnight 750 x 0.26 = 195, NVDA 1000 x 0.48 = 480, META 900 x 0.44 = 396; V2 ships 350, 750 and 700, the last two set by break-even, which is the quantity P4 says not to use for shape. The rebuttal's own sentence 'a quarter to a half of open, which is what C1 now does' is false for NVDA (0.75). And a pure sigma^2 rule ignores the thing the flow lens cares about: the overnight tier carries a different mix (ES-driven arb on SPY, extended-hours arb on single names, near-zero retail), so the toxicity per dollar of volume differs by tier and the variance ratio alone under-prices it. The workable rule is: variance sets the ratio, break-even sets a floor per tier, level sits at or above both. That is what V2 actually did on SPY and META; it should say so.",
+    "evidence": [
+     "tiervar_all.json ratios: SPY 0.261, NVDA 0.478, META 0.439, GLD (GC) 1.041",
+     "be_all.json: META OVERNIGHT_7d 710 > OPEN_7d 572; NVDA OVERNIGHT_7d 717",
+     "rebuttal V2 table: SPY 750/350 (0.47), NVDA 1000/750 (0.75), META 900/700 (0.78)",
+     "be3.py: SPY overnight vol/hr above open vol/hr"
+    ],
+    "would_change_my_mind": "A re-stated V2 that applies one rule consistently across all four pools, or markouts showing overnight toxicity per dollar matches the variance ratio."
+   },
+   {
+    "id": "P5",
+    "verdict": "UPHELD",
+    "confidence": 0.65,
+    "reasoning": "R's pitch for the cross ('already the cheapest quote' at 5 bps vs a 6.25 bps incumbent doing $1.1M/day) is self-refuting on R's own depth law: Fables is cheapest and gets none of it, so price is not what the incumbent wins on and being cheapest is not something to preserve. Out of the batch is right (C8). The 700/700/250 number should not be treated as a number: it comes from a break-even computed on $1.0k TVL, 98 swaps and a variance ratio of 0.66; when the cross is seeded the ladder needs its own measurement. The incumbent's $1.1M/day cannot be verified locally (no cross pool in now.json).",
+    "evidence": [
+     "be_all.json NVDA/SPY OPEN_7d 561, OVERNIGHT_7d 742, OPEN_48h 774; kall.json NVDA/SPY n 98, tvl 1,030",
+     "tiervar_all.json NVDA/SPY overnight/open 0.658",
+     "FEE_BENCHMARKING_REPORT.md lines 37, 47-49, 89; ProposedFees.t.sol line 37 (900/650/250)"
+    ],
+    "would_change_my_mind": "Seeding the cross with enough TVL to be routable, at which point the incumbent's fee becomes relevant to routed share."
+   },
+   {
+    "id": "P6",
+    "verdict": "UPHELD",
+    "confidence": 0.6,
+    "reasoning": "Direction is unanimous and the same-chain evidence for demand at 30 bps is solid on the 7d window ($984k on $150k TVL). The flow Fables would shed at 15 bps is identifiable: 0x6505 (34.9% of dollars, 1084 swaps, an arb address also 26.8% of the rival SPY 625 pool) and probably most of 0x1521 (17.6%). UR dollars (22.6%) route to a 30 bps GLD pool elsewhere on the chain, so they are not fee-elastic in this band. Expect roughly half the volume to go; at 3x the fee that is still about 1.5x revenue on cleaner flow, so the 'largest GLD venue by 24h volume' headline will not survive and marketing should know. J3's pacing concern is real only if there is a threshold between 5 and 15 bps for retail, and C7 exists to catch it. One caveat that keeps this at 0.6: the 3000 and 10000 pools' volume on 08-21 to 08-25 ($128k at 100 bps, $564k at 30 bps) is unexplained and could be points-era wash rather than proof of demand.",
+    "evidence": [
+     "now.json 7d: R-GLD-v3-3000 $984k / 53.9%; F-GLD $544k / 29.8%; daily 08-25 $564k at 30 bps",
+     "ur_now.json FABLES GLD: 0x65050a9b 34.9% (1084 swaps), 0x1521027b 17.6%, UR 22.6%",
+     "be_all.json GLD OPEN_7d 998 (968 on GC fill), OPEN_48h 408",
+     "FEE_BENCHMARKING_REPORT.md lines 44, 85, 100, 113 (0.95 bp probe, PAXG anchor)"
+    ],
+    "would_change_my_mind": "UR-dollar share of the 3000-pip GLD pool being near zero (its flow is wash, and demand at 30 bps is not proven), or a first-week share test showing UR dollars to Fables GLD falling more than 20%."
+   },
+   {
+    "id": "L1",
+    "verdict": "ACCEPT",
+    "confidence": 0.65,
+    "proposed_value": "750 / 350 / 250, no bells",
+    "reasoning": "On share, 750 sits between the 625 pool (routed, 70% of the pair) and the 3499 pool (74.8% UR-fed), inside the band where routed retail is proven indifferent; it sheds the 0x0000...296f arb flow at 5 bps and keeps 350 overnight as the cheapest non-dust venue in a window that is ES-arb anyway. 250 closed matches the measured near-zero weekend variance and R's own 0.56 ratio argument is superseded by the 730-day data. One unresolved item: the V addendum measured a 3.40x SPY opening bell and 1.77x close from 60 sessions and R_01 drafted a spike, yet V2 silently drops both. Since the UR already pays 35 bps flat on this pair, a 2-hour opening descent from ~2100 would not lose routed flow either; the omission should be a decision, not a default.",
+    "evidence": [
+     "ur_now.json SPY routing split; now.json daily share 8.7-10.7%",
+     "be_all.json SPY 759 / 173 / 178 (7d), 418 / 92 (48h)",
+     "tiervar_all.json SPY 0.261 / 0.025",
+     "script/recal/R_01_RecalibrateNvdaSpy.s.sol spyConfig (spikeMult 6, closeFloor 2200) vs ProposedFees.t.sol:31 (no bells)"
+    ],
+    "would_change_my_mind": "A post-raise window showing Fables' UR-dollar share of SPY falling while the 625 pool's rises."
+   },
+   {
+    "id": "L2",
+    "verdict": "ACCEPT",
+    "confidence": 0.6,
+    "proposed_value": "1000 / 750 / 300, spikeMult 5 (3750), closedSpike 3750, descent 7200, closeFloor 2200 / 1800 / 0",
+    "reasoning": "Fables holds 0.1-0.3% of NVDA against a 5 bps v3 pool with 70x its depth; UR is 10% of swaps and 6% of dollars; the top senders (0x6ddb 31.7%, 0xb055 12.0%) are contracts. There is no routed share to lose, and the flow a raise sheds is the flow that is 3-4x under break-even. 1000 is a 2x step against a 2751 break-even and stays under the 3499 and 10990 NVDA pools on the same chain, so it is not an outlier price. Overnight 750 is at the top of its evidenced band (717 7d / 390 48h) and is not what P4 would give (480), but it also prices the pre-market and costs no share; I would not fight it, and would revisit after C7's window. Do not seed TVL before this ships (I10).",
+    "evidence": [
+     "now.json: R-NVDA-v3-500 $3.1M TVL, $58.7M/24h; F-NVDA share 0.1-0.3% daily",
+     "ur_now.json FABLES NVDA: UR 10.1% count / 6.3% dollars; 0x6ddb2a04 31.7%, 0xb0550000 12.0%",
+     "be_all.json NVDA 2751 / 717 / 162 (7d), 2280 / 390 (48h)",
+     "ProposedFees.t.sol:32 validates; FablesRWA.setPoolConfig requires overnightFloor*spikeMult > openFloor and closedSpike > openFloor"
+    ],
+    "would_change_my_mind": "Evidence that NVDA's non-UR contract senders are aggregator routes carrying Robinhood app retail (RobinHoodSettler-style), which would put real flow at risk above 7 bps."
+   },
+   {
+    "id": "L3",
+    "verdict": "MODIFY",
+    "confidence": 0.6,
+    "proposed_value": "1500 / 1500 / 300 plus FORCE_OPEN overrides on every Sunday (monthly bitmap) so Sunday prices at 1500; if the operator refuses the override, 1500 / 1500 / 800 instead",
+    "reasoning": "Level and weekday shape are right (C2, P6). The defect is the weekend tier. Under the GC fill all of the CLOSED tier's variance is in Sunday 18:00-24:00 ET, at 1.77x the OPEN hourly variance, and V2 prices those six hours at 300 while the weekday is 1500: a 5x discount on the single most toxic window of the gold week, which is precisely R's 'discounting the arbitrageurs' point. CalendarLib honours a FORCE_OPEN override on a Sunday (weekend rule skipped, OPEN 09:30-16:00, OVERNIGHT otherwise), so a flat 1500 ladder plus Sunday force-opens prices Sunday evening correctly at config level; the cost is 15 bps on Sunday-daytime retail, which is small and not arbitrageable. Without the override, closedFloor 300 is wrong and V's own stage-1 draft (800) is the blunt compromise. Expect volume to roughly halve at 1500 as 0x6505 leaves; that is the intended outcome, and marketing should stop leaning on the GLD 24h volume headline before it ships.",
+    "evidence": [
+     "tiervar_all_gc.json GLD and allvar_gc.py CLOSED fill (zero except Sunday >= 18:00 ET); computed Sunday per-hour variance 7.21e-6 vs OPEN 4.09e-6",
+     "CalendarLib.sol _classify (force = bits == 2) and SessionLib.classify (weekend rule inside !forceTradingDay)",
+     "MarketCalendar.sol setDayOverrides (bitmap; closure cap counts bit0 only)",
+     "FEE-AND-APR-REVIEW.md lines 369-380 (stage-1 draft closedFloor 800); FEE_BENCHMARKING_REPORT.md lines 58-62",
+     "ur_now.json FABLES GLD sender mix"
+    ],
+    "would_change_my_mind": "A resolver test showing Sunday FORCE_OPEN does not price as intended, or measured Sunday-daytime GLD retail volume large enough that 15 bps on it costs more than the Sunday-evening arb it prevents."
+   },
+   {
+    "id": "L4",
+    "verdict": "ACCEPT",
+    "confidence": 0.6,
+    "proposed_value": "900 / 700 / 250 inside R's two-week protocol, revert trigger on UR-dollar share only",
+    "reasoning": "UR is 1.5% of META swaps and 1.3% of dollars; the top senders (0xa633 24%, 0x37b3 20%, 0x2ca3 14%, the last also present in SPY, NVDA and GLD) are contracts. There is essentially no routed flow to protect, so the raise costs share only among arb, and R's 30-35 bps rivals (not verifiable locally) say retail exists at far higher levels. Overnight 700 is 0.78x open, which contradicts P4 (0.44 gives ~400), but R's own proposal was 1000/700/500 so both sides land on 700 overnight; the disagreement is only on the closed tier, where V's 250 against a 0.03 variance ratio beats R's 500. The protocol's trigger must be UR-dollar share (C7), otherwise the expected arb departure fires the revert.",
+    "evidence": [
+     "ur_now.json FABLES META: urC 11/736, 0xa633c736 24.0%, 0x37b37940 19.9%, 0x2ca37ff9 14.0%",
+     "tiervar_all.json META 0.439 / 0.032; be_all.json META 572 / 710 (7d)",
+     "FEE_BENCHMARKING_REPORT.md lines 87, 112 (10/7/5, two weeks, >20% revert); ProposedFees.t.sol:36 (900/600/250)"
+    ],
+    "would_change_my_mind": "Local measurement of the META rival pools showing their 30-35 bps volume is self-LP wash, which would remove the only evidence that retail pays those levels."
+   },
+   {
+    "id": "L5",
+    "verdict": "ACCEPT",
+    "confidence": 0.75,
+    "proposed_value": "no change; markouts first, sign of any C change open",
+    "reasoning": "The ETH pool is the one place Fables is winning on flow terms: highest realised fee on the pair (9.63 bps to LPs), 0% zero-fee swaps, turnover 4.37x TVL/day against the dominant native venue's 3.19x, and UR volume grew through hours the fee sat at 17-23 bps. Nothing in the flow data argues for cutting; nothing proves LPs clear LVR either. Leave it, run the per-window markouts, and let those set the direction (P1).",
+    "evidence": [
+     "DATA-PACK.md sections 5, 6, 14, 16",
+     "res.json F-ETH; now.json ETH share 0.5-0.6% of a pair dominated by a 1 bp v3 conveyor"
+    ],
+    "would_change_my_mind": "Markouts showing LP losses concentrated in poked-high windows (cut C) or in floor windows (raise the floor)."
+   },
+   {
+    "id": "L6",
+    "verdict": "ACCEPT",
+    "confidence": 0.9,
+    "proposed_value": "AAPL, TSLA, SPY/GLD, NVDA/SPY unchanged and out of the batch",
+    "reasoning": "At $1-2.3k TVL these pools have no share at any price. Raising is harmless and pointless; leaving them avoids adding four unmeasurable moves to a batch that already needs a clean before/after. When any is reseeded, price it to its own variance and its own break-even, not SPY's (C8, P5).",
+    "evidence": [
+     "res.json / DATA-PACK.md section 1 TVL and volume; kall.json swap counts 16-98"
+    ],
+    "would_change_my_mind": "A seeding decision on any of the four."
+   }
+  ],
+  "rebuttal_errors": [
+   {
+    "claim": "C6: 'It is a contracts change, not a config' (gold cannot be expressed by the hook's calendar).",
+    "correction": "Partly wrong. CalendarLib passes a FORCE_OPEN day override into SessionLib.classify, which then skips the weekend rule, so a Sunday can be made to price at the OPEN/OVERNIGHT tiers by setting one bit per Sunday in the monthly bitmap. With a flat 1500/1500 weekday that prices the Sunday 18:00 ET gold reopen correctly today. NYSE holidays that COMEX trades on are the same mechanism. Only the daily 17:00-18:00 break and a session longer than 12h require bytecode.",
+    "evidence": "fables-contracts/src/libraries/CalendarLib.sol _classify (bool force = bits == 2); SessionLib.sol classify (weekend rule inside if (!forceTradingDay)); MarketCalendar.sol setDayOverrides and MAX_SESSION_LENGTH."
+   },
+   {
+    "claim": "P4: 'SPY and NVDA discount the overnight to roughly a quarter to a half of open, which is what C1 now does.'",
+    "correction": "V2's NVDA overnight is 750 against a 1000 open, a 0.75 ratio, set by the 7d break-even (717) rather than by variance (0.48). META overnight 700/900 (0.78) is likewise break-even driven against a 0.44 variance ratio. The ladder does not apply the rule P4 states.",
+    "evidence": "rebuttal V2 table; tiervar_all.json ratios NVDA 0.478, META 0.439; be_all.json NVDA OVERNIGHT_7d 717, META OVERNIGHT_7d 710."
+   },
+   {
+    "claim": "C5: 'on 27 Aug Fables out-traded the incumbent.'",
+    "correction": "True only on a partial day (now.json was fetched 2026-08-27 11:20 UTC: $46.8k vs $21.7k) and on the trailing 24h ($135k vs $54k). The incumbent's volume had collapsed from $292k to $66k on that window per DATA-PACK; the day before, the incumbent did $564k against Fables' $285k. Single-window GLD share claims should not be used in either direction.",
+    "evidence": "now.json daily volumes for F-GLD and R-GLD-v3-3000 08-24 to 08-27; DATA-PACK.md section 13."
+   },
+   {
+    "claim": "P3: 'a higher fee makes the wash dearer and shrinks it', presented as a general argument for the raise.",
+    "correction": "Cost per dollar washed is fee times (1 minus the washer's share of active liquidity); points share is roughly independent of the fee. The raise deters a small-share washer and does almost nothing to a dominant concentrated LP washing through its own range. The stronger point, which the rebuttal omits, is that wash inflates per-tier volume and so understates every break-even used to set the levels.",
+    "evidence": "DATA-PACK.md section 7 (points pro rata on fees earned); computed cost table (7.5 bps: 6.0 bps cost at s=0.2, 0.75 bps at s=0.9)."
+   },
+   {
+    "claim": "C7 as written can run on every raised pool (count and dollar share tracked separately).",
+    "correction": "The census script computes dollars as amount1/1e6 on every pool, which is wrong for NVDA, GLD and META (totV about 1e14). Dollar share for three of the four pools in the batch cannot be measured until ur_now.mjs is fixed.",
+    "evidence": "scratchpad/ur_now.mjs (const v=Math.abs(Number(l.args.amount1))/1e6); ur_now.json totV 6.25e14 / 5.17e14 / 1.2e14."
+   },
+   {
+    "claim": "P5: 'The cross's 7d break-even is 561 open and 742 overnight, so when it is seeded it should be priced around 700 / 700 / 250.'",
+    "correction": "The numbers reproduce, but they are computed on $1,030 of TVL and k from 98 swaps, so they are not a basis for a future ladder; the rebuttal's own C8 says to price reseeded pools to their own measurement at the time.",
+    "evidence": "be_all.json NVDA/SPY; kall.json NVDA/SPY n 98, tvl 1029.8."
+   }
+  ]
+ },
+ {
+  "lens": "VERIFICATION: every number the rebuttal leans on was re-run locally (be2.py, be3.py, allvar.py, allvar_gc.py, a re-derivation of be_all.json from kall.json and now.json, the ur_now.json dollar sums, the lvr keeper series, DATA-PACK line 111, SessionLib/MarketCalendar/FablesRWA source) and the V2 ladder was pushed through the live setPoolConfig validator in a throwaway forge test (all eight configs validate; time-weighted pips SPY 394, NVDA 741, GLD 1100, META 588).",
+  "rulings": [
+   {
+    "id": "C1",
+    "verdict": "ACCEPT",
+    "confidence": 0.88,
+    "reasoning": "Reproduced exactly. be2.py prints SPY shape 1.00/0.24/0.28 and NVDA 1.00/0.23/0.05; be3.py gives the same tiers on the 48h window. The 0.47/0.66 in the addendum and in R_01 script lines 55-56 does not come from any local artefact. SPY overnight 350 against a 7d break-even of 173 (my re-derivation with kall k gives 163) is a 2x margin as claimed. NVDA overnight 750 against 717 (my figure 628) is covered. The only wrinkle is that the NVDA justification is 'level by break-even on the overnight tier', which is the rule P4 says not to use; noted there, not here.",
+    "evidence": [
+     "scratchpad/be2.py run output: SPY OPEN 8.2 / OVERNIGHT 1.9 / CLOSED 2.3 bps, ratios 0.24x 0.28x; NVDA 27.0 / 6.2 / 1.5, ratios 0.23x 0.05x",
+     "scratchpad/be_all.json SPY OVERNIGHT_7d 172.5, OVERNIGHT_48h 92.3; NVDA OVERNIGHT_7d 717.1",
+     "re-derivation with kall.json k (78.8 / 20.7) and now.json TVL: SPY overnight 163 (7d) 91 (48h); NVDA overnight 628 (7d) 333 (48h)",
+     "fables-contracts/script/recal/R_01_RecalibrateNvdaSpy.s.sol:55-56 (the unreproducible 0.47 / 0.66)"
+    ],
+    "would_change_my_mind": "A per-window markout on SPY or NVDA showing realised overnight LP loss materially above the sigma^2/8 * k figure, which would mean the overnight break-evens are too low and the 0.24 shape too steep."
+   },
+   {
+    "id": "C2",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.8,
+    "reasoning": "The GC fill reproduces: allvar_gc.py writes GLD OPEN 4.085e-6, OVERNIGHT 4.254e-6, CLOSED 7.73e-7, i.e. overnight/open 1.04 and closed/open 0.19 (ES fill was 0.83 and 0.07). Re-deriving break-even from those variances gives open 952 and overnight 432 on the now.json TVL of 64,127, which scale to 968 and 440 on the 65,227 TVL be_all.json used; the rebuttal's 968 is exact and its 460 is within 5%. Two things the concession should also say: (1) the Yahoo GLD 1h series has no 15:00 ET bar with 25+ samples, so one of the seven OPEN hours is itself futures-filled and the OPEN variance moved 3% between fills for that reason; (2) the CLOSED tier still assumes zero variance outside Sunday 18:00-24:00 ET, and tokenised gold (PAXG/XAUT) trades all weekend, so 0.19 is a floor on closed/open, not a measurement.",
+    "evidence": [
+     "scratchpad/tiervar_all_gc.json GLD: 4.0854e-6 / 4.2542e-6 / 7.7273e-7 (ratios 1.041, 0.189)",
+     "scratchpad/tiervar_all.json GLD: 4.2116e-6 / 3.4838e-6 / 2.8810e-7 (ratios 0.827, 0.068)",
+     "allvar_gc.py hourvar('GLD') hours present: 4-14, 16-18 (hour 15 absent); tiervar CLOSED branch fills only wd==6 and h>=18",
+     "re-derived break-even: ES fill 981 / 354, GC fill 952 / 432 at TVL 64,127"
+    ],
+    "would_change_my_mind": "A GLD series with the 15:00 bar restored, or weekend PAXG/XAUT returns used for the CLOSED tier, changing the closed/open ratio materially above 0.19."
+   },
+   {
+    "id": "C3",
+    "verdict": "ACCEPT",
+    "confidence": 0.97,
+    "reasoning": "ur_now.json: ETH/USDG 1,426 of 2,772 swaps (51.4%) but $211,135 of $929,218 (22.7%). SPY/USDG is 17.3% by count and 22.8% by dollars. The rebuttal's number is exact. One addition: the same file's dollar figures for NVDA, GLD and META are garbage (totV around 1e14) because ur_now.mjs divides amount1 by 1e6 while toks.json shows USDG is token0 on those three pools, so any dollar-share tracking under C7 needs the script fixed first.",
+    "evidence": [
+     "scratchpad/ur_now.json ETH row: swaps 2772, urC 1426, urV 211135.1, totV 929218.2",
+     "scratchpad/ur_now.mjs line 'const v=Math.abs(Number(l.args.amount1))/1e6'",
+     "scratchpad/toks.json: NVDA/USDG, GLD/USDG, META/USDG have d0 6 (USDG is token0)"
+    ],
+    "would_change_my_mind": "Nothing on the number itself; it is arithmetic on a local file."
+   },
+   {
+    "id": "C4",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.8,
+    "reasoning": "The conclusion is right and the direction of the correction is right, but the window attribution is wrong. DATA-PACK line 111 gives 1.55% against 3.81% with no window stated (k 44.8, measured 08-26). On the local 7d series fee APR / k is 32.5 / 44.3 = 0.73%, on 48h 2.11%, on 24h 2.68%. 1.55% matches none of them, so 'on the 7d window' is not supportable; the honest line is 'below 3.1-3.8% on every window, 0.7% on 7d, up to 2.7-3.1% on the surge days'. The 'roughly doubles capture' clause checks out (9.53-9.65 bps realised against a 450 floor). Effective C in the keeper series is median 0.40, range 0.17-0.68, and the fee pinned at the 3000 cap on 27 of 567 points, so there is no single C to recalibrate.",
+    "evidence": [
+     "Writing/content-plan/DATA-PACK.md:111 '| ETH | 55% | 3.81% | 1.55% (44.8) | 5.88% (9.7) |'",
+     "scratchpad/res.json F-ETH a24 118.9, a48 93.6, a7 32.5; DATA-PACK k 44.3",
+     "scratchpad/lvr7d.json and lvr24h.json: f/s^2 median 0.40, min 0.168, max 0.68, 27 cap hits",
+     "FEE_BENCHMARKING_REPORT.md:66; DATA-PACK.md sec 14 (9.65 bps realised)"
+    ],
+    "would_change_my_mind": "A per-window markout showing realised ETH LP loss well under sigma^2/8 * k on this chain, which would make the naive comparison moot."
+   },
+   {
+    "id": "C5",
+    "verdict": "ACCEPT",
+    "confidence": 0.9,
+    "reasoning": "All five stale passages verified against the files: V:331-333 (overnight 92% as volatile), V:410-412 and 422 (closedSpike inert), V:107-119 (hooked pools excluded, falsified by 51.4% of ETH swaps from the UR), V:520-524 ('what shipped', contradicted by DATA-PACK sec 3 and sec 9). The GLD split reproduces from now.json 7d buckets: Fables $543,900, v3-3000 $983,140, v3-10000 $298,060, i.e. 29.8% / 53.9% / 16.3%; on the last 24h Fables $135,003 vs $53,450. Rewriting rather than annotating is the right call.",
+    "evidence": [
+     "FEE-AND-APR-REVIEW.md:331-333, 410-412, 422, 107-119, 520-524",
+     "scratchpad/now.json 7d volume sums per GLD pool (computed)",
+     "DATA-PACK.md sec 3 'NOTHING BELOW HAS BEEN CHANGED', sec 9 'drafted and tested, not deployed'"
+    ],
+    "would_change_my_mind": "Nothing; these are document-consistency facts."
+   },
+   {
+    "id": "C6",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.85,
+    "reasoning": "The three code facts are correct: SessionLib.classify returns CLOSED for Friday sec >= closeS and for all of Saturday and Sunday (lines 91-93), so CLOSED runs Friday 16:00 ET to Monday 00:00 ET; MarketCalendar.MAX_SESSION_LENGTH is 12 hours (line 112) so a 23h gold session is not expressible; bakedClosed (SessionLib:222-244) is the NYSE list (Juneteenth, Thanksgiving, Good Friday). The change: 'contracts change, not config' is only half true. The holiday mismatch is fixable today with setDayOverrides FORCE_OPEN (MarketCalendar:85-98, 143-147) on the NYSE days COMEX trades. And with a flat weekday ladder (open == overnight, which V2 now proposes) the session-length limit is moot. What genuinely needs a contract change is the weekend edge: Sunday 18:00-24:00 ET and Friday 16:00-17:00 ET price at closedFloor while gold is live, about 7 hours a week.",
+    "evidence": [
+     "fables-contracts/src/libraries/SessionLib.sol:91-97 (classify), 222-244 (bakedClosed)",
+     "fables-contracts/src/base/MarketCalendar.sol:112 (MAX_SESSION_LENGTH = 12 hours), 85-98 (setDayOverrides), 143-147 (FORCE_OPEN)"
+    ],
+    "would_change_my_mind": "Evidence that the 7 live-gold hours inside the hook's CLOSED window carry negligible arb volume, which would make the contract change low priority."
+   },
+   {
+    "id": "C7",
+    "verdict": "ACCEPT-WITH-CHANGE",
+    "confidence": 0.85,
+    "reasoning": "Correct and it is the thing that makes every raise in V2 acceptable given that no elasticity has been measured inside the 5-15 bps band. The change: dollar share cannot be tracked on NVDA, GLD or META until ur_now.mjs reads the USDG leg correctly (see C3), and the trigger should include a break-even re-measure per tier, because on SPY the V2 open (750) sits under the 7d break-even (759) and only above the 48h one (418); a share metric alone would not catch volume falling back to pre-routing levels.",
+    "evidence": [
+     "scratchpad/ur_now.mjs amount1/1e6 assumption; toks.json d0 6 for NVDA, GLD, META",
+     "scratchpad/be_all.json SPY OPEN_7d 758.8, OPEN_48h 418.3",
+     "FEE_BENCHMARKING_REPORT.md:87, 112 (R's protocol)"
+    ],
+    "would_change_my_mind": "Nothing; this is process."
+   },
+   {
+    "id": "C8",
+    "verdict": "ACCEPT",
+    "confidence": 0.9,
+    "reasoning": "AAPL $2.3k, TSLA $1.1k, SPY/GLD $1.6k and NVDA/SPY $1.0k of TVL with k measured on 16-98 swaps. Break-evens on those pools are ratios of dust volume and move by 2x between windows (TSLA open 2877 vs 4527; NVDA/SPY 561 vs 774). Pulling them from the batch removes four configs whose only support was the same ES-filled variance with no on-chain volume to price against. Pricing each to its own variance when reseeded is right (AAPL sigma 32.5%, TSLA 66.3% vs SPY 19.5%).",
+    "evidence": [
+     "scratchpad/kall.json n: AAPL 33, TSLA 66, NVDA/SPY 98, SPY/GLD 16",
+     "scratchpad/be_all.json TSLA, AAPL, NVDA/SPY, SPY/GLD 7d vs 48h",
+     "DATA-PACK.md sec 1 TVL column"
+    ],
+    "would_change_my_mind": "A seeding decision on any of the four, at which point they need their own ladder."
+   },
+   {
+    "id": "P1",
+    "verdict": "UPHELD",
+    "confidence": 0.75,
+    "reasoning": "Logically sound and the numbers back it. Fee APR / k is under sigma^2/8 on every local window (0.73% 7d, 2.11% 48h, 2.68% 24h vs 3.1-3.8%), so the naive test says C should go up, not down. R's 'down ~30%' rests on mainnet literature (arXiv 2404.05803, fast-block discount) that nobody has measured on this chain. The keeper series shows effective f/s^2 spanning 0.17-0.68 with a median of 0.40 and 27 cap hits in 7d, so 'recalibrate C' has no baseline to move from. Markouts first, sign as output, is the only consistent position. Round 1's R ruling on I9 was itself narrow (markouts first) so this is a small correction, not a reversal.",
+    "evidence": [
+     "scratchpad/res.json F-ETH; DATA-PACK.md:111",
+     "scratchpad/lvr7d.json: f/s^2 median 0.40, range 0.168-0.68, 27 points at 3000",
+     "FEE_BENCHMARKING_REPORT.md:71-75, 115"
+    ],
+    "would_change_my_mind": "A markout study showing LP loss on poked-high windows exceeds the fee collected there, which would give the sign directly."
+   },
+   {
+    "id": "P2",
+    "verdict": "PARTLY",
+    "confidence": 0.6,
+    "reasoning": "The narrow claim survives: J3's evidence (625-pip pool at 70% vs 3499-pip pool at 20%) is a 5.6x fee gap and says nothing about 500 to 750. The 3499 pool taking 74.8% of its dollars from the UniversalRouter reproduces ($603,167 of $806,258). But the rebuttal overreaches on 'we have essentially none to lose': the UR is now 22.8% of Fables SPY dollars and the 500-pip v3 rival at one third of Fables' TVL still does $193k/day, so there is price-sensitive flow in the band. 'Best supported inference' is fair only because C7 ships with it.",
+    "evidence": [
+     "scratchpad/ur_now.json rival SPY 0xfe2a: urV 603,167 / totV 806,258; Fables SPY urV 72,383 / 317,794",
+     "scratchpad/res.json R-SPY-v3-500 v24 193,091 on TVL 46,301",
+     "FEE-AND-APR-REVIEW.md:137-139 (V's own cross-section caveat)"
+    ],
+    "would_change_my_mind": "A measured before/after on Fables SPY routed dollars across the 500 to 750 move."
+   },
+   {
+    "id": "P3",
+    "verdict": "OVERRULED",
+    "confidence": 0.7,
+    "reasoning": "The mechanism does not hold under the points design in the data pack. Points are pro rata to swap fees your liquidity earns, from a fixed daily pot. A washer owning share s of a pool's liquidity pays (1-s)\u00b7f\u00b7V to other LPs and earns s\u00b7f\u00b7V of fee credit; both scale with f, so cost per point is (1-s)/s times total fees, independent of the fee level. Raising one pool's fee raises that pool's share of total fees and makes washing it more attractive per dollar, not less. The half-day labelling task for 0xb055, 0x8f10, 0x1521 is the right ask and is not a gate on fees, so the practical conclusion (do not wait) can stand on P2, but not on this argument.",
+    "evidence": [
+     "DATA-PACK.md sec 7: 'Points follow the swap fees your liquidity actually earns, pro rata, across every listed market', fixed 1,000,000,000 pot",
+     "scratchpad/ur_now.json ETH senders 0xb055 $206,803, 0x8f10 $129,572, 0x1521 $92,394"
+    ],
+    "would_change_my_mind": "Evidence that the wash is routed through pools where the washer holds no liquidity, in which case a higher fee is a pure cost to them."
+   },
+   {
+    "id": "P4",
+    "verdict": "PARTLY",
+    "confidence": 0.65,
+    "reasoning": "The rule is sensible and the premise is verified: variance ratios come from 730 days and break-evens fold in one week of volume that moved 2x between windows. But the V2 ladder does not follow it. NVDA overnight 750 is 0.75x open against a variance ratio of 0.48 and a break-even ratio of 0.23; META overnight 700 is 0.78x open against a variance ratio of 0.44. Both were set by overnight break-even, exactly what P4 says not to do. SPY (0.47x vs variance 0.26) and GLD (flat vs 1.04) are the only two that follow it. The sentence 'SPY and NVDA discount the overnight to roughly a quarter to a half of open, which is what C1 now does' is false for NVDA.",
+    "evidence": [
+     "scratchpad/tiervar_all.json ratios: SPY 0.261/0.025, NVDA 0.478/0.034, META 0.439/0.032",
+     "rebuttal V2 table: NVDA 1000/750, META 900/700, SPY 750/350, GLD 1500/1500",
+     "scratchpad/be_all.json NVDA OVERNIGHT_7d 717, META OVERNIGHT_7d 710"
+    ],
+    "would_change_my_mind": "The rebuttal restating the rule as 'overnight = max(variance-shaped tier, 7d break-even)', which is what V2 actually applied."
+   },
+   {
+    "id": "P5",
+    "verdict": "PARTLY",
+    "confidence": 0.7,
+    "reasoning": "Right to exclude the cross from the batch, and right that being cheapest at 5 bps has not won any of the incumbent's flow (Fables $1.6k/day). But the 700/700/250 number is not grounded: the 561/742 break-evens are computed on $1,030 of TVL and 98 swaps, and the cross's variance shape (overnight/open 0.66) says a seeded ladder should discount the overnight, not go flat. When seeded, price it fresh on its own volume.",
+    "evidence": [
+     "scratchpad/be_all.json NVDA/SPY OPEN_7d 561, OVERNIGHT_7d 742, OPEN_48h 774",
+     "scratchpad/kall.json NVDA/SPY tvl 1029.8, n 98",
+     "scratchpad/tiervar_all.json NVDA/SPY overnight/open 0.658",
+     "FEE_BENCHMARKING_REPORT.md:37, 89"
+    ],
+    "would_change_my_mind": "A seed of real size on the cross with a week of volume to re-measure break-even."
+   },
+   {
+    "id": "P6",
+    "verdict": "PARTLY",
+    "confidence": 0.6,
+    "reasoning": "Direction is verified (open break-even 952-968 on the GC fill, incumbent at 3000 holding 53.9% over 7d) and a flat weekday is verified (1.04). Two claims do not survive: '2x the break-even' is 1500/968 = 1.55x at the open, and the overnight at 1500 is 3.3x its 7d break-even (460) and 6.4x the 48h one (233), a 4.3x jump on the tier that carries most of the volume. Whether to take 1500 in one step is a pacing preference, as the rebuttal says, but so is 1500 itself; the evidence supports 'at least 968 flat', not a specific multiple.",
+    "evidence": [
+     "re-derived GC-fill break-even: open 952 (7d) / 389 (48h), overnight 432 (7d) / 233 (48h) at TVL 64,127; rebuttal 968 / 460 on TVL 65,227",
+     "scratchpad/now.json 7d GLD split 29.8 / 53.9 / 16.3%",
+     "forge V2 test: GLD time-weighted 1100 pips vs current ~330"
+    ],
+    "would_change_my_mind": "Two weeks of GLD share holding above 25% by dollars at 1200, which would justify the second step to 1500."
+   },
+   {
+    "id": "L1",
+    "verdict": "MODIFY",
+    "confidence": 0.55,
+    "proposed_value": "750 / 350 / 250, with the opening descent on: spikeMult 6 (peak 2100), closedSpike 2100, descentWindow 7200; closing ramp closeFloor 1500, closeBefore 1800, closeAfter 0",
+    "reasoning": "The three tiers are right: 750 clears the 48h break-even (418) and sits at the 7d one (759), 350 is 2x overnight break-even, 250 is near the closed break-even (178). Time-weighted this is 394 pips against about 362 today, a modest move. What V2 drops without saying so is the bell. V's own addendum and the data pack put SPY's 09:30-10:00 at 3.40x mid-session variance and 15:30-16:00 at 1.77x, and the R_01 script had both bells on; ProposedFees.t.sol:31 and V2 switch them off. The validator accepts the spike form (overnight*spikeMult and closedSpike both above openFloor). Note the SPY open is the only tier in V2 set below its 7d break-even, so C7 must include a break-even re-check.",
+    "evidence": [
+     "scratchpad/be_all.json SPY 759 / 173 / 178 (7d), 418 / 92 (48h)",
+     "DATA-PACK.md sec 4 bells table SPY 3.40x, 1.77x, 0.57x",
+     "fables-contracts/script/recal/R_01_RecalibrateNvdaSpy.s.sol:98-110; test/scratch/ProposedFees.t.sol:31 (spike 0)",
+     "forge V2 run: SPY time-weighted 394, peak 750; FablesRWA.setPoolConfig descent rule lines 72-74"
+    ],
+    "would_change_my_mind": "On-chain SPY swap data over the 09:30-10:00 window showing realised toxicity no higher than mid-session, which would justify leaving the bell off."
+   },
+   {
+    "id": "L2",
+    "verdict": "ACCEPT",
+    "confidence": 0.6,
+    "proposed_value": "1000 / 750 / 300, spikeMult 5 (3750), closedSpike 3750, descentWindow 7200, closeFloor 2200, closeBefore 1800, closeAfter 0",
+    "reasoning": "Validates (forge: time-weighted 741, peak 3750, under the 8000 cap). Open 1000 is a 1.4x step toward a 2751 break-even on the pool with the worst LVR deficit (be2: fee APR 20.8% vs LVR APR 34.2%), and staging is right given the 500-pip v3 venue holds 96%. Overnight 750 breaks P4 (variance says ~480) but clears both the 7d (717, my re-derivation 628) and 48h (390) break-evens, and the UR is only 6.3% of NVDA dollars so there is little routed flow to lose overnight. closeAfter 0 matches the measured 0.51x post-close quarter hour. Accept, with the P4 inconsistency on the record.",
+    "evidence": [
+     "forge V2 run: NVDA time-weighted 741, peak 3750",
+     "scratchpad/be2.py: NVDA LVR APR 34.2 vs fee APR 20.8; be_all.json NVDA 2751 / 717 / 162",
+     "scratchpad/ur_now.json NVDA urC 84 of 835; dollar share invalid but count 10.1%",
+     "DATA-PACK.md sec 4: NVDA 16:00-16:15 0.51x"
+    ],
+    "would_change_my_mind": "A markout showing NVDA overnight LP loss under 4 bps, which would send the overnight tier to the variance-shaped 480."
+   },
+   {
+    "id": "L3",
+    "verdict": "MODIFY",
+    "confidence": 0.5,
+    "proposed_value": "1200 / 1200 / 300 as step one under C7, with 1500 / 1500 / 300 as the pre-declared step two if dollar share holds",
+    "reasoning": "Flat weekday is verified (GC-fill overnight/open 1.04) and 300 on the weekend matches the 0.19 ratio. The level is the open question: 1200 is 1.24x the 7d open break-even (968) and 2.6x the overnight one (460), a 2.4x / 3.4x move from today; 1500 is 1.55x / 3.3x and a 3x / 4.3x move. Nothing in the record distinguishes the two, and the one measured win Fables has on GLD (2.5x the incumbent's 24h volume, 29.8% over 7d) was earned at 3.9 bps realised, so the first step should be the smaller one with the second step already written down. The hook prices Sunday 18:00-24:00 ET and Friday 16:00-17:00 ET at 300 while gold is live (C6); that stays wrong at either level.",
+    "evidence": [
+     "scratchpad/tiervar_all_gc.json GLD ratios 1.041 / 0.189",
+     "re-derived GC break-even 952-968 open, 432-460 overnight (7d)",
+     "scratchpad/now.json GLD 7d split 29.8 / 53.9 / 16.3%; 24h 135,003 vs 53,450",
+     "forge V2 run: GLD at 1500/1500/300 time-weighted 1100 pips"
+    ],
+    "would_change_my_mind": "A GLD markout showing LPs net negative at 3.9 bps by more than the step to 1200 would recover, which would argue for going straight to 1500."
+   },
+   {
+    "id": "L4",
+    "verdict": "ACCEPT",
+    "confidence": 0.55,
+    "proposed_value": "900 / 700 / 250 inside R's two-week protocol",
+    "reasoning": "900 is 1.57x the 7d open break-even (572) and 3.8x the 48h one; 700 sits at the 7d overnight break-even (710, my re-derivation 648) and 2x the 48h; 250 against a closed/open variance ratio of 0.03 is the floor the validator allows in practice. The overnight tier breaks P4 (variance says ~400) but is the only V2 tier where break-even is above open, because META's overnight volume per hour is thin relative to its 27% overnight sigma; pricing it at break-even is defensible. UR is 1.5% of META swaps, so R's share trigger will mostly measure arb departure, which is the intended effect. Validates; time-weighted 588 vs about 360 today.",
+    "evidence": [
+     "scratchpad/be_all.json META OPEN_7d 572, OVERNIGHT_7d 710, OPEN_48h 238, OVERNIGHT_48h 362",
+     "scratchpad/tiervar_all.json META ratios 0.439 / 0.032",
+     "scratchpad/ur_now.json META urC 11 of 736",
+     "forge V2 run: META time-weighted 588, peak 900"
+    ],
+    "would_change_my_mind": "Two weeks of META share by count dropping more than 20% with no change in dollar share, which would say the raise only shed small tickets."
+   },
+   {
+    "id": "L5",
+    "verdict": "ACCEPT",
+    "confidence": 0.8,
+    "proposed_value": "no change to flatPips 450 or C; per-window markouts first, sign of any C change open",
+    "reasoning": "Verified: fee APR / k is below sigma^2/8 on every local window, effective C already spans 0.17-0.68 with 27 cap hits in 7d, and every judge in round 1 named markouts as the decisive test. Both 'C down' (R) and 'the keeper clears LVR' (V's old framing) fail on the numbers; leaving C alone until a markout gives the sign is the only position the data supports.",
+    "evidence": [
+     "scratchpad/res.json F-ETH a7 32.5 / k 44.3 = 0.73%; a24 2.68%",
+     "scratchpad/lvr7d.json f/s^2 median 0.40, range 0.168-0.68",
+     "DATA-PACK.md:111, sec 16 (9.63 bps realised, 0% zero-fee swaps)"
+    ],
+    "would_change_my_mind": "A markout result on poked-high vs floor windows."
+   },
+   {
+    "id": "L6",
+    "verdict": "ACCEPT",
+    "confidence": 0.85,
+    "proposed_value": "AAPL, TSLA, SPY/GLD, NVDA/SPY unchanged until reseeded; then priced on their own variance and a fresh break-even",
+    "reasoning": "Combined TVL under $6k, k measured on 16-98 swaps, break-evens that move 1.4-2x between 7d and 48h. Any number set now is noise. ProposedFees.t.sol:34-38 had ladders for all four; dropping them is correct.",
+    "evidence": [
+     "scratchpad/kall.json n and tvl for the four pools",
+     "scratchpad/be_all.json TSLA 2877 vs 4527, NVDA/SPY 561 vs 774",
+     "fables-contracts/test/scratch/ProposedFees.t.sol:34-38"
+    ],
+    "would_change_my_mind": "A seeding decision on any of them."
+   }
+  ],
+  "rebuttal_errors": [
+   {
+    "claim": "C4: 'Fee APR / k is 1.55% against 3.81% on the 7d window'",
+    "correction": "DATA-PACK line 111 states no window. Locally the 7d figure is 0.73% (32.5% / 44.3), 48h is 2.11%, 24h is 2.68%. 1.55% matches none of the local windows; the conclusion (under sigma^2/8 everywhere but surge days) still holds.",
+    "evidence": "DATA-PACK.md:111; scratchpad/res.json F-ETH a7 32.5, a48 93.6, a24 118.9"
+   },
+   {
+    "claim": "P6: '1500 flat ... is one step, 2x the break-even, half the incumbent'",
+    "correction": "1500 / 968 = 1.55x at the open. On the overnight tier 1500 is 3.3x the GC-fill 7d break-even (460) and about 6.4x the 48h one (233).",
+    "evidence": "rebuttal C2 figures 968 and 460; re-derived 952 / 432 at now.json TVL"
+   },
+   {
+    "claim": "P4: 'SPY and NVDA discount the overnight to roughly a quarter to a half of open, which is what C1 now does'",
+    "correction": "V2 NVDA overnight is 750 / 1000 = 0.75x open, not a quarter to a half; V2 META is 0.78x. Both were set by overnight break-even, the method P4 says to reserve for the open tier only.",
+    "evidence": "rebuttal V2 table; tiervar_all.json NVDA 0.478, META 0.439"
+   },
+   {
+    "claim": "P3: 'a higher fee makes the wash dearer and shrinks it'",
+    "correction": "Points are pro rata to fees earned from a fixed pot. A washer's cost (1-s)fV and fee credit s\u00b7fV both scale with f, so cost per point is unchanged and a raised pool takes a larger share of total fees, which makes washing it relatively more attractive.",
+    "evidence": "DATA-PACK.md sec 7"
+   },
+   {
+    "claim": "C6: 'It is a contracts change, not a config'",
+    "correction": "The NYSE-vs-COMEX holiday gap is fixable by config today via setDayOverrides FORCE_OPEN, and with a flat weekday ladder the 12h MAX_SESSION_LENGTH is moot. Only the weekend edge (Sunday 18:00-24:00 ET and Friday 16:00-17:00 ET reading CLOSED) needs a contract change.",
+    "evidence": "MarketCalendar.sol:85-98, 112, 143-147; SessionLib.sol:91-97"
+   },
+   {
+    "claim": "V2 SPY basis: 'open break-even 759 (7d)' listed beside an open tier of 750",
+    "correction": "750 is under the 7d open break-even and clears only the 48h figure (418). Presented as support, it is the one tier in V2 set below its 7d break-even.",
+    "evidence": "scratchpad/be_all.json SPY OPEN_7d 758.8, OPEN_48h 418.3"
+   },
+   {
+    "claim": "C2 (implicit): the GC-filled OPEN variance is a pure GLD measurement",
+    "correction": "The Yahoo GLD 1h series has no 15:00 ET hour with 25+ samples, so one of seven OPEN hours is futures-filled in both scripts; that is why OPEN moved from 4.21e-6 to 4.09e-6 when the fill changed. The CLOSED tier also still assumes zero weekend variance outside Sunday evening.",
+    "evidence": "allvar_gc.py hourvar('GLD') keys 4-14, 16-18; tiervar CLOSED branch"
+   },
+   {
+    "claim": "C7 as written: 'share metric measured on swap count and on dollars separately'",
+    "correction": "Dollar shares for NVDA, GLD and META cannot be produced from the current census: ur_now.mjs divides amount1 by 1e6 but USDG is token0 on those pools, giving totV around 1e14. The script must be fixed before the dollar leg of the trigger exists.",
+    "evidence": "scratchpad/ur_now.mjs; scratchpad/toks.json d0 6 for NVDA/USDG, GLD/USDG, META/USDG; ur_now.json totV values"
+   },
+   {
+    "claim": "P5: 'when it is seeded it should be priced around 700 / 700 / 250'",
+    "correction": "The 561 / 742 break-evens are computed on $1,030 of TVL and 98 swaps and flip between windows (561 vs 774 at the open); the cross's own variance ratio (overnight/open 0.66) argues against a flat weekday. No number for the cross is supportable until it is seeded.",
+    "evidence": "scratchpad/be_all.json NVDA/SPY; kall.json NVDA/SPY; tiervar_all.json NVDA/SPY"
+   }
+  ]
+ }
+]
