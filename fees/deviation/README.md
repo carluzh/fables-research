@@ -56,6 +56,7 @@ Independent of the model and of each other. Each answers one factual question th
 | `closed-window-moves.mjs` | how often anything actually happens in a closed window, per asset |
 | `reference-depth.mjs` | what it costs to PUSH each reference, against what it costs to push our own pool |
 | `reference-second-source.mjs` | does a second venue exist for the equity references (OKX: yes, all twelve) |
+| `verify-ramp-vs-chainfloor.mjs` | simulates every poke the locked ramp would make against the live on-chain floors, by `eth_call` from the real poker key. This is the script that caught a base below `pokeFloor` |
 
 All on-chain reads go to `https://rpc.mainnet.chain.robinhood.com`, which rate-limits: `lib.mjs`
 carries the serialising gate, the retry and the range-halving that the fee scripts already use.

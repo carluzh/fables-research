@@ -260,8 +260,9 @@ The proposed schedule, in full:
 ```
 d       = | P_pool / P_reference - 1 |
 
-base    = 3000 pips (0.30%) during market hours
-        = 1500 pips (0.15%) out of hours
+base    = feeFloorAt(floorConfig(poolId), now), READ FROM CHAIN every cycle.
+          Never a keeper constant: a base below the pool's own pokeFloor makes the
+          first stretch of the ramp revert FeeBelowFloor. See SYSTEM-SPEC 7.1.
 
 kick    = 2%          the deviation at which the fee starts to move
 full    = 10%         the deviation at which it reaches the cap

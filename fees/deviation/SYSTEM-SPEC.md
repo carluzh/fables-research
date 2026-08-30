@@ -33,7 +33,8 @@ Status: **specified, not built.** Fees in pips: 100 pips = 1 bps = 0.01%, 1,000,
 
 ```
 d          = | P_pool / P_reference - 1 |
-base(t)    = the pool's existing session floor, unchanged
+base(t)    = feeFloorAt(floorConfig(poolId), block.timestamp), READ FROM THE POOL'S OWN HOOK
+             every cycle. Never a keeper constant. See 3.3 and 7.1
 kick, full = per-pool, from the reference census (section 7.3)
 cap        = the pool's maxFee
 
@@ -96,7 +97,12 @@ OKX USDG/USDT, pins the fee to cap while off peg, holds last state when every so
 `active()` returns False on stale data so the core fee logic never depends on the monitor succeeding.
 
 `engine.py` also carries an RPC fallback (`_switch_rpc`), Telegram alerting, a fee webhook, analytics
-and state persistence to `engine_state_eth_usdg.json`. Reuse all of it.
+and state persistence to `engine_state_eth_usdg.json`. Reuse all of it, with one deletion.
+
+**Drop the `step-down-to-flat` branch** (`engine.py:134`), which pokes to `min_fee` when leaving the
+elevated regime. `min_fee` is a keeper-side constant, so that branch is the one path in the template
+that can poke below the live ladder. A poke expiring on its own already returns the pool to its
+curve, which is what the TTL is for.
 
 ### 3.2 What is copied from the ETH keeper, and what is not
 
@@ -124,19 +130,35 @@ the fee work explicitly declined to derive. Out of scope for the pilot.
 ### 3.3 The loop
 
 ```
-on each reference tick:
+on a FIXED WALL-CLOCK CADENCE (not on message arrival, see below):
   P_ref   <- reference price, Binance websocket, per section 4
   P_pool  <- sqrtPriceX96 from PoolManager.extsload, converted per pool orientation
+  base    <- feeFloorAt(floorConfig(poolId), now) on the pool's own hook
+             on GLD / META / SPY-GLD: autonomousFee(poolId, zeroForOne), premium-inclusive
+             on ETH: flatFee(poolId)
+  floor   <- pokeFloor(poolId);  cap <- maxFee(poolId)    cached, invalidated on PoolConfigured
   d       <- | P_pool / (P_ref * basis) - 1 |
-  desired <- ramp(d) per side
+  desired <- clamp( ramp(d, base, cap), floor, cap )  per side
   if guards fail:                 hold, do not poke, alert   (section 4.3)
-  apply the SAME push policy as the ETH keeper: immediate on push_delta_immediate,
-    heartbeat on push_delta_heartbeat, forced renewal at ttl_renew_s, and a poke_gate
-    below which the pool rests at its session floor with no live poke at all
+  push policy as the ETH keeper: immediate on push_delta_immediate, heartbeat on
+    push_delta_heartbeat, forced renewal at ttl_renew_s, a poke_gate below which the pool
+    rests with no live poke at all, AND on any change in `base`, so the poke is restated at
+    every session boundary and at the opening bell regardless of d
 ```
+
+`autonomousFee(bytes32,bool)` does **not** exist on SPY, NVDA, TSLA, AAPL, NVDA/SPY or ETH, so
+`feeFloorAt(floorConfig(poolId), now)` is the only route on those.
 
 Keep `poke_gate`. On a deviation keeper it maps to `d <= kick`: below the kicker there should be no
 live poke and no gas.
+
+**Drive the loop from a wall clock, not from the websocket.** The ETH template subscribes to `@trade`
+and every timer sits behind `await ws.recv()` with a 60s `RECEIVE_TIMEOUT` and a bare `break` on
+timeout. That works on ETHUSDT and fails on the equities. Measured 2026-08-30 over 125 seconds:
+`metabusdt@trade` **0 messages** against 124 on `@bookTicker`; `spybusdt@trade` 1 against 17;
+`nvdabusdt@trade` 4 against 43. Six of seven pools would sit in a reconnect loop through the weekend
+and price nothing. **Subscribe `@bookTicker` for every RWA symbol** and run the push decision, TTL and
+heartbeat off a clock.
 
 ### 3.4 Reading the pool price
 
@@ -181,13 +203,24 @@ the failure that cost GLD its book.
 | pool price reads absurd at boot | refuse to start that pool, alert |
 | keeper dies | fee lapses at TTL. Correct in calm; mid-event it is a 12h window in which someone must notice |
 | `pokeFee` reverts | log the reason. `FeeAboveCap`, `FeeBelowFloor`, `InvalidTtl` are config errors, not transient |
+| **base changes under a live poke** | re-poke immediately at the new base. A poke set against a closed-session base and still live at the open resolves to `max(pokeFloor, base_new/2)`, i.e. **half the calendar's number**: NVDA 2,000 against its 4,000 bell, TSLA the same, SPY 400 against 800 |
+| **runaway poke** | the guardian `0x5cda43da9631fb84d390d91e750f549b7ada721c` holds `clearPoke` at zero delay on all nine hooks. **The poker key cannot clear its own poke.** This is the containment path |
 
-### 3.7 Prerequisite nobody has checked
+### 3.7 The poking role, verified
 
-`pokeFee` is `restricted` through the AccessManager at `0xa362d98b33a7bb5b5e2180a05f995a70fb404f30`.
-**Whether the ops key holds the poking role on each pool hook is unverified**, and `FeePoked` has
-never fired on GLD. Note that the role scripts bind `pokeFee` under **both** its ABIs, so a hook
-carrying the 4-arg selector needs the 4-arg binding. Confirm before build, per pool.
+An earlier draft listed this as an unchecked blocker. It is not: verified on chain 2026-08-30 through
+the AccessManager at `0xa362d98b33a7bb5b5e2180a05f995a70fb404f30`.
+
+`getTargetFunctionRole` binds the **4-arg** selector to role 1 on GLD, META and SPY/GLD, and the
+**3-arg** selector to role 1 on SPY, NVDA, TSLA, AAPL, NVDA/SPY and ETH. `isTargetClosed` is false on
+all nine. Both poker keys hold role 1 with **zero execution delay**, and a `pokeFee` `eth_call` from
+the poker key succeeds under each pool's own ABI.
+
+Separately, the guardian `0x5cda43da9631fb84d390d91e750f549b7ada721c` holds role 4, which carries
+`clearPoke` at zero delay, and does **not** hold the poker role. The poker key cannot clear its own
+poke. That is the containment path and it belongs in the runbook.
+
+Re-probe per hook before enabling that pool, but this is not a blocker.
 
 ---
 
@@ -246,6 +279,10 @@ Recomputing GLD against a rolling median rather than a fixed one moved its p99 e
 | thin reference | Saturday volume under 2,000 shares | needs a second reference before that pool goes live |
 | basis drift | today's basis more than 3% from the 30-day median | hold, alert, do not recut |
 
+Use `aiohttp` for the OKX guard, or set a User-Agent: `urllib` and `requests` get a 403 from
+`www.okx.com` and the guard would silently fall back to running on Binance alone. `depeg.py` already
+uses `aiohttp`, so only a rewrite breaks this.
+
 META (521 Saturday shares), MSFT (1,132) and AMZN (754) fail the thin test on volume. Section 4.4
 measures the thing that actually matters, which is book depth, and clears them.
 
@@ -257,21 +294,27 @@ against what it costs to move our own pool the same distance.
 
 | reference | cost to move it 2% | cost to move OUR pool 2% | ratio |
 |---|---|---|---|
-| PAXG (GLD) | $3,010,420 | $1,682 | **1,790x harder** |
+| PAXG (GLD) | $3,010,420 | $837 | **3,597x harder** |
 | XAUT (GLD guard) | $2,232,193 | | |
-| METAB | $200,734 | $8,687 | **23x harder** |
-| SPYB | $313,666 | $619,754 | **0.5x: inverted** |
+| METAB | $200,734 | $4,322 | **46x harder** |
+| SPYB | $313,666 | capped by inventory, see below | at worst ~1.4x |
 | NVDAB | $285,340 | | |
 | AAPLB | $186,356 | | |
 | TSLAB | $208,455 | | |
 | ETHUSDT | $11,160,048 | | |
 
 Every equity reference costs $186k to $479k to move 2%, and gold costs millions. Against our pools
-that is a comfortable margin everywhere **except SPY**, where our own pool is currently the harder
-target. That is not a property of the reference: it is the anomalous $61.98M of virtual depth SPY
-picked up in the last week, the same anomaly that flipped it LVR-negative (section 9). At its 27 Aug
-depth of $10.67M, moving our pool 2% cost $107k and the reference was 3x harder, which is the normal
-ordering. Treat the inversion as a symptom to watch rather than a designed-in weakness.
+that is a comfortable margin: the reference is 46x harder to move than META and 3,597x harder than
+GLD.
+
+**Two corrections an earlier draft of this table needed.** The pool-side column used
+`(virtual/2) * m`, but the quote-leg input to move a constant-product price by `m` is
+`(virtual/2) * (sqrt(1+m) - 1)`, which is 2.01x smaller at m = 2%. And it reported SPY as
+**inverted**, our pool costing $619,754 against the reference's $313,666. That is unreachable: the
+SPY/USDG pool holds 294.926 SPY and 221,600 USDG, about $449k of inventory in total, so no 2% push
+can cost more than that whatever the virtual figure implies. SPY's k of roughly 103 to 138 also puts
+a 2% move at or past the edge of its concentrated range, where the constant-product formula has
+nothing left to integrate. **There is no inversion.** The claim is withdrawn rather than rescued.
 
 **The second source exists**, which section 4.3's disagreement guard assumed without anyone checking.
 OKX lists all twelve equities with an `X` prefix (`XSPY-USDT`, `XNVDA-USDT` and so on), priced within
@@ -351,6 +394,11 @@ the pool is rich or cheap against the reference, so it cannot be a static config
   `min(side, maxFee)` before poking.** `pokeFee` rejects an over-cap side atomically, dropping the
   other side's update with it.
 - Event is `FeePoked(poolId, fee0For1, fee1For0, expiry)`.
+- The `0` sentinel exists **only on the 4-arg ABI**. On SPY, NVDA, TSLA, AAPL, NVDA/SPY and ETH a fee
+  of 0 is not a sentinel, it reverts `FeeBelowFloor`.
+- `autonomousFee()` is premium-inclusive while the resolution-time discount floor is premium-free, so
+  the moment anyone calls `setPoolAsymmetry`, a keeper computing its floor as `autonomousFee()/2`
+  overstates it by `premiumPips/2`.
 
 ---
 
@@ -408,14 +456,23 @@ changes go through the AccessManager delay: a standing setting, not an event lev
 |---|---|---|
 | reference | `PAXGUSDT`, guard against `XAUTUSDT` at 1% | only gold reference that exists |
 | basis | **0.091804**, rolling 30-day median, recut daily | measured, n=1,394 hours |
-| base, market hours | **3,000 pips (0.30%)** | matches the largest GLD incumbent on chain |
-| base, out of hours | **1,500 pips (0.15%)** | defensible only because the reference is live |
+| base | **read from chain every cycle**, currently open 3,000 / overnight 3,000 / closed 6,000 | **not a keeper parameter** |
 | kicker | **2.00%** | agreed. The census rule gives 2.25%; worth $653 on the replay and no change to the first-raise hour |
 | full | **10.00%** | above the worst weekend gold gap in 730d (7.97%) and the worst basis error (5.49%) |
 | cap | **15,000 pips (1.50%)** | the pool's live `maxFee`, no config change needed |
 | direction | **asymmetric, inbound share 0.33** | available on this hook. See the note below |
 | TTL | 7,200s calm / 43,200s triggered | |
 | push policy | the ETH keeper's, unchanged | |
+
+**Why base is not a locked number.** An earlier draft locked 3,000 in hours and 1,500 out of hours.
+Both sit below GLD's live `pokeFloor` of 3,000, and `pokeFloor = min(openFloor, overnightFloor,
+closedFloor)` (`FablesRWA.sol:98-101`), so **every poke from d = 2.00% to d = 2.889% would have
+reverted `FeeBelowFloor`**: the first 11% of the ramp, exactly the band the kicker was tuned to catch.
+Simulated by `eth_call` from the real poker key. The pilot's first live action would have been a
+config error, which section 3.6 itself classifies as "a config error, not transient".
+
+Reading base from chain fixes that, and is also what makes the "a ladder change touches no keeper
+code" promise true rather than aspirational.
 
 **On the asymmetry, and why the model does not settle it.** An earlier draft reported that symmetric
 "measured better" at $50,551 against $41,085 and used that to argue for shipping symmetric first.
@@ -512,20 +569,28 @@ confirmed on that pool under the correct `pokeFee` ABI.
 
 ## 8. Build checklist
 
-1. Confirm the poking role per pool, under the right `pokeFee` ABI. Blocks everything.
-2. Resolve section 6 with Yanis.
+1. Re-probe the poking role per hook before enabling that pool. Already verified once (section 3.7):
+   a pre-flight check, not a blocker.
+2. Resolve section 6 with Yanis. **The only genuinely open item.**
 3. Fork the ETH keeper. Keep `volatility.py` wholesale if a vol term is wanted later; keep
    `depeg.py`'s guard pattern; keep the executor, RPC fallback, alerting and state persistence.
 4. Pool-price reader with the orientation table and the startup assertion (3.4).
 5. Reference ingest and the rolling basis, with the four guards (4.3).
 6. The ramp, with unit tests at every boundary: `d` either side of the kicker, the ramp midpoint,
-   past full, cap clamping, the base flipping across a session boundary, and the direction flip when
-   the pool is cheap rather than rich.
+   past full, cap clamping, the direction flip when the pool is cheap rather than rich, and the base
+   changing under a live poke. **NVDA and TSLA do not flip at the open, they ramp**: `spikeMult` 5 and
+   8, `closedSpike` 4,000, `descentWindow` 7,200, plus a closing ramp. NVDA runs overnight 800 to a
+   4,000 bell, decaying 3,625 / 3,250 / 2,500 / 1,000 over two hours. Required cases: a poke set in
+   one session and resolved in the next; a poke live across the 13:30 UTC bell on NVDA and TSLA; a
+   poke live across TSLA's `closeAfter` 900s tail.
 7. Two-sided poke composition for GLD and META: clamp each side to `min(side, maxFee)`, restate both
    sides every call, and never read `currentFee` as the baseline.
-8. **Dry run ALL seven pools from day one** (`--dry-run` already exists and pokes nothing). This
-   costs nothing and carries no risk, so there is no reason to observe one pool at a time. Compare
-   GLD's output against `scripts/model.py`.
+8. **Dry run ALL seven pools from day one**, but know what it does and does not cover. As inherited,
+   `OnChainExecutor.__init__` returns before `_make_w3`, `Account.from_key` and `_make_contract` when
+   `dry_run` is set, so the template's dry run exercises **neither the pool read, nor the section 3.4
+   orientation assertion, nor the chain-read budget**. Either keep the read path live in dry run,
+   which makes it the largest new resource draw rather than free, or state plainly that the gate only
+   validates the ramp and the reference. Compare GLD's output against `scripts/model.py`.
 9. Enable live poking progressively: GLD, then SPY, AAPL, NVDA, TSLA, META, and ETH last. Days
    between steps, not weeks, gated on the dry run being clean per pool rather than on a calendar.
 
@@ -540,27 +605,53 @@ uniquely vulnerable; it simply went first.
 
 | | now, one pool | seven pools, extrapolated | headroom |
 |---|---|---|---|
-| RSS | 79.8 MB | 559 MB | 14% of RAM |
-| CPU | 0.4% | 2.8% | load average is currently 0.00 |
+| RSS | 79.8 MB | 559 MB by `ps`, 431 MB physical once shared pages are counted once | 14% of RAM |
+| CPU | 0.4% | under 2.8%, since that assumes every pool carries ETHUSDT's message volume and the equities carry two orders of magnitude less | load average is currently 0.00 |
 | connections | 4 | 28 | |
+| **chain reads** | **push only** | **per pool per cycle, forever** | **size this, see below** |
+
+The chain-read row is the one resource this keeper consumes that the ETH keeper does not. The ETH
+keeper touches chain only when it pushes; this one reads `extsload` plus `floorConfig` every cycle
+for every pool, permanently. Give it a fixed poll cadence decoupled from the reference tick and size
+it against the actual Alchemy plan, **which nobody has read**. Do not carry over any "public endpoint
+tops out near 1 req/s" figure: that was measured after a rate-limit sweep had already tripped a
+challenge, and a clean test returned 40 of 40 HTTP 200 at 4/s from the VM and 24 of 24 from a second
+IP. Also add `"403"` and `"forbidden"` to `_is_rpc_error`'s keyword tuple, which today ends at
+`"unavailable"` and would treat an auth failure as fatal rather than retryable.
 
 Binance is not a constraint either. The price feed is a **websocket**, which consumes no REST weight
 at all, and the limits are 6,000 request-weight per minute and 300,000 raw requests per five minutes
 per IP. The second-source guard is a ticker read, weight 1 to 2. Seven pools use a rounding error of
 that budget.
 
-**The blast radius of a keeper bug is bounded and expiring.** A poke resolves inside
-`[max(pokeFloor, autonomous/2), cap]` and lapses at its TTL, so the worst a bug can do is overcharge
-for up to two hours in calm or twelve once triggered. Our keeper only ever computes `ramp(d) >= base`
-and therefore never pokes downward: **assert that and refuse to poke below the session base**, and the
-downward half of the range becomes unreachable. Set against the failure it prevents, $4.79M of volume
-at three basis points, that is the cheaper risk.
+**The blast radius of a keeper bug, stated correctly.** An earlier draft called it "bounded and
+expiring, overcharge-only" and proposed asserting `ramp(d) >= base`. All three parts of that were
+wrong and it is worth being precise, because this is the argument for shipping seven pools at once.
+
+- **Magnitude is two-sided.** A poke resolves per side inside `[max(pokeFloor, base_now/2), cap]`,
+  where `base_now` is the live curve. So a poke computed against one session's base and still live in
+  the next **undercharges by up to 50%**: NVDA 2,000 against its 4,000 opening bell, TSLA the same,
+  SPY 400 against 800. That ships silently, with no revert and no alert.
+- **Duration is 72h on chain**, not 2h or 12h. Those are keeper TTLs, and a *live* buggy keeper
+  renews at `ttl_renew_s` indefinitely. Only a **dead** keeper lapses.
+- **Containment is the guardian's `clearPoke`**, at zero delay, held by a key that is not the poker.
+
+The assertion `ramp(d) >= base` is deleted rather than kept: against a hardcoded base it compares the
+keeper's number to itself and catches nothing. Reading `base` from chain every cycle (section 3.3) is
+what actually closes this, and it is the same fix as F1.
+
+Set against the failure it prevents, $4.79M of volume at three basis points, this is still the
+cheaper risk, but it is a risk with three edges rather than one.
 
 **One thing genuinely argues for doing them together rather than GLD alone.** GLD and META take the
 four-argument `pokeFee`; SPY, NVDA, TSLA, AAPL and ETH take the legacy three-argument one. A
 GLD-only build implements only the four-argument path and then has to be retrofitted. Building both
 from the start is less work, not more.
-10. Only after the keeper is live on GLD: `setPoolConfig` to move its closed tier back to 1,500.
+10. GLD's closed tier. Moving it from the emergency 6,000 back to 1,500 **drops `pokeFloor` from
+    3,000 to 1,500**, because the floor is the minimum of the three tiers. That opens a 50% downward
+    hole on the one pool that currently has none. Either sequence it after the read-base-from-chain
+    change lands, or set the closed tier no lower than half the open tier so the config floor stays
+    binding. Do not ship it as written.
 
 ---
 

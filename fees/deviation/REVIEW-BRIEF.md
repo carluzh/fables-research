@@ -25,26 +25,41 @@ ETH keeper up 5 days 23 hours:
 
 | | now, one pool | seven pools | headroom |
 |---|---|---|---|
-| RSS | 79.8 MB | 559 MB | 14% of RAM |
-| CPU | 0.4% | 2.8% | load average is currently 0.00 |
+| RSS | 79.8 MB | 431 MB physical | 11% of RAM |
+| CPU | 0.4% | under 2.8% | load average is currently 0.00 |
 | connections | 4 | 28 | |
+| **chain reads** | **push only** | **per pool per cycle, forever** | **needs sizing** |
+
+The last row is the one real new draw and the spec now says so: the ETH keeper touches chain only
+when it pushes, this one reads the pool and its ladder every cycle. Give it a fixed poll cadence and
+size it against the Alchemy plan, which nobody has read yet.
 
 **Binance is not a constraint either.** The price feed is a websocket, so it consumes no REST weight
 at all. The limits are 6,000 request-weight per minute and 300,000 raw requests per five minutes per
 IP, and the second-source guard is a weight-1 ticker read. Seven pools use a rounding error of that.
 
-**Blast radius is bounded and expiring.** A poke resolves inside `[max(pokeFloor, autonomous/2), cap]`
-and lapses at its TTL, so the worst a bug does is overcharge for 2h in calm or 12h once triggered.
-The keeper only ever computes `ramp(d) >= base`, so assert that and refuse to poke below the session
-base: the downward half of the range becomes unreachable.
+**Blast radius, corrected.** I had this wrong in the first draft and a review pass caught it. It is
+two-sided, not overcharge-only: a poke computed against one session's base and still live in the next
+resolves to `max(pokeFloor, base_now/2)`, so it **undercharges by up to 50%**, and NVDA and TSLA carry
+4,000-pip opening bells right inside that hole. Duration is 72h on chain, and unbounded while a live
+buggy keeper keeps renewing; only a dead one lapses in 2h. Containment is the guardian's `clearPoke`
+at zero delay, held by a key that is not the poker. The fix is reading `base` from chain every cycle,
+which the spec now requires.
 
 **One thing actively favours doing them together.** GLD and META take the four-argument `pokeFee`;
 SPY, NVDA, TSLA, AAPL and ETH take the legacy three-argument one. A GLD-only build implements one
 path and then gets retrofitted.
 
-Suggested shape: **dry-run all seven from day one** (`--dry-run` exists and pokes nothing, so it is
-free), then enable live poking pool by pool over days, gated on each dry run being clean rather than
-on a calendar.
+**The one thing the keeper must not do:** hold `base` as a config constant. It reads
+`feeFloorAt(floorConfig(poolId), now)` from the pool's own hook every cycle, and re-pokes whenever
+that changes. NVDA and TSLA do not step at the open, they ramp: `spikeMult` 5 and 8 with a 4,000-pip
+bell decaying over two hours, which a keeper-side constant cannot express.
+
+Suggested shape: **dry-run all seven from day one**, then enable live poking pool by pool over days,
+gated on each dry run being clean rather than on a calendar. One caveat I got wrong first time: the
+template's `--dry-run` returns before it builds the web3 client, so as inherited it exercises neither
+the pool read nor the orientation assertion. Keep the read path live in dry run, which makes it the
+real resource test rather than a free one.
 
 ## You are not waiting on the parameters
 
@@ -53,8 +68,10 @@ full point for every asset with a live reference, from a rule a script applies.
 
 The parameters still landing are the **calendar ladder**, the per-session base fees, from the separate
 per-pool competitive work in `../pools/`. Those are a different layer and **the keeper does not depend
-on them**: it reads whatever base the pool is configured with and adds a deviation term on top. A
-later ladder change is a `setPoolConfig` and touches no keeper code. Build now.
+on them**, precisely because it reads the base from chain every cycle rather than holding it: a later
+ladder change is a `setPoolConfig` and touches no keeper code. That is true only with the
+read-from-chain design above; the first draft of this spec held base as a constant and the claim would
+have been false. Build now.
 
 ## Reference is Binance, with OKX as the guard
 
@@ -62,9 +79,9 @@ The tokenised equities (SPYB, NVDAB, METAB and nine more) trade 24/7 through the
 per share, basis 0.999 to 1.000. Gold is the exception and needs PAXG converted from an ounce to an
 ETF share by a measured basis of 0.091804.
 
-Moving a reference 2% costs $186k to $479k on the equities and millions on gold, against $1,682 to
-move our own GLD pool the same distance. OKX lists all twelve within 0.12% of Binance and is the
-disagreement guard, not a fallback to trade off. Section 4.4.
+Moving a reference 2% costs $186k to $479k on the equities and millions on gold, against $837 to move
+our own GLD pool the same distance: 3,597x harder. OKX lists all twelve within 0.12% of Binance and is
+the disagreement guard, not a fallback to trade off. Section 4.4.
 
 ## Your work, used
 
@@ -76,20 +93,29 @@ twice.
 Your asymmetric fee work is deployed on GLD, META and SPY/GLD, so those use the two-sided poke with
 the inbound leg at a third. The other four are symmetric and permanently so.
 
-## Two things I need from you
+## One thing I need from you
 
-1. **Protocol fee.** I could not find how Fables sets one. Section 6 has four specific questions and
-   is the only place the spec says "unknown" instead of giving a number. Until it is answered the
-   keeper ships with no treasury cut.
-2. **The poking role**, per pool, under the right `pokeFee` ABI: four-argument on GLD and META,
-   three-argument on the rest. Unverified, and it blocks everything.
+**The protocol fee.** I could not find how Fables sets one. Section 6 has four specific questions and
+is the only place the spec says "unknown" instead of giving a number. Until it is answered the keeper
+ships with no treasury cut.
+
+The poking role is **no longer** an ask: a review pass verified it on chain. `getTargetFunctionRole`
+binds the 4-arg selector to role 1 on GLD, META and SPY/GLD and the 3-arg to role 1 on the other six,
+`isTargetClosed` is false everywhere, both poker keys hold role 1 at zero delay, and a `pokeFee`
+`eth_call` from the poker key succeeds under each pool's own ABI. Sorry for the false alarm.
 
 ## Calibration
 
-Two things in here I got wrong and corrected: I read asymmetry availability off
-`audit/cofounder-fixes` and concluded no pool had it, and I over-read the replay model on symmetric
-versus asymmetric. Both retractions are in the documents rather than quietly fixed, so you can see
-which claims have been stress-tested and which have not.
+Four things in here I got wrong and corrected, all left visible in the documents rather than quietly
+fixed, so you can see which claims have been stress-tested:
+
+- Read asymmetry availability off `audit/cofounder-fixes` and concluded no pool had it. Wrong: GLD,
+  META and SPY/GLD have it.
+- Over-read the replay model on symmetric versus asymmetric. The model cannot answer that question.
+- **Locked a GLD base of 1,500 out of hours, below the pool's own `pokeFloor` of 3,000.** Every poke
+  from d = 2.00% to 2.889% would have reverted `FeeBelowFloor`. This is why the spec now reads `base`
+  from chain instead of carrying it as a constant.
+- Called the poking role an unchecked blocker when it is bound correctly on all nine hooks.
 
 Every number is reproducible. `python scripts/model.py` prints its output labelled by document
 section, so checking it is a diff.

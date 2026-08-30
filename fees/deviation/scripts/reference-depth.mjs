@@ -58,12 +58,23 @@ for (const [label, sym] of SYMS) {
 
 fs.writeFileSync(new URL('../data/reference-depth.json', import.meta.url), JSON.stringify(out, null, 1))
 
-console.log('\nCompare against what it costs to move OUR pool the same distance. For a constant-product')
-console.log('pool, moving the price by m costs roughly (virtual/2) * m of one leg. GLD virtual is')
-console.log('$168,196 and SPY $61,975,350 (data/kall.json equivalents in the fee work), so:')
-for (const [name, virt] of [['GLD', 168196], ['SPY', 61975350], ['META', 868705]]) {
-  const line = MOVES.map((m) => ('$' + Math.round((virt / 2) * m).toLocaleString()).padStart(11)).join(' ')
-  console.log(`  move OUR ${name.padEnd(5)} pool: ${line}`)
+// Quote-leg input needed to move a constant-product price by m is (virtual/2)*(sqrt(1+m)-1),
+// NOT (virtual/2)*m, which overstates it by 2.01x at m = 2%. An earlier version had the wrong one.
+//
+// TWO CEILINGS THIS STILL IGNORES, both of which matter and neither of which is modelled here:
+//  1. A pool cannot absorb more than the inventory it holds. SPY/USDG holds about $449k in total,
+//     so no push can cost more than that whatever `virtual` implies.
+//  2. `virtual` is 2*L*sqrt(P) at the CURRENT tick. On a concentrated pool with k around 100, a 2%
+//     move is at or past the edge of the range and the formula has nothing left to integrate.
+// Treat the pool column as an upper bound that is only meaningful well inside the range.
+console.log('\nCompare against what it costs to move OUR pool the same distance:')
+console.log('  cost = (virtual/2) * (sqrt(1+m) - 1), capped by the pool actual inventory')
+for (const [name, virt, inventoryUsd] of [['GLD', 168196, 41545], ['SPY', 61975350, 449283], ['META', 868705, 26139]]) {
+  const line = MOVES.map((m) => {
+    const c = Math.min((virt / 2) * (Math.sqrt(1 + m) - 1), inventoryUsd)
+    return ('$' + Math.round(c).toLocaleString()).padStart(11)
+  }).join(' ')
+  console.log(`  move OUR ${name.padEnd(5)} pool: ${line}   (inventory ceiling $${inventoryUsd.toLocaleString()})`)
 }
 console.log('\nIF PUSHING THE REFERENCE IS CHEAPER THAN PUSHING THE POOL, the oracle is the soft target')
 console.log('and that pool must not go live on a single reference.')
