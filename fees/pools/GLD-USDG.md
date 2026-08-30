@@ -12,7 +12,8 @@ pushed at 2026-08-29 19:19 UTC during the dislocation.
 The deviation spec correctly dropped its "revert closed to 1,500" instruction, because 1,500 sits
 below `pokeFloor`. This document says "no change" because GLD is mid-dislocation. Between the two,
 **nothing reverts the emergency 6,000**, so it persists by default rather than by decision. One call
-is needed: keep 6,000, or pick a considered closed floor at or above 3,000. Raised by Yanis, 31 Aug.
+is needed: keep 6,000, or pick a considered closed floor at or above 3,000. Raised by Yanis 31 Aug and
+**still open**: it is the only outstanding decision in this folder. Raised by Yanis, 31 Aug.
 
 ## 1. Why it is held
 

@@ -1,6 +1,11 @@
 # ETH/USDG
 
-**State: NO CHANGE SHIPPING. It is NOT a valid control:** its keeper repriced it every day inside
+**State 31 Aug: HANDED OFF to a separate workstream, which is taking the fee DOWN in low-volatility
+regimes.** Nothing in this folder should touch ETH. It is also **the largest single line in the gap at
+$3,331 a week** on 65% of our TVL, and the least examined thing here: its four largest venues were
+excluded from every scan, so there is no depth measurement for ETH at all.
+
+It is also NOT a valid control: its keeper repriced it every day inside
 the frozen window (OPEN realised 2,119 / 1,122 / 899 / 1,053 / 2,065 across 08-24 to 08-28), so it
 cannot serve as a tide gauge. Drift is measured from the field instead. Cross-asset frozen state in
 [BASELINE-2026-08-30.md](BASELINE-2026-08-30.md). Fees in pips. Cap 3,000, pokeFloor 100,

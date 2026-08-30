@@ -9,9 +9,17 @@ pokeFloor 250.
 **CORRECTED 2026-08-30 evening. The raise is cut from 900/800/700 to 500/500/450** because the
 elasticity behind the larger number turned out to be incoherent: see section 3.
 
-**CORRECTED AGAIN 31 Aug.** **Live on chain META is 900 / 750 / 250.** The proposed 500 / 500 was a
-**44% and 33% cut**, not a raise: the 167h window is 80% pre-change and its realised 579 / 361
-describes the config replaced on 28 August. Only the closed tier ships.
+**FINAL 31 Aug: META closed is the only fee change shipping anywhere.** Live on chain META is
+**900 / 750 / 250**. The proposed 500 / 500 was a **44% and 33% cut**, not a raise: the 167h window is
+80% pre-change and its realised 579 / 361 describes the config replaced on 28 August.
+
+It ships because META is the **one pool where our own diagnosis says price is the binding constraint**
+(share 2.57x depth share, k rank 3 of 5), and because it is therefore the clean place to measure the
+demand curve we have failed to identify five times from observational data.
+
+**Ship it with a randomised `pokeFee` schedule, not a calendar-shaped one.** The hook sets a fee with
+a TTL that lapses on its own, so a randomised ladder across nights costs nothing, reverts itself, and
+produces the one number every recommendation in this folder depends on.
 
 | tier | **live on chain** | realised in window | **shipping** | market | vs live |
 |---|---|---|---|---|---|

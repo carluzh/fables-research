@@ -170,8 +170,8 @@ the unrealistic one.
 1. **Do not spend a chain scan on this pool.** A 48h scan of AAPL's 13 venues would cost roughly
    what SPY's cost and would resolve a $18-a-week question. If depth is ever wanted here, get it as
    a by-product of an all-asset depth sweep, not as its own job.
-2. **Move the ladder with the equity set, not on its own evidence.** When SPY's 550 / 450 / 400
-   result comes back, apply the same shaped move to AAPL by analogy and say plainly that it is by
+2. **Move the ladder with the equity set, not on its own evidence.** As of 31 Aug no equity ladder
+   change is shipping except META closed, so there is nothing for AAPL to follow yet.
    analogy. The field supports it: nothing meaningful on chain trades below us, and 68% of volume
    sits at 400 to 600 pips, so a move toward 500 in the session and 400 in closed hours is well
    inside where the market already clears. There is no AAPL-specific elasticity to size it with and

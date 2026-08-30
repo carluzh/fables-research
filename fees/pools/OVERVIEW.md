@@ -208,20 +208,28 @@ keeper, not a fee tier and not a range.
 
 ## 3. What is shipping and what is held
 
-A live fee change, so this baseline is the "before" of an experiment. Rationale in
-[BASELINE-2026-08-30.md](BASELINE-2026-08-30.md) section 2, per-pool detail in each file.
+**FINAL 31 Aug. One tier ships.**
 
-Revised on the evening of 2026-08-30 after the dual review. Two of the three raises were cut,
-because they had been sized against numbers that were wrong.
+| move | live on chain | to | vs market | why |
+|---|---|---|---|---|
+| **META closed** | **250** | **450** | **0.08x** | the only pool where price is the binding constraint |
 
-| pool | realised now, O / N / C | shipping | why |
-|---|---|---|---|
-| SPY/USDG | 528 / 350 / 250 | **550 / 450 / 400** | overnight cut from 500: it was priced off a revenue index that measured dollars contradict. Market is 1,282 / 1,260 / 1,079 |
-| NVDA/USDG | 1,377 / 417 / 300 | **hold / 550 / 450** | overnight cut from 800. The field is 605 pips in overnight once two dead venues are dropped, not 1,091, so 800 would have been 1.32x market. The session tier earns **1.19x** the field APR and is left alone |
-| META/USDG | 579 / 361 / 250 | **500 / 500 / 450** | cut from 900 / 800 / 700. The level gap is real and measured at 0.08x market, but META's own demand curve slopes UP (41.33% share at 900 pips against 21.14% at 250), so there is no elasticity to size a bigger step against |
-| GLD/USDG | 1,065 / 392 / 1,207 | **none, and NOT a valid control** | mid-dislocation, owned by the deviation work, and its own config changed inside the window |
-| ETH/USDG | 1,493 / 736 / 460 | **none, and NOT a valid control** | the opposite error, and the fee is a live keeper loop rather than a config |
-| TSLA, AAPL, NVDA/SPY, SPY/GLD | see each file | **none** | $26.70 of fees between them over the week. Nothing set here is measurable, and a fourth mover would add noise to the read on SPY, NVDA and META |
+Everything else is held. Two decisions from 31 August drive this. **k is not ours to set**, which
+withdraws the SPY concentration lever rather than deferring it, and leaves SPY depth-constrained with
+no direct lever. And **ETH is handed to a separate workstream** taking its fee down in low-volatility
+regimes.
+
+| pool | state | reason |
+|---|---|---|
+| SPY | held | the two unchanged-tier raises are worth 42/wk against a ,651/wk gap; the binding constraint is depth and it is not ours |
+| NVDA | held | already above market on the live config; the closed raise is worth 3/wk; the constraint is scale, 197x |
+| GLD | held | an event. One open decision on the closed floor |
+| ETH | handed off | separate workstream. Largest single line in the gap at ,331/wk, and the least measured |
+| TSLA, AAPL, crosses | held | 6.70 of fees between them for the week |
+
+The four cuts proposed on 30 August (SPY open, NVDA overnight, META open and overnight) were
+reversals of a config that landed on 28 August, written as raises because the measurement window is
+80% pre-change. They are held pending a window that contains the current config.
 
 **There is no valid control pool, and BASELINE section 2 now says so.** This section reached that
 conclusion independently and it was right; drift is measured from each asset's own field instead, with

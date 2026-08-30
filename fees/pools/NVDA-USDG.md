@@ -20,8 +20,10 @@ not a raise**, and it is held.
 | OVERNIGHT | **800** | 417 | **held, was 550** | 605 | **1.32x** |
 | CLOSED | **300** | 300 | **450** | 574 | 0.52x |
 
-Only the closed tier ships. **We are already above market in open and overnight on the live config**,
-which the published 0.38x overnight ratio hid entirely.
+**FINAL 31 Aug: nothing ships on NVDA.** We are already above market in open and overnight on the
+live config, which the published 0.38x overnight ratio hid entirely, and the closed raise is worth
+**$13 a week**. NVDA's constraint is scale: we hold 0.38% of the asset's TVL against an incumbent 197x
+our size, and no fee setting addresses that.
 
 And "OPEN: hold" was not achievable as written: the routine bell is `overnightFloor * spikeMult`
 (`SessionLib.sol:118`), live `800 x 5 = 4000`. Moving overnight to 550 drops it to **2750**, a 31% cut

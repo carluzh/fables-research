@@ -14,19 +14,23 @@ pokeFloor 250, `protocolFee = 0`.
 **CORRECTED 2026-08-30 evening.** Overnight cut from 500 to 450: the 500 was priced off a revenue
 index that measured dollars contradict (section 4).
 
-**CORRECTED AGAIN 31 Aug.** **Live on chain SPY is 800 / 350 / 250, flat with no bells.** The
-proposed open 550 was a **31% cut**, not a raise: the 167h window is 80% pre-change and its realised
-528 describes the config replaced on 28 August. The two unchanged tiers ship.
+**FINAL 31 Aug: nothing ships on SPY.** Live on chain SPY is **800 / 350 / 250**, flat, no bells.
+The proposed open 550 was a **31% cut**, not a raise: the 167h window is 80% pre-change and its
+realised 528 describes the config replaced on 28 August. The two unchanged-tier raises are defensible
+but worth **$642 a week combined**, and SPY's binding constraint is not the fee.
 
 | tier | **live on chain** | realised in window | **shipping** | market | vs live |
 |---|---|---|---|---|---|
-| OPEN | **800** | 528 | **held, was 550** | 1,282 | 0.62x |
-| OVERNIGHT | **350** | 350 | **450** | 1,260 | 0.28x |
-| CLOSED | **250** | 250 | **400** | 1,079 | 0.23x |
+| OPEN | **800** | 528 | **held** (was 550) | 1,282 | 0.62x |
+| OVERNIGHT | **350** | 350 | **held** (was 450) | 1,260 | 0.28x |
+| CLOSED | **250** | 250 | **held** (was 400) | 1,079 | 0.23x |
 
-Overnight and closed did not change on 28 August, so the window's evidence applies to them directly.
-The open tier now needs a window containing the current config, and a cut to 550 would need share to
-rise 45.5% just to hold revenue flat.
+Overnight and closed did not change on 28 August, so the window's evidence does apply to them, and
+those two raises are worth $141.50 and $500.55 a week. They are held anyway, because SPY's gap to the
+field is **$3,651 a week** and the fee is 18% of it at best.
+
+The open tier separately needs a window containing the current config: a cut to 550 would need share
+to rise 45.5% just to hold revenue flat.
 
 "528 realised" blends two configurations: roughly 490 pips Monday to Thursday and 673 on Friday
 2026-08-28. No Fables pool held one regime across the window.
@@ -130,8 +134,14 @@ Also: the 1,167-pip field fee is **not a price we can charge**. It is inflated b
 $3.34M of TVL quoting $1.1bn of depth. The venues at our size charge 500 to 625, so that is the
 realistic ceiling, not 1,167.
 
-Ranked fixes: **concentration first (5.7x, free), then the WETH pair (unlocks half the market), then
-price (worth about 1.3x).**
+**Concentration is withdrawn as a lever, 31 Aug: k is not ours to set.** It is a consequence of how
+LPs place ranges. Earlier drafts of this file called it "a 5.7x available for free, the highest-return
+action on the board", and that was wrong about who controls it.
+
+That leaves SPY in an uncomfortable position. The fee is not the binding constraint, the binding
+constraint is not ours to move, and **the only remaining lever is reach: 49.1% of SPY volume routes
+through WETH/SPY, a pair we do not quote at all.** That is a product decision, not a parameter, and it
+is the only thing on this pool with the size of the $3,651/week gap.
 
 LP efficiency: our 18.0% APR against a field of 59.3%, **0.30x, rank 8 of 8**.
 
@@ -189,4 +199,6 @@ See [../deviation/DEVIATION-FEE.md](../deviation/DEVIATION-FEE.md).
 | 2026-08-30 pm | **corrected to a whole-field benchmark** | benchmarking against one rival was wrong. Against the field: 0.26x market fee, 0.30x market APR. The 600-pip ceiling claim was overstated, and rank moved to 4/8 once the TVL denominator was time-weighted |
 | 2026-08-30 pm | **widened to 167h / 5 sessions** | conclusions stable on SPY across both windows. Overnight identified as the largest and most discounted block, 77 of 167 hours |
 | 2026-08-30 pm | baseline frozen, change proposed | 550 / 500 / 400 |
+| 2026-08-31 | **Yanis: the table was built on realised fees, not live config** | live SPY is **800 / 350 / 250**, so the proposed open 550 was a 31% cut. The window is 80% pre-change |
+| 2026-08-31 | **final: nothing ships on SPY** | k is not ours to set, so the concentration lever is withdrawn rather than deferred. The fee is not the constraint, the constraint is not ours, and reach (WETH/SPY, 49.1% of volume) is what is left |
 | 2026-08-30 eve | **dual review, five blocking errors, change revised** | **550 / 450 / 400**. The k of 158.5 was a point reading during a 4.66x depth spike, so on a common basis SPY is 34.2 and ranks 7 of 8. The revenue peak at 450 was an index artefact that measured dollars contradict |
