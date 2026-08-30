@@ -54,6 +54,8 @@ Independent of the model and of each other. Each answers one factual question th
 | `reference-census.mjs` | which assets have a continuous reference, how tight it tracks, and the kicker it earns |
 | `gap-information.mjs` | does the 24/7 reference know anything while the cash market is shut (yes: mid-window slope near 1) |
 | `closed-window-moves.mjs` | how often anything actually happens in a closed window, per asset |
+| `reference-depth.mjs` | what it costs to PUSH each reference, against what it costs to push our own pool |
+| `reference-second-source.mjs` | does a second venue exist for the equity references (OKX: yes, all twelve) |
 
 All on-chain reads go to `https://rpc.mainnet.chain.robinhood.com`, which rate-limits: `lib.mjs`
 carries the serialising gate, the retry and the range-halving that the fee scripts already use.

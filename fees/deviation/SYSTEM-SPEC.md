@@ -242,13 +242,63 @@ Recomputing GLD against a rolling median rather than a fixed one moved its p99 e
 | guard | rule | on breach |
 |---|---|---|
 | staleness | reference print older than 15 min | hold, alert |
-| disagreement | two independent references more than 1% apart | hold, alert |
+| disagreement | primary and secondary reference more than 1% apart | hold, alert |
 | thin reference | Saturday volume under 2,000 shares | needs a second reference before that pool goes live |
 | basis drift | today's basis more than 3% from the 30-day median | hold, alert, do not recut |
 
-META (521 Saturday shares), MSFT (1,132) and AMZN (754) fail the thin test. If the reference trades
-that little, pushing IT is cheaper than pushing our pool, and an attacker who moves it makes us raise
-our own fee on honest flow.
+META (521 Saturday shares), MSFT (1,132) and AMZN (754) fail the thin test on volume. Section 4.4
+measures the thing that actually matters, which is book depth, and clears them.
+
+### 4.4 Can the reference be pushed, and is there a second one
+
+Volume is not the test. A venue can turn over plenty on a thin book. `scripts/reference-depth.mjs`
+walks the live order book and prices the attack directly: what it costs to move each reference, set
+against what it costs to move our own pool the same distance.
+
+| reference | cost to move it 2% | cost to move OUR pool 2% | ratio |
+|---|---|---|---|
+| PAXG (GLD) | $3,010,420 | $1,682 | **1,790x harder** |
+| XAUT (GLD guard) | $2,232,193 | | |
+| METAB | $200,734 | $8,687 | **23x harder** |
+| SPYB | $313,666 | $619,754 | **0.5x: inverted** |
+| NVDAB | $285,340 | | |
+| AAPLB | $186,356 | | |
+| TSLAB | $208,455 | | |
+| ETHUSDT | $11,160,048 | | |
+
+Every equity reference costs $186k to $479k to move 2%, and gold costs millions. Against our pools
+that is a comfortable margin everywhere **except SPY**, where our own pool is currently the harder
+target. That is not a property of the reference: it is the anomalous $61.98M of virtual depth SPY
+picked up in the last week, the same anomaly that flipped it LVR-negative (section 9). At its 27 Aug
+depth of $10.67M, moving our pool 2% cost $107k and the reference was 3x harder, which is the normal
+ordering. Treat the inversion as a symptom to watch rather than a designed-in weakness.
+
+**The second source exists**, which section 4.3's disagreement guard assumed without anyone checking.
+OKX lists all twelve equities with an `X` prefix (`XSPY-USDT`, `XNVDA-USDT` and so on), priced within
+0.005% to 0.122% of Binance, so it is unambiguously the same underlying. Bybit lists seven with an
+`X` suffix, missing SPY, QQQ, MSFT, MSTR and NFLX. Kraken and Gate list none.
+
+| | primary | secondary (guard) |
+|---|---|---|
+| equities | Binance, 2% push costs $186k to $479k | OKX, $12k to $126k |
+| gold | Binance PAXG | Binance XAUT, and OKX and Kraken both carry PAXG |
+
+Binance is primary because its book is three to five times deeper. OKX is the guard, not a fallback
+to trade off: it is thin enough ($12k moves NFLX 2%) that acting on it alone would be worse than
+holding. `scripts/reference-second-source.mjs` re-runs the comparison.
+
+**The risk this does not solve.** Every equity reference is a tokenised-equity product, and that whole
+product category is a regulatory posture rather than a market. A venue can withdraw it, and my
+recollection is that Binance has discontinued such a product before, though I have not verified that
+here and it should be checked rather than taken from me. Two venues protect against one venue's
+decision; they do not protect against a sector-wide withdrawal, which would remove every equity
+reference at once and leave those pools with no live anchor.
+
+**What happens if it goes.** The keeper holds its last poke and renews it, per section 3.6, so nothing
+lapses to the closed floor. The pools then have to fall back to the anchored mode described in
+`DEVIATION-FEE.md` section 5.3, using the on-chain Robinhood feed's last print with the much wider
+per-asset bands in section 6.1 of that document, which is why that section is kept rather than
+deleted. Gold would have no anchor at all, since chain 4663 carries no gold feed.
 
 ---
 
