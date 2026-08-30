@@ -21,11 +21,21 @@ roughly at market.
 
 | pool | realised now, O / N / C | shipping | why |
 |---|---|---|---|
-| SPY | 528 / 350 / 250 | **550 / 450 / 400** | 0.26x market fee on 9.0% of the asset's TVL |
-| NVDA | 1,377 / 417 / 300 | **hold / 550 / 450** | the session tier earns 1.19x the field APR, so it is untouched |
-| META | 579 / 361 / 250 | **500 / 500 / 450** | 0.08x market in closed hours, but see calibration |
-| GLD, ETH | | **none** | GLD is mid-dislocation, ETH is keeper-driven |
-| TSLA, AAPL, NVDA/SPY, SPY/GLD | | **none** | $26.70 of fees between them for the week |
+**Revised 31 Aug against live config.** Only the four raises ship; the four cuts are held.
+
+| move | live on chain | to | vs market | ship |
+|---|---|---|---|---|
+| SPY overnight | 350 | **450** | 0.28x | **yes** |
+| SPY closed | 250 | **400** | 0.23x | **yes** |
+| NVDA closed | 300 | **450** | 0.52x | **yes** |
+| META closed | 250 | **450** | **0.08x** | **yes** |
+| SPY open | **800** | 550 | 0.62x | hold, a 31% cut |
+| NVDA overnight | **800** | 550 | **1.32x** | hold, a 31% cut |
+| META open | **900** | 500 | 0.34x | hold, a 44% cut |
+| META overnight | **750** | 500 | 0.25x | hold, a 33% cut |
+
+Three `setPoolConfig` calls, each a whole-struct restatement. The four held moves reverse a change
+that has had one cash session of data.
 
 The **level** argument is measured: charging 0.08x of what a market clears at is arithmetic on two
 well-measured quantities. The **size** of each step is not, and that is the weakness of this whole
@@ -54,7 +64,27 @@ So the ceiling constrains the calendar base and does not constrain the deviation
 
 ## Calibration
 
-Nine things I got wrong and corrected, left visible in the documents rather than quietly fixed, so
+**The biggest one came from Yanis on 31 Aug and it changed what the change is.** The shipping table's
+"was" column was realised fee measured over a 167h window that ends 30 August. A ladder change landed
+on **28 August**, so the window is roughly 80% pre-change and mostly describes the config we replaced.
+Read live from chain, NVDA overnight is **800**, not the 417 I published, so the proposed 550 is a
+**31% cut, not a raise**. Four of the eight tier moves were cuts written as raises, and for a cut the
+pre-registered test inverts: share must rise by the full fee ratio, up to 80% on META open, just to
+hold revenue flat.
+
+I had the evidence and did not apply it. BASELINE section 7 says "no pool held one fee regime across
+the window" and the regime timeline in `data/CORRECTIONS.txt` shows Friday breaking ranks on every
+pool. I wrote that caveat and then built the shipping table off the blend anyway. **A realised fee is
+not a configuration**, and nothing in this work read `floorConfig` off chain until Yanis did.
+
+Second from the same review: **NVDA's "OPEN: hold" was not achievable.** The routine bell is
+`overnightFloor * spikeMult` (`SessionLib.sol:118`), so moving overnight to 550 drops it 4000 to 2750,
+a 31% cut to the one tier earning above its field, and leaves `closedSpike` absolute at 4000 so Monday
+opens become dearer than Tuesday. Both pass validation silently.
+
+The nine below were found earlier, by Carl and by an adversarial pass over the finished documents.
+
+Nine more things I got wrong and corrected, left visible in the documents rather than quietly fixed, so
 you can see which claims have been stress-tested and which have not. The first two were caught by
 Carl, the rest by an adversarial review pass over the finished documents.
 

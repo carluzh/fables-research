@@ -4,6 +4,16 @@
 [BASELINE-2026-08-30.md](BASELINE-2026-08-30.md). Fees in pips. Cap 15,000, pokeFloor 3,000,
 autonomous 6,000, `protocolFee = 0`.
 
+## 0. The closed floor needs a decision, not a default
+
+**Live on chain GLD is 3000 / 3000 / 6000, cap 15,000, pokeFloor 3,000.** That is the emergency config
+pushed at 2026-08-29 19:19 UTC during the dislocation.
+
+The deviation spec correctly dropped its "revert closed to 1,500" instruction, because 1,500 sits
+below `pokeFloor`. This document says "no change" because GLD is mid-dislocation. Between the two,
+**nothing reverts the emergency 6,000**, so it persists by default rather than by decision. One call
+is needed: keep 6,000, or pick a considered closed floor at or above 3,000. Raised by Yanis, 31 Aug.
+
 ## 1. Why it is held
 
 Two independent reasons.

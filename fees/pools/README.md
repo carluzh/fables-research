@@ -10,7 +10,8 @@ shipping, everything that was got wrong and corrected, and what to hit hardest.
 **[OVERVIEW.md](OVERVIEW.md) is the one page.** Read it after, for the nine-pool map.
 **[BASELINE-2026-08-30.md](BASELINE-2026-08-30.md) is the frozen "before" state**, corrected on the
 evening of 2026-08-30 after a dual review found five blocking errors: see its section 8. A fee change
-is shipping on SPY, NVDA and META. GLD and ETH ship no change but **neither is a valid control**,
+is shipping on SPY, NVDA and META, cut back on 31 Aug to the four tiers that did NOT change on
+28 August: the rest were reversals of a three-day-old config written as raises. GLD and ETH ship no change but **neither is a valid control**,
 because both had their own fee moved inside the window, so drift is measured from the field instead.
 Re-measure 1 to 2 days after the change using section 6 of that file.
 
@@ -18,9 +19,9 @@ Re-measure 1 to 2 days after the change using section 6 of that file.
 |---|---|---|---|
 | [OVERVIEW.md](OVERVIEW.md) | the one page | n/a | all nine pools on one table; the book is $1,609,701 of TVL and $15,061.85 of fees in the week, 86% of it GLD and ETH |
 | [BASELINE-2026-08-30.md](BASELINE-2026-08-30.md) | frozen, never edit | n/a | the cross-asset "before", the pre-registered predictions, and the re-measurement recipe |
-| [SPY-USDG.md](SPY-USDG.md) | baseline frozen | 550 / **450** / 400 | 0.26x market fee, 0.30x market APR, on 9.0% of the asset's TVL |
-| [NVDA-USDG.md](NVDA-USDG.md) | baseline frozen | hold / **550** / **450** | corrected: the field is 592 pips not 845 once two dead venues are dropped, so we are ABOVE market at 1.09x, and the session tier earns 1.19x the field APR |
-| [META-USDG.md](META-USDG.md) | baseline frozen | **500 / 500 / 450** | worst discount on the board at 0.08x market fee in closed hours, but its measured demand curve slopes UP, so the raise is cut to a step |
+| [SPY-USDG.md](SPY-USDG.md) | baseline frozen | o/n 350->450, closed 250->400 | 0.26x market fee, 0.30x market APR, on 9.0% of the asset's TVL |
+| [NVDA-USDG.md](NVDA-USDG.md) | baseline frozen | closed 300->450 only | corrected: the field is 592 pips not 845 once two dead venues are dropped, so we are ABOVE market at 1.09x, and the session tier earns 1.19x the field APR |
+| [META-USDG.md](META-USDG.md) | baseline frozen | closed 250->450 only | worst discount on the board at 0.08x market fee in closed hours, but its measured demand curve slopes UP, so the raise is cut to a step |
 | [GLD-USDG.md](GLD-USDG.md) | no change, **not a valid control** | none | its own config changed inside the window, 2026-08-29 19:19 UTC. Still the only within-session fee experiment we have |
 | [ETH-USDG.md](ETH-USDG.md) | no change, **not a valid control** | none | the opposite error: 5.37x market fee, 0.52% share, and its keeper repriced it daily |
 | [TSLA-USDG.md](TSLA-USDG.md) | baseline frozen, **dust** | none, none proposed | $2,260 of TVL and $4.95 of fees in the whole week; 0.25x fee, 0.08x APR on a denominator too small to act on |

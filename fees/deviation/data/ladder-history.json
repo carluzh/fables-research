@@ -1,0 +1,180 @@
+{
+ "GLD": [
+  {
+   "ts": 1787574260,
+   "iso": "2026-08-24T12:24:20.000Z",
+   "block": 44863706,
+   "cap": 8000,
+   "openFloor": 500,
+   "overnightFloor": 350,
+   "closedFloor": 300,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  },
+  {
+   "ts": 1787892223,
+   "iso": "2026-08-28T04:43:43.000Z",
+   "block": 48022517,
+   "cap": 8000,
+   "openFloor": 1500,
+   "overnightFloor": 1500,
+   "closedFloor": 300,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  },
+  {
+   "ts": 1788031170,
+   "iso": "2026-08-29T19:19:30.000Z",
+   "block": 49398455,
+   "cap": 15000,
+   "openFloor": 3000,
+   "overnightFloor": 3000,
+   "closedFloor": 6000,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  }
+ ],
+ "SPY": [
+  {
+   "ts": 1786811140,
+   "iso": "2026-08-15T16:25:40.000Z",
+   "block": 37256574,
+   "cap": 8000,
+   "openFloor": 500,
+   "overnightFloor": 350,
+   "closedFloor": 300,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  },
+  {
+   "ts": 1787892072,
+   "iso": "2026-08-28T04:41:12.000Z",
+   "block": 48021026,
+   "cap": 8000,
+   "openFloor": 800,
+   "overnightFloor": 350,
+   "closedFloor": 250,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  }
+ ],
+ "NVDA": [
+  {
+   "ts": 1786811138,
+   "iso": "2026-08-15T16:25:38.000Z",
+   "block": 37256557,
+   "cap": 8000,
+   "openFloor": 700,
+   "overnightFloor": 400,
+   "closedFloor": 300,
+   "spikeMult": 8,
+   "closedSpike": 3200,
+   "descentWindow": 7200,
+   "closeFloor": 1500,
+   "closeBefore": 1800,
+   "closeAfter": 900
+  },
+  {
+   "ts": 1787892169,
+   "iso": "2026-08-28T04:42:49.000Z",
+   "block": 48021988,
+   "cap": 8000,
+   "openFloor": 1000,
+   "overnightFloor": 800,
+   "closedFloor": 300,
+   "spikeMult": 5,
+   "closedSpike": 4000,
+   "descentWindow": 7200,
+   "closeFloor": 2200,
+   "closeBefore": 1800,
+   "closeAfter": 0
+  }
+ ],
+ "META": [
+  {
+   "ts": 1787574263,
+   "iso": "2026-08-24T12:24:23.000Z",
+   "block": 44863734,
+   "cap": 8000,
+   "openFloor": 500,
+   "overnightFloor": 350,
+   "closedFloor": 300,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  },
+  {
+   "ts": 1787892266,
+   "iso": "2026-08-28T04:44:26.000Z",
+   "block": 48022942,
+   "cap": 8000,
+   "openFloor": 900,
+   "overnightFloor": 750,
+   "closedFloor": 250,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  }
+ ],
+ "TSLA": [
+  {
+   "ts": 1787212011,
+   "iso": "2026-08-20T07:46:51.000Z",
+   "block": 41252062,
+   "cap": 10000,
+   "openFloor": 900,
+   "overnightFloor": 500,
+   "closedFloor": 400,
+   "spikeMult": 8,
+   "closedSpike": 4000,
+   "descentWindow": 7200,
+   "closeFloor": 1600,
+   "closeBefore": 1800,
+   "closeAfter": 900
+  }
+ ],
+ "AAPL": [
+  {
+   "ts": 1787212009,
+   "iso": "2026-08-20T07:46:49.000Z",
+   "block": 41252048,
+   "cap": 8000,
+   "openFloor": 500,
+   "overnightFloor": 350,
+   "closedFloor": 300,
+   "spikeMult": 0,
+   "closedSpike": 0,
+   "descentWindow": 0,
+   "closeFloor": 0,
+   "closeBefore": 0,
+   "closeAfter": 0
+  }
+ ],
+ "ETH": []
+}

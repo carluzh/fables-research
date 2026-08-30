@@ -14,11 +14,19 @@ pokeFloor 250, `protocolFee = 0`.
 **CORRECTED 2026-08-30 evening.** Overnight cut from 500 to 450: the 500 was priced off a revenue
 index that measured dollars contradict (section 4).
 
-| tier | was | **shipping** | market | after (fill in) |
-|---|---|---|---|---|
-| OPEN | 528 realised | **550** | 1,282 | |
-| OVERNIGHT | 350 | **450** (was 500) | 1,260 | |
-| CLOSED | 250 | **400** | 1,079 | |
+**CORRECTED AGAIN 31 Aug.** **Live on chain SPY is 800 / 350 / 250, flat with no bells.** The
+proposed open 550 was a **31% cut**, not a raise: the 167h window is 80% pre-change and its realised
+528 describes the config replaced on 28 August. The two unchanged tiers ship.
+
+| tier | **live on chain** | realised in window | **shipping** | market | vs live |
+|---|---|---|---|---|---|
+| OPEN | **800** | 528 | **held, was 550** | 1,282 | 0.62x |
+| OVERNIGHT | **350** | 350 | **450** | 1,260 | 0.28x |
+| CLOSED | **250** | 250 | **400** | 1,079 | 0.23x |
+
+Overnight and closed did not change on 28 August, so the window's evidence applies to them directly.
+The open tier now needs a window containing the current config, and a cut to 550 would need share to
+rise 45.5% just to hold revenue flat.
 
 "528 realised" blends two configurations: roughly 490 pips Monday to Thursday and 673 on Friday
 2026-08-28. No Fables pool held one regime across the window.

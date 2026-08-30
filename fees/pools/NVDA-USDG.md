@@ -10,11 +10,23 @@ Fees in pips. `protocolFee = 0`, cap 8,000, pokeFloor 300.
 two venues dead for most of the window. Excluding them the field is much cheaper and the overnight
 raise is cut from 800 to 550.
 
-| tier | was | **shipping** | market (as published) | **market (live venues only)** |
-|---|---|---|---|---|
-| OPEN | 1,377 realised | **hold** | 673 | **584** |
-| OVERNIGHT | 417 | **550** (was 800) | 1,091 | **605** |
-| CLOSED | 300 | **450** (was 500) | 574 | 574 |
+**CORRECTED AGAIN 31 Aug.** The "was" column below was realised fee over a window that is 80%
+pre-change. **Live on chain NVDA is 1000 / 800 / 300**, so the proposed overnight 550 is a **31% cut,
+not a raise**, and it is held.
+
+| tier | **live on chain** | realised in window | **shipping** | market (live venues) | vs live |
+|---|---|---|---|---|---|
+| OPEN | **1000** | 1,377 | hold | 584 | **1.71x** |
+| OVERNIGHT | **800** | 417 | **held, was 550** | 605 | **1.32x** |
+| CLOSED | **300** | 300 | **450** | 574 | 0.52x |
+
+Only the closed tier ships. **We are already above market in open and overnight on the live config**,
+which the published 0.38x overnight ratio hid entirely.
+
+And "OPEN: hold" was not achievable as written: the routine bell is `overnightFloor * spikeMult`
+(`SessionLib.sol:118`), live `800 x 5 = 4000`. Moving overnight to 550 drops it to **2750**, a 31% cut
+to the tier this document says is untouched, and leaves `closedSpike` at 4000 so Monday opens become
+dearer than Tuesday. Both pass validation silently.
 
 At 800 pips the overnight tier would have been **1.32x the live market**, not a discount. The two
 excluded venues (0x3d4db2a4, 0x1bdf79ca) are 4.0% of NVDA volume and **32.7% of field fees**,

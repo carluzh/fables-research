@@ -9,11 +9,19 @@ pokeFloor 250.
 **CORRECTED 2026-08-30 evening. The raise is cut from 900/800/700 to 500/500/450** because the
 elasticity behind the larger number turned out to be incoherent: see section 3.
 
-| tier | was | **shipping** | market | after (fill in) |
-|---|---|---|---|---|
-| OPEN | 579 realised | **500** (was 900) | 2,659 | |
-| OVERNIGHT | 361 | **500** (was 800) | 2,989 | |
-| CLOSED | 250 | **450** (was 700) | 3,033 | |
+**CORRECTED AGAIN 31 Aug.** **Live on chain META is 900 / 750 / 250.** The proposed 500 / 500 was a
+**44% and 33% cut**, not a raise: the 167h window is 80% pre-change and its realised 579 / 361
+describes the config replaced on 28 August. Only the closed tier ships.
+
+| tier | **live on chain** | realised in window | **shipping** | market | vs live |
+|---|---|---|---|---|---|
+| OPEN | **900** | 579 | **held, was 500** | 2,659 | 0.34x |
+| OVERNIGHT | **750** | 361 | **held, was 500** | 2,989 | 0.25x |
+| CLOSED | **250** | 250 | **450** | 3,033 | **0.08x** |
+
+The closed tier did not change on 28 August, so the window's evidence applies to it and it carries the
+deepest discount on the board. The two open tiers now need a window containing the current config
+before anything moves, and to break even a cut would need share to rise 80% and 50% respectively.
 
 The *level* argument is unchanged and is measured, not inferred: charging 0.08x to 0.22x of the
 market's clearing price is a fact. What is not supportable is the size of the step, which rested on

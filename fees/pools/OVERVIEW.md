@@ -1,5 +1,12 @@
 # Where Fables sits, on nine pools, against the whole field
 
+
+> **STOP, 2026-08-30 late: the shipping table below must not be executed as written.** Its
+> "realised now" column is a week-long blend, not the live config. A `setPoolConfig` landed
+> 2026-08-28 04:41-04:44 UTC on SPY, NVDA, META and GLD, so four of the eight tier moves are
+> cuts that reverse it. Corrected table, chain-verified config history and the three calls to
+> execute: [LADDER-CORRECTION.md](LADDER-CORRECTION.md).
+
 The one page. Read this and you have the map; everything under it is detail.
 
 **The question every document in this folder answers:** measured against the volume-weighted whole

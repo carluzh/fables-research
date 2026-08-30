@@ -1,0 +1,65 @@
+[
+ {
+  "roleId": 0,
+  "account": "0x359856655934338d798F9ccE1f181486301D36a5",
+  "last": "granted",
+  "delay": 0,
+  "block": 37250998,
+  "isMember": true,
+  "executionDelay": 0
+ },
+ {
+  "roleId": 1,
+  "account": "0xb9e8Db60e88F8949ce0b91d451B269d0108c03D9",
+  "last": "granted",
+  "delay": 0,
+  "block": 37263385,
+  "isMember": true,
+  "executionDelay": 0
+ },
+ {
+  "roleId": 1,
+  "account": "0x1B6a8808E1D26dba66bA11E52997803C43CAd429",
+  "last": "granted",
+  "delay": 0,
+  "block": 44042849,
+  "isMember": true,
+  "executionDelay": 0
+ },
+ {
+  "roleId": 2,
+  "account": "0xb9e8Db60e88F8949ce0b91d451B269d0108c03D9",
+  "last": "granted",
+  "delay": 3600,
+  "block": 37263484,
+  "isMember": true,
+  "executionDelay": 3600
+ },
+ {
+  "roleId": 4,
+  "account": "0x5cDa43Da9631fB84D390D91e750F549B7ada721c",
+  "last": "granted",
+  "delay": 0,
+  "block": 37263433,
+  "isMember": true,
+  "executionDelay": 0
+ },
+ {
+  "roleId": 5,
+  "account": "0x359856655934338d798F9ccE1f181486301D36a5",
+  "last": "granted",
+  "delay": 0,
+  "block": 37263125,
+  "isMember": true,
+  "executionDelay": 0
+ },
+ {
+  "roleId": 6,
+  "account": "0x359856655934338d798F9ccE1f181486301D36a5",
+  "last": "granted",
+  "delay": 0,
+  "block": 37263178,
+  "isMember": true,
+  "executionDelay": 0
+ }
+]
