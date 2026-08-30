@@ -1,0 +1,70 @@
+META  UNIVERSE BENCHMARKS, 48h chain scan to 2026-08-30T13:21:14+00:00
+5 venues scanned. Fees in PIPS. APR is LP-NET.
+
+================================================================================================================
+WHOLE WINDOW  (48 hours)
+  market volume        $1,686,140
+  market fees          $3,303.11   LP-net $2,891.53
+  MARKET FEE           1,959 pips   volume-weighted across all 5 venues
+  market TVL           $366,551   working depth $27,058,417
+  MARKET APR           144.0%   what an LP earns holding the whole field
+  OURS                 333 pips (0.17x market),  APR 32.2% (0.22x market),  share 8.23%,  depth share 3.20%
+  cheapest venue by depth floor (a cheap pool with no depth is not a real alternative):
+    virtual >= $           0   FABLES 250 dyn             333 pips  (vol $      138,752, virt $       867,141)   we are   1.00x it
+    virtual >= $     500,000   FABLES 250 dyn             333 pips  (vol $      138,752, virt $       867,141)   we are   1.00x it
+    virtual >= $   2,000,000   v4 SPY/META 625            625 pips  (vol $      724,226, virt $    24,298,108)   we are   0.53x it
+    virtual >= $  10,000,000   v4 SPY/META 625            625 pips  (vol $      724,226, virt $    24,298,108)   we are   0.53x it
+  volume by fee band:
+       300 to       600  $       138,752    8.2%   FABLES 250 dyn
+       600 to      1200  $       724,226   43.0%   v4 SPY/META 625
+     1,200 to      3000  $        30,591    1.8%   v3 3000
+     3,000 to       inf  $       792,571   47.0%   v4 3499, v3 WETH/META 3000
+  OUR POSITION IN THE FIELD:
+    volume trading CHEAPER than us   $             0    0.0% of the market
+    volume trading DEARER  than us   $     1,547,388   91.8%
+    venues beating our APR           4 of 5   holding $340,403 of TVL
+
+================================================================================================================
+OPEN  (6 hours)
+  market volume        $260,460
+  market fees          $288.46   LP-net $265.24
+  MARKET FEE           1,107 pips   volume-weighted across all 5 venues
+  market TVL           $366,551   working depth $13,235,442
+  MARKET APR           105.6%   what an LP earns holding the whole field
+  OURS                 900 pips (0.81x market),  APR 89.0% (0.84x market),  share 6.80%,  depth share 6.54%
+  cheapest venue by depth floor (a cheap pool with no depth is not a real alternative):
+    virtual >= $           0   v4 SPY/META 625            625 pips  (vol $      196,297, virt $    11,153,599)   we are   1.44x it
+    virtual >= $     500,000   v4 SPY/META 625            625 pips  (vol $      196,297, virt $    11,153,599)   we are   1.44x it
+    virtual >= $   2,000,000   v4 SPY/META 625            625 pips  (vol $      196,297, virt $    11,153,599)   we are   1.44x it
+    virtual >= $  10,000,000   v4 SPY/META 625            625 pips  (vol $      196,297, virt $    11,153,599)   we are   1.44x it
+  volume by fee band:
+       600 to      1200  $       214,014   82.2%   v4 SPY/META 625, FABLES 250 dyn
+     1,200 to      3000  $        15,688    6.0%   v3 WETH/META 3000
+     3,000 to       inf  $        30,758   11.8%   v4 3499, v3 3000
+  OUR POSITION IN THE FIELD:
+    volume trading CHEAPER than us   $       196,297   75.4% of the market
+    volume trading DEARER  than us   $        46,446   17.8%
+    venues beating our APR           3 of 5   holding $89,115 of TVL
+
+================================================================================================================
+CLOSED  (42 hours)
+  market volume        $1,425,680
+  market fees          $3,014.66   LP-net $2,626.30
+  MARKET FEE           2,115 pips   volume-weighted across all 5 venues
+  market TVL           $366,551   working depth $27,686,624
+  MARKET APR           149.4%   what an LP earns holding the whole field
+  OURS                 250 pips (0.12x market),  APR 24.1% (0.16x market),  share 8.49%,  depth share 3.13%
+  cheapest venue by depth floor (a cheap pool with no depth is not a real alternative):
+    virtual >= $           0   FABLES 250 dyn             250 pips  (vol $      121,035, virt $       867,144)   we are   1.00x it
+    virtual >= $     500,000   FABLES 250 dyn             250 pips  (vol $      121,035, virt $       867,144)   we are   1.00x it
+    virtual >= $   2,000,000   v4 SPY/META 625            625 pips  (vol $      527,929, virt $    24,726,048)   we are   0.40x it
+    virtual >= $  10,000,000   v4 SPY/META 625            625 pips  (vol $      527,929, virt $    24,726,048)   we are   0.40x it
+  volume by fee band:
+       100 to       300  $       121,035    8.5%   FABLES 250 dyn
+       600 to      1200  $       527,929   37.0%   v4 SPY/META 625
+     3,000 to       inf  $       776,716   54.5%   v4 3499, v3 WETH/META 3000, v3 3000
+  OUR POSITION IN THE FIELD:
+    volume trading CHEAPER than us   $             0    0.0% of the market
+    volume trading DEARER  than us   $     1,304,645   91.5%
+    venues beating our APR           4 of 5   holding $340,403 of TVL
+

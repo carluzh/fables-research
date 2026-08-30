@@ -1,0 +1,161 @@
+{
+ "asset": "NVDA",
+ "assetUsd": 220.0,
+ "assetDecimals": 18,
+ "pools": [
+  {
+   "key": "FABLES 300 dyn",
+   "proto": "v4",
+   "id": "0x7990aad9e8fb048f49a155a7df5603db0366f0657035b78eb4196395cccb3dcd",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v3 500 dominant",
+   "proto": "v3",
+   "id": "0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3",
+   "fee": 500,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 3499",
+   "proto": "v4",
+   "id": "0x3bb34a44f1b2b5f32c034c38a53065a521a47b199700fa9bd19d60985ff24bf1",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 0 dyn USDG",
+   "proto": "v4",
+   "id": "0x8a4b200cfb9fb8a40d2778eda432bfaa36d21fdaa9ee8e529929f6afaf61a2bf",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v3 3000",
+   "proto": "v3",
+   "id": "0xb944cec30bd4175855215d767adc81f39e5f7e2b",
+   "fee": 3000,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 375",
+   "proto": "v4",
+   "id": "0x55c2dddc6c6b85897009759787655c6fad1e1c4d5c63d33e38bd7e18c55000d2",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 475",
+   "proto": "v4",
+   "id": "0xdf5c0bcd967d54774c139a4ef803ec994779736346fb4c21b50ed241b1fd2682",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 10990",
+   "proto": "v4",
+   "id": "0x6a41bdbdf82850998dd5f30588cde7a38447ba6334258ba91775e090155eb796",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 WETH 0 dyn A",
+   "proto": "v4",
+   "id": "0x3d4db2a47686c5d019bbb49b2be17851eae586b52891bb4e0562bcbfe99fbb38",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "WETH",
+   "quoteDecimals": 18,
+   "quoteUsd": 2459.0
+  },
+  {
+   "key": "v3 WETH 500",
+   "proto": "v3",
+   "id": "0x62ab521f71431f78ac374cdbadc6cda3c8916b6c",
+   "fee": 500,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "WETH",
+   "quoteDecimals": 18,
+   "quoteUsd": 2459.0
+  },
+  {
+   "key": "v3 WETH 3000",
+   "proto": "v3",
+   "id": "0xc0be1cb0f674d9737c72b2a63fc542361185b807",
+   "fee": 3000,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "WETH",
+   "quoteDecimals": 18,
+   "quoteUsd": 2459.0
+  },
+  {
+   "key": "v4 WETH 1193",
+   "proto": "v4",
+   "id": "0x647836c4965c512f0d82a2128abe7826eacf5a79d2dbed252a89ba5c591d1e87",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "WETH",
+   "quoteDecimals": 18,
+   "quoteUsd": 2459.0
+  },
+  {
+   "key": "v4 WETH 0 dyn B",
+   "proto": "v4",
+   "id": "0x1bdf79cae9c6a83216a659974c9915e632bdd6916736bf29ea1d8211310048d2",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "WETH",
+   "quoteDecimals": 18,
+   "quoteUsd": 2459.0
+  },
+  {
+   "key": "v4 SPY/NVDA 625",
+   "proto": "v4",
+   "id": "0xbc732a1a0baabce2574ec2bca24fccad8e2c38a061a37cefc17a2fd12809394f",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "SPY",
+   "quoteDecimals": 18,
+   "quoteUsd": 772.937805519385
+  }
+ ]
+}

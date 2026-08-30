@@ -1,0 +1,62 @@
+{
+ "asset": "META",
+ "assetUsd": 579.4968478317472,
+ "assetDecimals": 18,
+ "pools": [
+  {
+   "key": "FABLES 250 dyn",
+   "proto": "v4",
+   "id": "0x4ac4259eb99dce57268a856719d087fa1a53569b2fed6f330aabe32d9a4aa4f5",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 3499",
+   "proto": "v4",
+   "id": "0x5875d407a42965b0e768c8925cea290e06fa50603ef34fc99eb92a1050e6ae36",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 SPY/META 625",
+   "proto": "v4",
+   "id": "0xe6b713cf680868a40aafca45810b0c894eb5c696f5a2230d4816e6695e90e681",
+   "fee": null,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "SPY",
+   "quoteDecimals": 18,
+   "quoteUsd": 772.937805519385
+  },
+  {
+   "key": "v3 WETH/META 3000",
+   "proto": "v3",
+   "id": "0xa4bdb396a69617eb7f70e2cc1ef526f7340b1b0d",
+   "fee": 3000,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "WETH",
+   "quoteDecimals": 18,
+   "quoteUsd": 2459.0
+  },
+  {
+   "key": "v3 3000",
+   "proto": "v3",
+   "id": "0x107a7cb40d8665360ba10e59471af06150a50922",
+   "fee": 3000,
+   "assetIdx": 1,
+   "quoteIdx": 0,
+   "quoteSym": "USDG",
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  }
+ ]
+}

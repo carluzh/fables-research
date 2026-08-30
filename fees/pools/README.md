@@ -5,13 +5,60 @@ Robinhood Chain for its asset, and if not, what would make it so.**
 
 Fees in pips throughout: 100 pips = 1 bps = 0.01%.
 
-| pool | status | verdict |
-|---|---|---|
-| [SPY-USDG.md](SPY-USDG.md) | done 2026-08-30 | not first on any LP metric; the cause is not what we assumed |
-| NVDA-USDG.md | in progress | |
-| GLD-USDG.md | pending, blocked on the dislocation in [../deviation/](../deviation/) | |
-| META-USDG.md | pending | |
-| ETH-USDG.md | pending | |
+**[REVIEW-BRIEF.md](REVIEW-BRIEF.md) is the entry point for a reviewer**: why this exists, what is
+shipping, everything that was got wrong and corrected, and what to hit hardest.
+**[OVERVIEW.md](OVERVIEW.md) is the one page.** Read it after, for the nine-pool map.
+**[BASELINE-2026-08-30.md](BASELINE-2026-08-30.md) is the frozen "before" state**, corrected on the
+evening of 2026-08-30 after a dual review found five blocking errors: see its section 8. A fee change
+is shipping on SPY, NVDA and META. GLD and ETH ship no change but **neither is a valid control**,
+because both had their own fee moved inside the window, so drift is measured from the field instead.
+Re-measure 1 to 2 days after the change using section 6 of that file.
+
+| document | state | fee change | headline |
+|---|---|---|---|
+| [OVERVIEW.md](OVERVIEW.md) | the one page | n/a | all nine pools on one table; the book is $1,609,701 of TVL and $15,061.85 of fees in the week, 86% of it GLD and ETH |
+| [BASELINE-2026-08-30.md](BASELINE-2026-08-30.md) | frozen, never edit | n/a | the cross-asset "before", the pre-registered predictions, and the re-measurement recipe |
+| [SPY-USDG.md](SPY-USDG.md) | baseline frozen | 550 / **450** / 400 | 0.26x market fee, 0.30x market APR, on 9.0% of the asset's TVL |
+| [NVDA-USDG.md](NVDA-USDG.md) | baseline frozen | hold / **550** / **450** | corrected: the field is 592 pips not 845 once two dead venues are dropped, so we are ABOVE market at 1.09x, and the session tier earns 1.19x the field APR |
+| [META-USDG.md](META-USDG.md) | baseline frozen | **500 / 500 / 450** | worst discount on the board at 0.08x market fee in closed hours, but its measured demand curve slopes UP, so the raise is cut to a step |
+| [GLD-USDG.md](GLD-USDG.md) | no change, **not a valid control** | none | its own config changed inside the window, 2026-08-29 19:19 UTC. Still the only within-session fee experiment we have |
+| [ETH-USDG.md](ETH-USDG.md) | no change, **not a valid control** | none | the opposite error: 5.37x market fee, 0.52% share, and its keeper repriced it daily |
+| [TSLA-USDG.md](TSLA-USDG.md) | baseline frozen, **dust** | none, none proposed | $2,260 of TVL and $4.95 of fees in the whole week; 0.25x fee, 0.08x APR on a denominator too small to act on |
+| [AAPL-USDG.md](AAPL-USDG.md) | baseline frozen, **dust** | none, none proposed | $4,259 of TVL, $18.17 of fees; the entire zero-elasticity prize is $74.66, and adding a fourth mover would only add noise |
+| [NVDA-SPY.md](NVDA-SPY.md) | baseline frozen, **dust** | none | $4,395 of TVL, $2.25 of fees; worst APR ratio of any Fables pool at 0.05x, and its closed row at 0.03x is the lowest cell in the table |
+| [SPY-GLD.md](SPY-GLD.md) | baseline frozen, **dust** | none, not a control either | smallest pool we run: $1,073 of TVL, $1.33 of fees; we are the only venue on chain quoting the pair, so its 1.00x is an identity, not a win |
+
+Two labels in that table carry weight. **Dust** means the pool holds $1k to $4k of TVL and earned
+single-digit or low-double-digit dollars over 167 hours: the ratios are honest arithmetic and none
+of them is worth a decision. And the market APR for TSLA, AAPL and NVDA/SPY is **charged-basis, not
+LP-net**, because `protofee.json` covers under 0.5% of those fields by volume, so those market APRs
+are overstated and our ratio understated. Each document states its own correction.
+
+### The benchmark is the whole field, never one rival
+
+Every metric compares Fables against the **volume-weighted field**, not against a chosen incumbent.
+This was a real error in the first pass and it changed conclusions: benchmarking SPY against "the
+deepest rival at 625 pips" hid that the volume-weighted market fee is 1,167, and benchmarking NVDA
+against "the incumbent at 500" wrote out a venue realising 9 pips on $1.68M. Compute:
+
+```
+market fee = sum(fees) / sum(volume) across EVERY venue trading that asset
+market APR = sum(LP-net fees) / sum(TVL) across EVERY venue
+```
+
+and report ours as a ratio to each. Rank is secondary; the ratio is the number that means something.
+
+### Two windows, and one of them has broken a conclusion
+
+Report both. Where they disagree, the 167h window wins.
+
+| window | source | answers | n |
+|---|---|---|---|
+| 48h chain scan | raw Swap events | depth, k, utilisation, exact per-swap fee | 1 cash session |
+| 167h buckets | LiquidityService | share, fee and APR **by session** | 5 cash sessions |
+
+On 2026-08-30 the 48h scan said NVDA's session earned **1.46x** the market APR. Over five sessions
+it was **0.95x**. Never draw a session conclusion from the chain scan alone.
 
 ## Method
 
@@ -19,6 +66,43 @@ The point of these documents is that **a snapshot proves nothing**. Every headli
 earlier fee work was a single reading of TVL, volume and fee at one instant. That is how a pool whose
 depth quadrupled inside a window can be ranked last on an APR that divides a period's fees by its
 closing TVL. So each pool is measured as a time series, per hour, from raw chain data.
+
+### 0. The two windows, and the pre-flight check
+
+There are two windows and they answer different questions. Running only one of them is the mistake
+this section exists to stop.
+
+| window | source | answers | why not the other |
+|---|---|---|---|
+| **48h chain scan** | raw `Swap` events | depth, exact per-swap fee, utilisation, time-weighted TVL, intra-hour fee behaviour | the indexer publishes no depth at all |
+| **7d hourly buckets** | LiquidityService | share, realised fee and APR **by session**, over 5 cash sessions | a chain scan of 7d on a busy pool is not practical |
+
+**Pre-flight, before launching any scan: compute which sessions the window will contain, and print
+them.** A 24h window taken on a Sunday contains zero cash-session hours and is worthless for the
+question these documents ask. This was learned by wasting a scan on NVDA on 2026-08-30.
+
+- The chain scan is **48h and must contain at least one complete cash session**. If the head lands on
+  a weekend, 48h reaches back to Friday's session and is the minimum that works; a Sunday-afternoon
+  head needs more.
+- Never draw a session conclusion from the chain scan alone. It holds one session at best, so it is
+  n=1. The session comparison comes from the 7d buckets, which hold five.
+- State the session composition of every window in the document, in hours, so the reader can see the
+  n.
+
+`pool_series.mjs <config.json> <hours> <out.json>` is the scanner; the config carries the venue list,
+the asset spot mark, and per-venue `assetIdx`, `quoteIdx`, `quoteDecimals` and `quoteUsd`.
+
+### 0b. Cost, so the window is chosen deliberately
+
+Scan time is set by swap density, not by pool count. The node caps a response at roughly 2,000 logs,
+so a chunk holding 20,000 logs bisects four levels deep and costs about 30 sub-calls. Budget from the
+census `txCount` before launching:
+
+| asset | venues | window | swaps | wall clock |
+|---|---|---|---|---|
+| SPY | 8 | 48h | 206,361 | ~40 min |
+| NVDA | 14 | 24h | 91,000 | ~11 min |
+| NVDA | 14 | 48h | ~200,000 | ~30 min |
 
 **1. Enumerate the whole field, not a hand-picked rival list.**
 v3 exhaustively from the factory `0x1f7d7550b1b028f7571e69a784071f0205fd2efa` by calling

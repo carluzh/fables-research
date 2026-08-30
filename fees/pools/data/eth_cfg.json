@@ -1,0 +1,85 @@
+{
+ "asset": "ETH",
+ "assetUsd": 1.0,
+ "assetDecimals": 6,
+ "pools": [
+  {
+   "key": "FABLES 450 dyn",
+   "proto": "v4",
+   "id": "0xbac3aa3b91584a53a579b3c999a56756e954e59247e497bad1d25a4334bde551",
+   "fee": null,
+   "assetIdx": 0,
+   "volIdx": 1,
+   "volDecimals": 6,
+   "volUsd": 1.0,
+   "quoteIdx": 1,
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 625 native",
+   "proto": "v4",
+   "id": "0x387bf619da4d3fb62bb276482693dba1b9b3520f573cabdfe033384a24125982",
+   "fee": null,
+   "assetIdx": 0,
+   "volIdx": 1,
+   "volDecimals": 6,
+   "volUsd": 1.0,
+   "quoteIdx": 1,
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v3 3000",
+   "proto": "v3",
+   "id": "0xa9188730fe85be88ad499d7d52b099e800fb0334",
+   "fee": 3000,
+   "assetIdx": 0,
+   "volIdx": 1,
+   "volDecimals": 6,
+   "volUsd": 1.0,
+   "quoteIdx": 1,
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 0 dyn A",
+   "proto": "v4",
+   "id": "0x2ada73f1c143a8469b755877402302914156c9a1b8e9266041e4dc342f8b0366",
+   "fee": null,
+   "assetIdx": 0,
+   "volIdx": 1,
+   "volDecimals": 6,
+   "volUsd": 1.0,
+   "quoteIdx": 1,
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 0 dyn B",
+   "proto": "v4",
+   "id": "0xa583fdfb7ba7959fd8285592fb78e71041ff29eb782ee6e92490c6e30f3c752c",
+   "fee": null,
+   "assetIdx": 0,
+   "volIdx": 1,
+   "volDecimals": 6,
+   "volUsd": 1.0,
+   "quoteIdx": 1,
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  },
+  {
+   "key": "v4 3499",
+   "proto": "v4",
+   "id": "0x77c25b9386d47de62e0155c393696e9f43f7e6d036c6ca52f66735ccbb8808a7",
+   "fee": null,
+   "assetIdx": 0,
+   "volIdx": 1,
+   "volDecimals": 6,
+   "volUsd": 1.0,
+   "quoteIdx": 1,
+   "quoteDecimals": 6,
+   "quoteUsd": 1.0
+  }
+ ]
+}

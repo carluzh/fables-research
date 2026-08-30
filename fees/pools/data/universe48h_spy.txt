@@ -1,0 +1,98 @@
+SPY  UNIVERSE BENCHMARKS, 48h chain scan to 2026-08-30T11:13:05+00:00
+8 venues scanned. Fees in PIPS. APR is LP-NET.
+
+================================================================================================================
+WHOLE WINDOW  (48 hours)
+  market volume        $35,420,375
+  market fees          $40,577.49   LP-net $33,852.35
+  MARKET FEE           1,146 pips   volume-weighted across all 8 venues
+  market TVL           $5,166,523   working depth $1,235,261,343
+  MARKET APR           119.6%   what an LP earns holding the whole field
+  OURS                 263 pips (0.23x market),  APR 38.6% (0.32x market),  share 10.52%,  depth share 1.29%
+  cheapest venue by depth floor (a cheap pool with no depth is not a real alternative):
+    virtual >= $           0   v4 75                       75 pips  (vol $      343,219, virt $     1,087,839)   we are   3.51x it
+    virtual >= $     500,000   v4 75                       75 pips  (vol $      343,219, virt $     1,087,839)   we are   3.51x it
+    virtual >= $   2,000,000   FABLES 250 dyn             263 pips  (vol $    3,727,531, virt $    15,910,634)   we are   1.00x it
+    virtual >= $  10,000,000   FABLES 250 dyn             263 pips  (vol $    3,727,531, virt $    15,910,634)   we are   1.00x it
+  volume by fee band:
+         0 to       100  $       343,219    1.0%   v4 75
+       100 to       300  $     3,727,531   10.5%   FABLES 250 dyn
+       300 to       600  $    18,113,779   51.1%   v3 WETH/SPY 500, v3 500
+       600 to      1200  $     5,712,877   16.1%   v4 625
+     3,000 to       inf  $     7,522,969   21.2%   v4 3499, v4 10000 dyn, v3 3000
+  OUR POSITION IN THE FIELD:
+    volume trading CHEAPER than us   $       343,219    1.0% of the market
+    volume trading DEARER  than us   $    31,349,625   88.5%
+    venues beating our APR           7 of 8   holding $4,702,451 of TVL
+
+================================================================================================================
+OPEN  (7 hours)
+  market volume        $4,637,425
+  market fees          $7,624.77   LP-net $6,419.96
+  MARKET FEE           1,644 pips   volume-weighted across all 8 venues
+  market TVL           $5,166,523   working depth $781,185,575
+  MARKET APR           155.5%   what an LP earns holding the whole field
+  OURS                 673 pips (0.41x market),  APR 19.5% (0.13x market),  share 2.32%,  depth share 2.03%
+  cheapest venue by depth floor (a cheap pool with no depth is not a real alternative):
+    virtual >= $           0   v4 75                       75 pips  (vol $       62,794, virt $     1,086,878)   we are   8.97x it
+    virtual >= $     500,000   v4 75                       75 pips  (vol $       62,794, virt $     1,086,878)   we are   8.97x it
+    virtual >= $   2,000,000   v3 500                     500 pips  (vol $      184,359, virt $     9,403,685)   we are   1.35x it
+    virtual >= $  10,000,000   v4 625                     625 pips  (vol $    1,162,694, virt $    86,379,005)   we are   1.08x it
+  volume by fee band:
+         0 to       100  $        62,794    1.4%   v4 75
+       300 to       600  $     1,580,776   34.1%   v3 WETH/SPY 500, v3 500
+       600 to      1200  $     1,270,106   27.4%   v4 625, FABLES 250 dyn
+     3,000 to       inf  $     1,723,749   37.2%   v4 3499, v3 3000
+  OUR POSITION IN THE FIELD:
+    volume trading CHEAPER than us   $     2,806,264   60.5% of the market
+    volume trading DEARER  than us   $     1,723,749   37.2%
+    venues beating our APR           5 of 7   holding $4,652,155 of TVL
+
+================================================================================================================
+OVERNIGHT  (1 hours)
+  market volume        $259,626
+  market fees          $334.67   LP-net $282.23
+  MARKET FEE           1,289 pips   volume-weighted across all 8 venues
+  market TVL           $5,166,523   working depth $726,297,367
+  MARKET APR           47.9%   what an LP earns holding the whole field
+  OURS                 350 pips (0.27x market),  APR 26.7% (0.56x market),  share 15.57%,  depth share 2.03%
+  cheapest venue by depth floor (a cheap pool with no depth is not a real alternative):
+    virtual >= $           0   v4 75                       75 pips  (vol $        5,166, virt $     1,087,923)   we are   4.67x it
+    virtual >= $     500,000   v4 75                       75 pips  (vol $        5,166, virt $     1,087,923)   we are   4.67x it
+    virtual >= $   2,000,000   FABLES 250 dyn             350 pips  (vol $       40,413, virt $    14,712,759)   we are   1.00x it
+    virtual >= $  10,000,000   FABLES 250 dyn             350 pips  (vol $       40,413, virt $    14,712,759)   we are   1.00x it
+  volume by fee band:
+         0 to       100  $         5,166    2.0%   v4 75
+       300 to       600  $       123,293   47.5%   v3 WETH/SPY 500, FABLES 250 dyn, v3 500
+       600 to      1200  $        62,694   24.1%   v4 625
+     3,000 to       inf  $        68,473   26.4%   v4 3499, v3 3000
+  OUR POSITION IN THE FIELD:
+    volume trading CHEAPER than us   $         5,166    2.0% of the market
+    volume trading DEARER  than us   $       214,047   82.4%
+    venues beating our APR           4 of 6   holding $4,572,535 of TVL
+
+================================================================================================================
+CLOSED  (40 hours)
+  market volume        $30,523,324
+  market fees          $32,618.06   LP-net $27,150.16
+  MARKET FEE           1,069 pips   volume-weighted across all 8 venues
+  market TVL           $5,166,523   working depth $1,277,206,802
+  MARKET APR           115.1%   what an LP earns holding the whole field
+  OURS                 250 pips (0.23x market),  APR 42.2% (0.37x market),  share 11.73%,  depth share 1.28%
+  cheapest venue by depth floor (a cheap pool with no depth is not a real alternative):
+    virtual >= $           0   v4 75                       75 pips  (vol $      275,259, virt $     1,088,004)   we are   3.33x it
+    virtual >= $     500,000   v4 75                       75 pips  (vol $      275,259, virt $     1,088,004)   we are   3.33x it
+    virtual >= $   2,000,000   FABLES 250 dyn             250 pips  (vol $    3,579,706, virt $    16,294,243)   we are   1.00x it
+    virtual >= $  10,000,000   FABLES 250 dyn             250 pips  (vol $    3,579,706, virt $    16,294,243)   we are   1.00x it
+  volume by fee band:
+         0 to       100  $       275,259    0.9%   v4 75
+       100 to       300  $     3,579,706   11.7%   FABLES 250 dyn
+       300 to       600  $    16,450,124   53.9%   v3 WETH/SPY 500, v3 500
+       600 to      1200  $     4,487,489   14.7%   v4 625
+     1,200 to      3000  $        18,754    0.1%   v3 3000
+     3,000 to       inf  $     5,711,993   18.7%   v4 3499, v4 10000 dyn
+  OUR POSITION IN THE FIELD:
+    volume trading CHEAPER than us   $       275,259    0.9% of the market
+    volume trading DEARER  than us   $    26,668,359   87.4%
+    venues beating our APR           6 of 8   holding $4,691,546 of TVL
+
