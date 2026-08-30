@@ -69,6 +69,25 @@ nothing to do with our fee. There is no usable elasticity here.
 The entire top-of-curve evidence for META is **$2.68 an hour on one day**, which is why the raise is
 now a step to roughly the level we already charge in the session rather than a 3.6x jump.
 
+## 3b. The binding constraint is price, and depth is fine
+
+`scripts/diagnose.py`. Volume share **8.23%** against depth share **3.20%**, a ratio of **2.57**: we
+out-punch our depth by two and a half times, and k at 33.2 ranks 3 of 5. **Depth is not the ceiling
+on META.**
+
+The clinching comparison is `v3 WETH/META 3000`: **half our TVL, identical k at 32.9, charging 9x our
+fee, and taking 88% of our share.** We give away a 9x discount to win 14% more flow than a pool that
+does not bother.
+
+This is the one asset where the naive "just raise the fee" answer is close to right, and it is also
+the one whose demand curve came back sloping up, which is why the raise was cut. That tension is
+unresolved and it is the sharpest one in the set.
+
+Reach matters too: **43% of META flow is the SPY/META cross**, a pair we do not quote.
+
+LP efficiency: our 21.5% APR against a field of 181.2%, **0.12x, rank 4 of 4**. The worst ratio of any
+pool where we hold real capital.
+
 ## 4. Context
 
 The 48h field fee of 1,959 pips is set by `v4 3499` ($670,906 at 3,499) and `v3 WETH/META 3000`.

@@ -103,6 +103,19 @@ The comparable SPY figure over the same 48h window is **-0.582**, not the -0.363
 which is a 167h number. **GLD** is the only pool in the set with genuine within-session fee variation
 and therefore the only clean elasticity observation we have anywhere.
 
+## 4b. The binding constraint is depth, then scale
+
+`scripts/diagnose.py`. Volume share **0.17%** against depth share **0.16%**, a ratio of **1.01**: we
+win exactly the flow our quoted depth entitles us to, so no fee setting moves it. k is 22.6 against a
+field median of 27.5.
+
+The deeper number is worse. We hold **0.38% of the asset's TVL and take 0.17% of its volume**, so we
+under-punch even our capital. Doubling k to the incumbent's 48.5 takes us to roughly 0.35% share, and
+the incumbent is 197x our size. **This is a scale problem wearing a depth problem's clothes.** Reach
+is not the issue here: only 11.4% of NVDA flow sits in pairs we do not quote, against SPY's 49%.
+
+LP efficiency: our 54.5% APR against a field of 70.3%, **0.78x, rank 8 of 13** at a $10k TVL floor.
+
 ## 5. What this does not settle
 
 - **A claim made and withdrawn on 2026-08-30.** From the 48h scan, NVDA's session looked like

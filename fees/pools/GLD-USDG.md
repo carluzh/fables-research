@@ -68,6 +68,21 @@ a normal pool's trader can route away.
 **Treat the GLD elasticity as an upper bound on how insensitive flow is elsewhere, never as an
 estimate of it.**
 
+## 3b. Neither depth nor price: the numbers describe an event
+
+`scripts/diagnose.py`. Volume share **20.4%** against depth share **50.5%**, a ratio of **0.40**, and
+k of **32.7 is first in the field** against rivals running near-full-range at 1.1 to 5.7. We hold half
+the field's quoting depth and take a fifth of its flow.
+
+That inverts the SPY and NVDA pattern completely, and it is not a depth failure. This week's GLD flow
+is not router flow: it is arbitrage against a pool mispriced by roughly 181%, and an arbitrageur does
+not shop for depth, they trade the mispricing wherever it sits. **The action on GLD is the deviation
+keeper, not a fee tier and not a range.**
+
+LP efficiency: our 1,141.3% APR against a field of 1,683.4%, 0.68x, rank 3 of 5. Both numbers are
+event figures. GLD is **2.1% of our TVL and 49.7% of our weekly fee income**, which is the clearest
+single statement of how distorted the book currently is.
+
 ## 4. What this does not settle
 
 - **Whether the event was manipulation or a broken market.** Unresolved, upstream of the fee, and

@@ -101,6 +101,32 @@ Correlation -0.582 over the 48h scan and -0.363 over 167h. Every observation abo
 Friday 2026-08-28, which is also the only cash session in the 48h scan, so the two windows are not
 independent evidence at the top of the curve.
 
+## 4b. The binding constraint is depth
+
+`scripts/diagnose.py`. The comparison that settles it, SPY OPEN over 167h:
+
+| | TVL | k | fee | share | turnover |
+|---|---|---|---|---|---|
+| v4 625 | $507,842 | **178.1** | **625** | **41.6%** | 10.0 |
+| **Fables** | **$464,072** | **34.3** | 528 | **4.1%** | **1.1** |
+
+A pool of essentially identical size **charges 18% more than we do and takes ten times our flow**. In
+closed hours it charges 2.5x our price and still takes 1.8x our flow. Flow is not being bought with
+our discount, so raising to their price would not move us toward their share.
+
+Same capital, **a fifth of the quoting depth**. Concentrating from k 34.3 toward 178 would 5x our
+depth with zero new capital, and our share tracks our depth share almost exactly (2.03% of session
+depth, 4.15% of session volume).
+
+Also: the 1,167-pip field fee is **not a price we can charge**. It is inflated by the v4 3499 pool,
+$3.34M of TVL quoting $1.1bn of depth. The venues at our size charge 500 to 625, so that is the
+realistic ceiling, not 1,167.
+
+Ranked fixes: **concentration first (5.7x, free), then the WETH pair (unlocks half the market), then
+price (worth about 1.3x).**
+
+LP efficiency: our 18.0% APR against a field of 59.3%, **0.30x, rank 8 of 8**.
+
 ## 5. Structural facts, independent of the fee
 
 - **Half the market is unreachable.** 49.1% of chain SPY volume over 48h routed through

@@ -78,6 +78,49 @@ is our own column copied across and every ratio is an identity. `universe7d.txt`
 
 ---
 
+---
+
+## 1b. LP efficiency: where we actually rank
+
+`scripts/lprank.py`. Rank is our position on LP-net APR among every venue on chain trading the same
+asset, 167h, two dead NVDA venues excluded, floors on TVL so a micro-pool cannot take the top slot.
+
+| asset | our APR | field APR | ratio | rank, TVL over $10k |
+|---|---|---|---|---|
+| SPY | 18.0% | 59.3% | 0.30x | **8 of 8** |
+| NVDA | 54.5% | 70.3% | 0.78x | 8 of 13 |
+| META | 21.5% | 181.2% | **0.12x** | **4 of 4** |
+| GLD | 1,141.3% | 1,683.4% | 0.68x | 3 of 5 |
+| ETH | 27.8% | 44.6% | 0.62x | 6 of 14 |
+| TSLA | 11.5% | 142.2% | **0.08x** | 5 of 6 |
+| AAPL | 22.4% | 110.3% | 0.20x | 7 of 11 |
+| NVDA/SPY | 2.7% | 49.8% | **0.05x** | **3 of 3** |
+| GLD/SPY | 6.5% | 6.5% | 1.00x | 1 of 1, the only venue |
+
+**We are last in our field on SPY, META and NVDA/SPY, and first nowhere except a pool where we are the
+only venue.**
+
+The whole book: **$1,609,701 of TVL earning $15,061.85 a week LP-net, a blended 49.1% APR**, against a
+rival book of $31.1M at 74.4%. Field 73.1%, so **our ratio is 0.67x**.
+
+That flatters us. Half our fee income is one dislocating pool:
+
+| pool | LP-net fees, 167h | share of our income | TVL | APR |
+|---|---|---|---|---|
+| GLD | $7,482.77 | **49.7%** | $34,391 | 1,141.3% |
+| ETH | $5,532.06 | 36.7% | $1,042,590 | 27.8% |
+| SPY | $1,596.22 | 10.6% | $464,072 | 18.0% |
+| NVDA | $316.81 | 2.1% | $30,511 | 54.5% |
+| META | $107.30 | 0.7% | $26,148 | 21.5% |
+| AAPL, TSLA, crosses | $26.70 | 0.2% | $11,987 | 2.7 to 22.4% |
+
+GLD is **2.1% of our TVL producing half our revenue**, entirely because it is mispriced against its
+anchor and being arbitraged. **Strip it and the book earns 25.2% against a field of 72.0%: 0.35x.**
+
+Two caveats. APR divides a week of fees by one end-of-window TVL snapshot and our TVL moved more than
+anyone's, so these ranks are if anything understated. And the "best in field" is often a thin pool:
+at a $50k floor SPY is 5 of 5 rather than 8 of 8, the same answer with less noise.
+
 ## 2. The pattern, and the pool that breaks it
 
 **We charge a fraction of what the market charges, on eight of nine pools, and we earn a fraction of
@@ -111,6 +154,50 @@ Two secondary patterns worth carrying:
   field is still the right benchmark, but on six of eight it is close to one rival plus a tail.
 
 ---
+
+---
+
+## 2b. Why each pool underperforms, and it is not the same reason
+
+`scripts/diagnose.py` splits the gap three ways. APR is turnover times fee, so a pool falls behind
+its field for exactly one of three reasons: **PRICE**, we charge less than the field for the flow we
+win; **DEPTH**, our capital quotes less depth than theirs so we win less flow per dollar; or **REACH**,
+the flow is in a pair we do not quote at all. The tell is volume share against **depth share**. A pool
+that wins its depth share is depth-constrained. One that wins more is buying flow with price. One that
+wins less has depth that is not converting.
+
+| asset | share ÷ depth share | k, rank in field | binding constraint |
+|---|---|---|---|
+| SPY | out-punches, but k 34.3 against 178.1 for a same-size rival | 7 of 8 | **DEPTH** |
+| NVDA | **1.01** | 9 of 12 | **DEPTH, then scale** |
+| META | **2.57** | 3 of 5 | **PRICE** |
+| GLD | **0.40** | **1 of 5** | neither: an event |
+
+**SPY.** The v4 625 pool holds $507,842 against our $464,072, charges **18% more**, and takes **41.6%
+of session volume against our 4.1%**. Same capital, and it quotes $90.5M of depth against our $15.9M,
+so k 178.1 against 34.3. Concentrating would 5x our quoted depth with no new capital. Separately,
+**49.1% of SPY volume routes through WETH/SPY**, a pair we do not quote, so half the market is
+unreachable at any price.
+
+**NVDA.** Volume share 0.17% against depth share 0.16%: we win exactly what our depth entitles us to.
+But we hold 0.38% of the asset's TVL and take 0.17% of its volume, so we under-punch even our capital,
+and the incumbent is 197x our size. Doubling k to the incumbent's 48.5 would take us to roughly 0.35%
+share. **This is a scale problem wearing a depth problem's clothes.** Reach is not the issue: only
+11.4% of NVDA flow is in pairs we do not quote.
+
+**META.** Share 8.23% against depth share 3.20%, and k ranks 3 of 5. Depth is fine. The clinching row
+is `v3 WETH/META 3000`: **half our TVL, identical k at 32.9, charging 9x our fee, taking 88% of our
+share.** We are giving away a 9x discount to win 14% more flow than a pool that does not bother. This
+is the one asset where the naive "just raise the fee" answer is close to right, and it is also the one
+whose demand curve came back sloping up, which is the sharpest unresolved tension in this set. 43% of
+META flow is the SPY/META cross, which we do not quote.
+
+**GLD.** Share 20.4% against depth share **50.5%**, and k of 32.7 is **first in the field** against
+rivals running near-full-range at 1.1 to 5.7. We hold half the field's quoting depth and take a fifth
+of its flow. That is not a depth failure, it is a sign that this week's GLD flow is not router flow at
+all: it is arbitrage against a pool mispriced by roughly 181%, and an arbitrageur does not shop for
+depth. **These numbers describe an incident, not a business.** The action on GLD is the deviation
+keeper, not a fee tier and not a range.
 
 ## 3. What is shipping and what is held
 

@@ -96,6 +96,32 @@ python universe.py ../data/spy_series.json   # the 48h field benchmark for one a
 The scripts read from `../data/`. Re-measuring means re-running `census*.mjs` and `pool_series.mjs`
 first, which need network and roughly 40 minutes for a busy asset.
 
+## Where we actually rank, and why each pool is behind
+
+`scripts/lprank.py` and `scripts/diagnose.py`, both reproducible from `data/`.
+
+The whole book is **$1,609,701 of TVL earning $15,062 a week LP-net, a blended 49.1% APR**, against a
+field of 73.1%. That is **0.67x**, and it flatters us: **GLD is 2.1% of our TVL and 49.7% of our fee
+income**, purely because it is mispriced and being arbitraged. Strip it and the book earns 25.2%
+against 72.0%, **0.35x**. We are last in our field on SPY, META and NVDA/SPY.
+
+The reasons differ per pool, which matters because the fix differs too:
+
+| asset | share / depth share | k, rank | binding constraint |
+|---|---|---|---|
+| SPY | k 34.3 against 178.1 for a same-size rival | 7 of 8 | **depth** |
+| NVDA | 1.01 | 9 of 12 | **depth, then scale** |
+| META | 2.57 | 3 of 5 | **price** |
+| GLD | 0.40 | 1 of 5 | neither, an event |
+
+**Only META is a pricing problem.** On SPY a pool of identical size charges 18% more than us and takes
+ten times our flow, quoting $90.5M of depth against our $15.9M. On NVDA we win exactly our depth
+share and are 197x smaller than the incumbent. On GLD we hold half the field depth and take a fifth of
+the flow, because arbitrage does not shop for depth.
+
+This is the part most likely to change what you do with the fee changes, so it is worth reading before
+the per-pool files.
+
 ## What I need from you
 
 **A sanity check on the three shipped numbers, not on the diagnosis.** The diagnosis is arithmetic on
