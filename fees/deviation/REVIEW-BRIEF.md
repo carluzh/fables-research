@@ -12,32 +12,77 @@ through `setPoolConfig`. `FeePoked` has never fired on that pool.
 ## What it is
 
 A deviation term poked on top of the session ladder. Below a per-pool kicker nothing changes and no
-poke happens at all. Above it the fee ramps to the pool cap. GLD is the pilot and its parameters are
-locked; every other live-reference asset has a kicker from a rule a script applies, so adding an asset
-means running `reference-census.mjs`, not interpreting a paragraph.
+poke happens at all. Above it the fee ramps to the pool cap.
 
-## Reference is Binance
+## Build it for all seven pools, not GLD alone
+
+You were right to push back. **Nothing made GLD uniquely vulnerable; it just went first.** As this is
+written, on a Sunday, SPY, NVDA, META, TSLA and AAPL are all resting at 250 to 400 pips, which is the
+same 0.025% to 0.04% in the same blind window that cost GLD its book.
+
+**Capacity is not a constraint.** Measured on `lvrfee-engine` (e2-medium, 2 vCPU, 3,924 MB) with the
+ETH keeper up 5 days 23 hours:
+
+| | now, one pool | seven pools | headroom |
+|---|---|---|---|
+| RSS | 79.8 MB | 559 MB | 14% of RAM |
+| CPU | 0.4% | 2.8% | load average is currently 0.00 |
+| connections | 4 | 28 | |
+
+**Binance is not a constraint either.** The price feed is a websocket, so it consumes no REST weight
+at all. The limits are 6,000 request-weight per minute and 300,000 raw requests per five minutes per
+IP, and the second-source guard is a weight-1 ticker read. Seven pools use a rounding error of that.
+
+**Blast radius is bounded and expiring.** A poke resolves inside `[max(pokeFloor, autonomous/2), cap]`
+and lapses at its TTL, so the worst a bug does is overcharge for 2h in calm or 12h once triggered.
+The keeper only ever computes `ramp(d) >= base`, so assert that and refuse to poke below the session
+base: the downward half of the range becomes unreachable.
+
+**One thing actively favours doing them together.** GLD and META take the four-argument `pokeFee`;
+SPY, NVDA, TSLA, AAPL and ETH take the legacy three-argument one. A GLD-only build implements one
+path and then gets retrofitted.
+
+Suggested shape: **dry-run all seven from day one** (`--dry-run` exists and pokes nothing, so it is
+free), then enable live poking pool by pool over days, gated on each dry run being clean rather than
+on a calendar.
+
+## You are not waiting on the parameters
+
+The **deviation** parameters are done and in `SYSTEM-SPEC.md` section 7: GLD locked, and a kicker and
+full point for every asset with a live reference, from a rule a script applies.
+
+The parameters still landing are the **calendar ladder**, the per-session base fees, from the separate
+per-pool competitive work in `../pools/`. Those are a different layer and **the keeper does not depend
+on them**: it reads whatever base the pool is configured with and adds a deviation term on top. A
+later ladder change is a `setPoolConfig` and touches no keeper code. Build now.
+
+## Reference is Binance, with OKX as the guard
 
 The tokenised equities (SPYB, NVDAB, METAB and nine more) trade 24/7 through the weekend at one token
-per share, basis 0.999 to 1.000. Gold is the one exception and needs PAXG converted from an ounce to
-an ETF share by a measured basis of 0.091804.
+per share, basis 0.999 to 1.000. Gold is the exception and needs PAXG converted from an ounce to an
+ETF share by a measured basis of 0.091804.
+
+Moving a reference 2% costs $186k to $479k on the equities and millions on gold, against $1,682 to
+move our own GLD pool the same distance. OKX lists all twelve within 0.12% of Binance and is the
+disagreement guard, not a fallback to trade off. Section 4.4.
 
 ## Your work, used
 
-I read the keeper on `lvrfee-engine` and modelled the new one on it: same push policy, poke lifecycle,
-RPC fallback, `depeg.py` guard pattern, `--dry-run`. **Engine copied, signal not**: no volatility term,
-because the RWA calendar already prices session vol and a live term would charge twice.
+I read the keeper on `lvrfee-engine` and modelled the new one on it: same push policy, poke
+lifecycle, RPC fallback, `depeg.py` guard pattern, `--dry-run`. **Engine copied, signal not**: no
+volatility term, because the RWA calendar already prices session vol and a live term would charge
+twice.
 
-Your asymmetric fee work is deployed on GLD, META and SPY/GLD, so the pilot uses the two-sided poke
-with the inbound leg at a third.
+Your asymmetric fee work is deployed on GLD, META and SPY/GLD, so those use the two-sided poke with
+the inbound leg at a third. The other four are symmetric and permanently so.
 
 ## Two things I need from you
 
 1. **Protocol fee.** I could not find how Fables sets one. Section 6 has four specific questions and
    is the only place the spec says "unknown" instead of giving a number. Until it is answered the
    keeper ships with no treasury cut.
-2. **The poking role on GLD**, under the four-argument `pokeFee` ABI specifically. Unverified, and it
-   blocks everything.
+2. **The poking role**, per pool, under the right `pokeFee` ABI: four-argument on GLD and META,
+   three-argument on the rest. Unverified, and it blocks everything.
 
 ## Calibration
 
