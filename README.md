@@ -20,3 +20,16 @@ number.
   SPY until the decimals fix lands (USDG is token0 on NVDA, GLD and META).
 
 Yahoo bar files (`y_*_1h.json`) are not committed; `allvar.py` expects them beside it.
+
+## fees/deviation/
+
+`DEVIATION-FEE.md`: the proposal that every RWA pool prices its distance from its reference market,
+not just the time of day, worked through the GLD/USDG dislocation of 28 to 30 Aug 2026 (the pool ran
+to +381% above fair while gold moved 0.13%, and earned $1,437 on $4.8M of volume because the closed
+tier prices 300 pips). Holds the schedule, the argument for every parameter, the per-asset gap
+measurements that set the trigger bands, and a rollout order for the other six pools.
+
+`scripts/` re-derives every number: four fetchers (Uniswap gateway, Binance PAXG and XAUT, Yahoo
+bars), six independent on-chain probes, and `model.py`, whose output is labelled by the section of the
+document it backs. `data/` is what those fetchers wrote on 2026-08-30, committed because the gateway
+rolls its history. See `fees/deviation/README.md`.

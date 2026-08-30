@@ -1,0 +1,93 @@
+{
+ "GLD": {
+  "hook": "0xB608a78761f179f7C56f15E7D13921B92F00a080",
+  "poolId": "0xfe281bbfa9aa658c1aa9c2ad1b0c62c4286f96c7cb1074296b54e869935a7a3a",
+  "ABSOLUTE_MAX_FEE": 15000,
+  "MAX_POKE_TTL": 259200,
+  "MIN_POOL_FEE": 100,
+  "MAX_POKE_DISCOUNT_BPS": 5000,
+  "maxFee": 15000,
+  "pokeFloor": 3000,
+  "pokeFee": 0,
+  "pokeExpiry": 0,
+  "currentFee": 6000
+ },
+ "SPY": {
+  "hook": "0xA0E8fBFf13E24Af2b5e61A72800E08a161bDe080",
+  "poolId": "0x8674c1c5544f3c9563565b5d4bd5916701d90b3559b072acf7cef5b4fc5b8dcd",
+  "ABSOLUTE_MAX_FEE": 15000,
+  "MAX_POKE_TTL": 259200,
+  "MIN_POOL_FEE": 100,
+  "MAX_POKE_DISCOUNT_BPS": 5000,
+  "maxFee": 8000,
+  "pokeFloor": 250,
+  "pokeFee": 0,
+  "pokeExpiry": 0,
+  "currentFee": 250
+ },
+ "NVDA": {
+  "hook": "0x66622f77B797D506e5376F7798b67ab288966080",
+  "poolId": "0x7990aad9e8fb048f49a155a7df5603db0366f0657035b78eb4196395cccb3dcd",
+  "ABSOLUTE_MAX_FEE": 20000,
+  "MAX_POKE_TTL": 259200,
+  "MIN_POOL_FEE": 100,
+  "MAX_POKE_DISCOUNT_BPS": 5000,
+  "maxFee": 8000,
+  "pokeFloor": 300,
+  "pokeFee": 0,
+  "pokeExpiry": 0,
+  "currentFee": 300
+ },
+ "META": {
+  "hook": "0x8AF95932eC4484fb10C641a4cBcf19a798cB2080",
+  "poolId": "0x4ac4259eb99dce57268a856719d087fa1a53569b2fed6f330aabe32d9a4aa4f5",
+  "ABSOLUTE_MAX_FEE": 15000,
+  "MAX_POKE_TTL": 259200,
+  "MIN_POOL_FEE": 100,
+  "MAX_POKE_DISCOUNT_BPS": 5000,
+  "maxFee": 8000,
+  "pokeFloor": 250,
+  "pokeFee": 0,
+  "pokeExpiry": 0,
+  "currentFee": 250
+ },
+ "TSLA": {
+  "hook": "0x67D86050d22D574Df046F3D90F722045F714e080",
+  "poolId": "0xd5effce87036cd858146c0c15fa825c231a9de1843200ca108e431e431331e8e",
+  "ABSOLUTE_MAX_FEE": 20000,
+  "MAX_POKE_TTL": 259200,
+  "MIN_POOL_FEE": 100,
+  "MAX_POKE_DISCOUNT_BPS": 5000,
+  "maxFee": 10000,
+  "pokeFloor": 400,
+  "pokeFee": 0,
+  "pokeExpiry": 0,
+  "currentFee": 400
+ },
+ "AAPL": {
+  "hook": "0x70a9A88402989226847Ec122043CE5e7FF462080",
+  "poolId": "0xa2347ba69167e5602f74640ffbf737ee7cdd825e4726d3462564fc6533070147",
+  "ABSOLUTE_MAX_FEE": 15000,
+  "MAX_POKE_TTL": 259200,
+  "MIN_POOL_FEE": 100,
+  "MAX_POKE_DISCOUNT_BPS": 5000,
+  "maxFee": 8000,
+  "pokeFloor": 300,
+  "pokeFee": 0,
+  "pokeExpiry": 0,
+  "currentFee": 300
+ },
+ "ETH": {
+  "hook": "0x06a889870C8f83640D6816319f72e2aA579b6080",
+  "poolId": "0xbac3aa3b91584a53a579b3c999a56756e954e59247e497bad1d25a4334bde551",
+  "ABSOLUTE_MAX_FEE": 20000,
+  "MAX_POKE_TTL": 259200,
+  "MIN_POOL_FEE": 100,
+  "MAX_POKE_DISCOUNT_BPS": 5000,
+  "maxFee": 3000,
+  "pokeFloor": 100,
+  "pokeFee": 450,
+  "pokeExpiry": 1788058440,
+  "currentFee": 450
+ }
+}

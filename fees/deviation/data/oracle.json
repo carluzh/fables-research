@@ -1,0 +1,135 @@
+{
+ "headTs": 1788088004,
+ "head": 49961073,
+ "live": {
+  "RHSPY / USD": {
+   "addr": "0x78bcb218fa04b9b3a278ebc865ed320bf8defbac",
+   "answer": 770.26515,
+   "updatedAt": 1787933919,
+   "ageSec": 154085,
+   "dec": 8
+  },
+  "RHNVDA / USD": {
+   "addr": "0xc9d16e4f2569b9e3ea0468fd85844953713dc2a2",
+   "answer": 218.15545,
+   "updatedAt": 1787946989,
+   "ageSec": 141015,
+   "dec": 8
+  },
+  "Robinhood META / USD": {
+   "addr": "0xc190b6164b9e320a6400cdab0085a2e0e2b9738e",
+   "answer": 576.5713,
+   "updatedAt": 1787938130,
+   "ageSec": 149874,
+   "dec": 8
+  },
+  "ETH / USD": {
+   "addr": "0x6091e64eb7138eef066a80fd3a0d7427b91f2721",
+   "answer": 2456.3113,
+   "updatedAt": 1788030815,
+   "ageSec": 57189,
+   "dec": 8
+  },
+  "RHTSLA / USD": {
+   "addr": "0x7a6b81ba7fbcb90104d8c496158cf383cd7233b1",
+   "answer": 348.36125,
+   "updatedAt": 1787946889,
+   "ageSec": 141115,
+   "dec": 8
+  },
+  "Robinhood AAPL / USD": {
+   "addr": "0xbb11a21267cfdb63d4935d99a499133dd1744acb",
+   "answer": 319.71273059,
+   "updatedAt": 1787938651,
+   "ageSec": 149353,
+   "dec": 8
+  },
+  "Robinhood SLV / USD": {
+   "addr": "0xcdf6f7043b3af6afa0caaace1230b355096b5386",
+   "answer": 60.085,
+   "updatedAt": 1787945252,
+   "ageSec": 142752,
+   "dec": 8
+  },
+  "Robinhood SGOV-USD": {
+   "addr": "0x0e96b7708487f91baac09697593d3e8bf253f2d8",
+   "answer": 100.98519427,
+   "updatedAt": 1787875314,
+   "ageSec": 212690,
+   "dec": 8
+  },
+  "Robinhood QQQ / USD": {
+   "addr": "0x25e996ce8b3529885d429241156e83e7b7744049",
+   "answer": 715.9,
+   "updatedAt": 1787934277,
+   "ageSec": 153727,
+   "dec": 8
+  },
+  "USDG / USD": {
+   "addr": "0x8beee3503f6860d5dac4ce26b5eee92982951c2e",
+   "answer": 1.000028,
+   "updatedAt": 1788017306,
+   "ageSec": 70698,
+   "dec": 8
+  },
+  "BTC / USD": {
+   "addr": "0xc5845f87ad59a7a3d4bf9b90a0c19dba38475eec",
+   "answer": 78283.43291019,
+   "updatedAt": 1788030773,
+   "ageSec": 57231,
+   "dec": 8
+  }
+ },
+ "emitters": [
+  {
+   "addr": "0x2e0847e8910a9732eb3fb1bb4b70a580adad4fe3",
+   "n": 6,
+   "desc": null
+  },
+  {
+   "addr": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+   "n": 3,
+   "desc": null
+  },
+  {
+   "addr": "0x0bd7d308f8e1639fab988df18a8011f41eacad73",
+   "n": 3,
+   "desc": null
+  },
+  {
+   "addr": "0xe492912f37c2a4eca45d42dc67548f4c6cd7ce2b",
+   "n": 2,
+   "desc": null
+  },
+  {
+   "addr": "0x47db868c304f26b3406c3dc271f7f8b5245a384d",
+   "n": 2,
+   "desc": "paired with $GOOGL"
+  },
+  {
+   "addr": "0xa0e66bc4ce7cfcebc4cb1606807bc87d3dffd588",
+   "n": 2,
+   "desc": ""
+  },
+  {
+   "addr": "0x69bfaf19c9f377bb306a89aed9f6b07e2c1a8d9a",
+   "n": 1,
+   "desc": null
+  },
+  {
+   "addr": "0x34d0dc122cf9a8eb296fc5e0d3a233625d7d19b7",
+   "n": 1,
+   "desc": null
+  },
+  {
+   "addr": "0xd5656dd818dd6a2be1a0e5c445f5ed1c5ac0ca6c",
+   "n": 1,
+   "desc": null
+  },
+  {
+   "addr": "0xb774a4361879b92f92b61785d7e3197e5ab65780",
+   "n": 1,
+   "desc": null
+  }
+ ]
+}
