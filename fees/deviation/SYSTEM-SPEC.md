@@ -85,10 +85,11 @@ fee         = clamp(fee_onchain, min_fee, max_fee)
 The push decision is event-driven, not a fixed cadence. The ~9.5 minute average interval visible in
 `../data/lvr7d_new.json` is emergent, not configured.
 
-Two pieces of `volatility.py` worth copying rather than reinventing: the **intra-candle preview**,
-which previews what the EWMA would be if the candle closed now and takes `max(current, preview)` so a
-surcharge only ever raises the fee mid-candle; and the **gap scaling**, which divides a log return by
-`sqrt(gap)` for gaps of 2 to 60 minutes and discards anything longer.
+`volatility.py` itself is **not** used by the pilot (section 3.2), but two of its ideas transfer to
+the deviation signal and are worth borrowing rather than rediscovering: the **only-ever-raise rule**,
+where an intra-interval reading is combined as `max(current, preview)` so a mid-interval surcharge can
+lift the fee but never cut it; and its **gap handling**, which scales across a 2 to 60 minute hole in
+the feed and refuses anything longer rather than pretending the stale value is current.
 
 `depeg.py` is already a deviation monitor and is the pattern to follow: median of Kraken USDG/USD and
 OKX USDG/USDT, pins the fee to cap while off peg, holds last state when every source is down, and
