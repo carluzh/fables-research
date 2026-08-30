@@ -350,7 +350,7 @@ From `scripts/reference-census.mjs`, applying the rule in 7.3.
 
 | asset | kicker | full | cap | direction | flags |
 |---|---|---|---|---|---|
-| SPY | 0.75% | 4.00% | 8,000 | symmetric only | base disputed, see section 9 |
+| SPY | **1.50%** | **4.50%** | 8,000 | symmetric only | kicker widened, see section 9 |
 | QQQ | 1.00% | 4.00% | at listing | symmetric only | no pool yet |
 | AMZN | 1.75% | 5.25% | at listing | symmetric only | thin reference |
 | NFLX | 2.00% | 6.00% | at listing | symmetric only | no pool yet |
@@ -416,17 +416,48 @@ confirmed on that pool under the correct `pokeFee` ABI.
 
 ---
 
-## 9. Known conflict with the per-pool work
+## 9. The SPY dispute, adjudicated
 
-`../pools/SPY-USDG.md` measures our own SPY demand curve over 167 hourly observations and finds
-revenue peaking near 400 to 450 pips, with a hard two-hop route ceiling at 600 pips
-(USDG to WETH at 100, WETH to SPY at 500). This document's earlier suggestion of a 0.30% (3,000 pip)
-base for the equity pools was an analogy from GLD, not a measurement, and **the measured number
-should win.** Whether that route ceiling also bounds the deviation *cap*, or only the calendar
-*base*, is being adjudicated separately. Until that resolves, treat SPY's base as open and its
-kicker (0.75%) and cap (8,000) as provisional.
+Two documents disagreed on SPY's base: this one proposed 3,000 pips by analogy from GLD,
+`../pools/SPY-USDG.md` measured a revenue peak near 400 to 450 and a two-hop route ceiling at 600.
+A reconciler and an independent adversarial verifier were run over both plus the raw data. The
+verifier's findings, each reproduced from source:
 
----
+**The route ceiling is not a ceiling.** In the open session the v4 625 pool takes 41.6% of SPY volume
+at 625 pips and the v4 3499 pool takes 24.4% at 3,499. Two thirds of open-session USDG volume goes to
+venues priced *above* the alleged 600-pip all-in bound. A bound that two thirds of the market ignores
+describes an idealised router, not a constraint. The per-asset ceiling table computed during
+reconciliation is also built over the wrong alternative set: it ranks only USDG to WETH to asset and
+never checks direct rival pools in the same pair, which are cheaper everywhere. On that corrected
+test **this document's 3,000-pip GLD base is 6x GLD's cheapest funded direct alternative**, a v3
+500-pip pool doing $5.7M over 7 days, rather than comfortably under a loose ceiling.
+
+**The measured SPY elasticity does not survive either.** The reconciler's difference-in-differences
+put share at 21% of counterfactual when the open tier went to 800 pips. But Friday's session at 800
+produced **the week's highest session fee take in dollars** ($57.89 against $17.67, $39.58, $30.76
+and $56.24), our absolute session volume of $72,368 sat at the week's median of $70,346, and the raw
+treated-day z is -1.42, not significant. The DiD draws 44% of its effect from Friday's pre-open share
+being the week's highest, which is a property of the control window, not of the treatment.
+
+**What both documents missed, and it is larger than the dispute.** SPY/USDG flipped from LVR-positive
+to LVR-negative **with no fee change at all**, purely because its working depth went from $10.67M to
+$61.98M of virtual: weekly cover 1.21 on 27 Aug against 0.84 on 30 Aug, LVR $1,906/wk against
+$1,596/wk of fees. The base-fee argument concerns the open tier, which produced $266.71 of that
+week's $1,596.22. Depth is the binding lever on this pool and neither fee ladder touches it.
+
+**Resolution.** SPY's base stays **800 / 400 / 400** pending its own dated test window: the open tier
+is not reverted, because the 800 hours produced the week's highest fee take and the signed revert
+trigger (UniversalRouter dollar share against a 27.5% baseline) has not been computed. The out-of-
+hours raise from 350/250 to 400/400 is where the evidence is: out of hours is 83.3% of the pool's fees
+(open $266.71, overnight $495.25, closed $834.25), and in closed hours the v4 625 pool holds 9% more
+TVL than us and takes 18.6% share at 625 pips against our 10.3% at 250. A rival at comparable depth
+takes nearly double our share at 2.5x our price.
+
+**SPY's kicker is widened from 0.75% to 1.50%, and full from 4.00% to 4.50%.** The census rule set
+0.75% from basis noise alone, but the pool's own measured deviation over an entirely normal weekend
+reached 0.74%, so 0.75% would have fired at the margin on nothing at all. Full follows this document's
+own rule, `max(3 x kicker, 4%)` = 4.5%, which still clears SPY's worst weekend gap in 730 days
+(3.37%). The cap stays 8,000 and on SPY should essentially never bind.
 
 ## 10. Deferred: the close-anchor trigger
 

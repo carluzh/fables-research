@@ -353,8 +353,27 @@ At the full point the arbitrageur still keeps 81% of the gap. Past 20% deviation
 8%. The ramp exists precisely so that the top-left cell of that table, where a 1.50% fee would be half
 the mispricing, is never actually charged.
 
-And the event settles it empirically. When the fee went from 300 to 6,000 pips at Saturday 15:00,
-**$908,386 of volume still came**. A twentyfold fee increase did not stop the flow.
+And the event settles it empirically, harder than this document originally argued. When the fee went
+from 300 to 6,000 pips at Saturday 15:00, **$926,461 of volume still came**. Measured properly, on
+our SHARE of all on-chain GLD/USDG volume rather than on raw hourly volume, which controls for the
+event decaying:
+
+| fee | our share of all on-chain GLD volume | our volume |
+|---|---|---|
+| 300 pips, Fri 16:00 ET on, 23h | 33.9% mean, 28.9% volume-weighted | $4,789,279 |
+| 6,000 pips, Sat 15:00 on, 16h | 25.2% mean, 22.4% volume-weighted | $926,461 |
+
+**A twentyfold fee raise cost 26% of share.** Share elasticity is **-0.10**, and revenue per unit of
+market volume went up **14.9x**. The `empirical` model used elsewhere in this document fits -0.431
+from the raw volume drop, which conflates the fee with the event decaying: measured on share it is
+four times more inelastic, so every revenue figure in section 8 that leans on the `empirical` column
+is conservative by roughly that factor.
+
+The decisive detail: over those same 16 hours the cheapest funded direct alternative, a v3 pool
+**12x cheaper at 500 pips**, took **$132,528** against our $926,461. A cheaper venue sat live the
+whole time and could not take the flow, because it was mispriced in the same direction. That is the
+mechanism in one line: **when the alternative route reaches a price that is itself dislocated, the
+competitive ceiling is not merely non-binding, it is absent.**
 
 Capping lower is worse than doing nothing new: at a 3,000 cap the whole schedule earns $12,113,
 against $6,885 actually earned and $8,321 for a flat schedule with no trigger at all. The competitive
