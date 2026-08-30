@@ -97,7 +97,30 @@ OKX USDG/USDT, pins the fee to cap while off peg, holds last state when every so
 `engine.py` also carries an RPC fallback (`_switch_rpc`), Telegram alerting, a fee webhook, analytics
 and state persistence to `engine_state_eth_usdg.json`. Reuse all of it.
 
-### 3.2 The loop
+### 3.2 What is copied from the ETH keeper, and what is not
+
+The ETH keeper has exactly one job: `fee = C * sigma^2`, a volatility term. **The deviation keeper
+carries no volatility term at all.** Decided 2026-08-30.
+
+The reason is that an RWA pool already prices session volatility, statically, in its calendar. Each
+tier of the signed ladder was derived from `sigma_T^2 / 8 * k * TVL / volume_T` in the break-even
+work, so a live vol term on top would charge twice for the same risk. ETH needs one because
+`FablesRamp` has no calendar: a flat 450 pips is its entire autonomous fee, so its keeper's vol term
+IS its dynamic pricing. `FablesRWA` already has the equivalent built in.
+
+So what gets copied from the ETH service is the **engine**, not the signal: the push policy, the poke
+lifecycle, the RPC fallback, the guard pattern in `depeg.py`, the state persistence and the
+`--dry-run` mode. `volatility.py` is not used by the pilot.
+
+**The gap this leaves, stated so it is a choice and not an oversight.** A sharp move in gold *inside*
+a session, which does not dislocate the pool because the pool tracks it correctly, is priced only by
+the calendar tier and not by anything live. The hook already has machinery for exactly that, the
+`spikeMult` / `closedSpike` / `descentWindow` bells, and GLD has them switched off: the signed ladder
+gave GLD `spikeMult = 0` and "no equity bells". If that case ever needs pricing, the fix is a
+`setPoolConfig` on the hook with no keeper involvement, and it needs spike parameters for gold that
+the fee work explicitly declined to derive. Out of scope for the pilot.
+
+### 3.3 The loop
 
 ```
 on each reference tick:
@@ -114,7 +137,7 @@ on each reference tick:
 Keep `poke_gate`. On a deviation keeper it maps to `d <= kick`: below the kicker there should be no
 live poke and no gas.
 
-### 3.3 Reading the pool price
+### 3.4 Reading the pool price
 
 The input the backtest does not exercise and the one most likely to be got wrong.
 
@@ -132,7 +155,7 @@ the fee debate** (`ur_now.mjs`, open item 2 in `FEE-POSITION.md`) and it bit the
 Build a table, assert each pool's computed price against its reference at startup, and refuse to run
 a pool that is more than 5% off at boot. `PoolManager` is `0x8366a39CC670B4001A1121B8F6A443A643e40951`.
 
-### 3.4 Poke policy
+### 3.5 Poke policy
 
 | | |
 |---|---|
@@ -147,7 +170,7 @@ The TTL asymmetry is the point: short in calm so a keeper failure lapses back wi
 once triggered so a keeper failure mid-event does not hand the fee back to the closed floor, which is
 the failure that cost GLD its book.
 
-### 3.5 Failure modes
+### 3.6 Failure modes
 
 | failure | behaviour |
 |---|---|
@@ -158,7 +181,7 @@ the failure that cost GLD its book.
 | keeper dies | fee lapses at TTL. Correct in calm; mid-event it is a 12h window in which someone must notice |
 | `pokeFee` reverts | log the reason. `FeeAboveCap`, `FeeBelowFloor`, `InvalidTtl` are config errors, not transient |
 
-### 3.6 Prerequisite nobody has checked
+### 3.7 Prerequisite nobody has checked
 
 `pokeFee` is `restricted` through the AccessManager at `0xa362d98b33a7bb5b5e2180a05f995a70fb404f30`.
 **Whether the ops key holds the poking role on each pool hook is unverified**, and `FeePoked` has
@@ -442,7 +465,7 @@ confirmed on that pool under the correct `pokeFee` ABI.
 2. Resolve section 6 with Yanis.
 3. Fork the ETH keeper. Keep `volatility.py` wholesale if a vol term is wanted later; keep
    `depeg.py`'s guard pattern; keep the executor, RPC fallback, alerting and state persistence.
-4. Pool-price reader with the orientation table and the startup assertion (3.3).
+4. Pool-price reader with the orientation table and the startup assertion (3.4).
 5. Reference ingest and the rolling basis, with the four guards (4.3).
 6. The ramp, with unit tests at every boundary: `d` either side of the kicker, the ramp midpoint,
    past full, cap clamping, the base flipping across a session boundary, and the direction flip when
