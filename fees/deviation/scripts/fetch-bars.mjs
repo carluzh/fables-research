@@ -9,6 +9,14 @@ const SYMS = [
   ['META', 'META'],
   ['ES_F', 'ES=F'],
   ['GC_F', 'GC=F'],
+  // the rest of the Binance-covered tickers, scored by reference-census.mjs
+  ['QQQ', 'QQQ'],
+  ['MSFT', 'MSFT'],
+  ['AMZN', 'AMZN'],
+  ['GOOGL', 'GOOGL'],
+  ['COIN', 'COIN'],
+  ['MSTR', 'MSTR'],
+  ['NFLX', 'NFLX'],
 ]
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36'
 for (const [name, ticker] of SYMS) {

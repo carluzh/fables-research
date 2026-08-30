@@ -1,0 +1,290 @@
+{
+ "generatedFrom": "binance klines 1h, 30d; yahoo 1h bars in ../bars",
+ "rows": [
+  {
+   "asset": "SPY",
+   "symbol": "SPYBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 12021.920000000006,
+   "basisMedian": 0.9994178551965147,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0005585642045982109,
+    "p90": 0.0014188939722472593,
+    "p99": 0.002667114301954765,
+    "max": 0.0043534005239666
+   },
+   "kicker": 0.0075,
+   "full": 0.04,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "NVDA",
+   "symbol": "NVDABUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 12643.830999999998,
+   "basisMedian": 0.9993300009171788,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0009811345120083192,
+    "p90": 0.0048925519127976935,
+    "p99": 0.011073059140154995,
+    "max": 0.016357480195472007
+   },
+   "kicker": 0.0225,
+   "full": 0.0675,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "META",
+   "symbol": "METABUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 521.4370000000002,
+   "basisMedian": 0.9990270155926774,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0009739320279995578,
+    "p90": 0.004882650216905704,
+    "p99": 0.011913003310344505,
+    "max": 0.06490052308141592
+   },
+   "kicker": 0.025,
+   "full": 0.07500000000000001,
+   "outlierFlag": true,
+   "thinReference": true
+  },
+  {
+   "asset": "AAPL",
+   "symbol": "AAPLBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 7906.547999999998,
+   "basisMedian": 0.9993901714759942,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0009561588929523079,
+    "p90": 0.0037535828454693387,
+    "p99": 0.009103821529505729,
+    "max": 0.014185337545964627
+   },
+   "kicker": 0.02,
+   "full": 0.06,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "TSLA",
+   "symbol": "TSLABUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 8137.404999999995,
+   "basisMedian": 0.999381821620678,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0009948397098527018,
+    "p90": 0.00521449028408294,
+    "p99": 0.011556649631143334,
+    "max": 0.015471236199244842
+   },
+   "kicker": 0.025,
+   "full": 0.07500000000000001,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "QQQ",
+   "symbol": "QQQBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 17382.779999999995,
+   "basisMedian": 0.9996625611607896,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0006073460468236647,
+    "p90": 0.0022538652505544876,
+    "p99": 0.004796274847277959,
+    "max": 0.006351769246815797
+   },
+   "kicker": 0.01,
+   "full": 0.04,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "MSFT",
+   "symbol": "MSFTBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 1131.9370000000001,
+   "basisMedian": 0.9994245777044237,
+   "basisN": 331,
+   "err": {
+    "p50": 0.001193247969016653,
+    "p90": 0.0034906406612311702,
+    "p99": 0.011925614890147873,
+    "max": 0.020606777556057443
+   },
+   "kicker": 0.025,
+   "full": 0.07500000000000001,
+   "outlierFlag": false,
+   "thinReference": true
+  },
+  {
+   "asset": "AMZN",
+   "symbol": "AMZNBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 754.3919999999999,
+   "basisMedian": 0.9990239855416139,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0010193360256787187,
+    "p90": 0.004005968591697218,
+    "p99": 0.00842229454192256,
+    "max": 0.013084933697420364
+   },
+   "kicker": 0.0175,
+   "full": 0.052500000000000005,
+   "outlierFlag": false,
+   "thinReference": true
+  },
+  {
+   "asset": "GOOGL",
+   "symbol": "GOOGLBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 4110.198000000001,
+   "basisMedian": 0.9993263997413375,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0009054307125320182,
+    "p90": 0.003924189025921843,
+    "p99": 0.010233573791460504,
+    "max": 0.05435851153695104
+   },
+   "kicker": 0.0225,
+   "full": 0.0675,
+   "outlierFlag": true,
+   "thinReference": false
+  },
+  {
+   "asset": "COIN",
+   "symbol": "COINBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 5743.146000000002,
+   "basisMedian": 0.9989846935365282,
+   "basisN": 331,
+   "err": {
+    "p50": 0.002178284195124114,
+    "p90": 0.009442415084470746,
+    "p99": 0.02046416159978337,
+    "max": 0.03647357487153857
+   },
+   "kicker": 0.0425,
+   "full": 0.1275,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "MSTR",
+   "symbol": "MSTRBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 57760.84799999999,
+   "basisMedian": 0.9992719899225656,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0017674696289800007,
+    "p90": 0.01257620122322467,
+    "p99": 0.027977333127373605,
+    "max": 0.02895612285436333
+   },
+   "kicker": 0.0575,
+   "full": 0.17250000000000001,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "NFLX",
+   "symbol": "NFLXBUSDT",
+   "note": "1 token = 1 share",
+   "listed": true,
+   "bars": 601,
+   "saturdayHours": 96,
+   "saturdayVolume": 3116.999999999999,
+   "basisMedian": 0.9992969839161167,
+   "basisN": 284,
+   "err": {
+    "p50": 0.0012539937004161228,
+    "p90": 0.0038831350495573957,
+    "p99": 0.009566997385428433,
+    "max": 0.011424587220133064
+   },
+   "kicker": 0.02,
+   "full": 0.06,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "GLD",
+   "symbol": "PAXGUSDT",
+   "note": "one OUNCE against one ETF SHARE: needs a fitted basis",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 4990.827300000001,
+   "basisMedian": 0.09180415176501919,
+   "basisN": 331,
+   "err": {
+    "p50": 0.0010913525760716247,
+    "p90": 0.0029366583954428815,
+    "p99": 0.010397000127181921,
+    "max": 0.014546647980465788
+   },
+   "kicker": 0.0225,
+   "full": 0.0675,
+   "outlierFlag": false,
+   "thinReference": false
+  },
+  {
+   "asset": "ETH",
+   "symbol": "ETHUSDT",
+   "note": "native, no conversion",
+   "listed": true,
+   "bars": 720,
+   "saturdayHours": 120,
+   "saturdayVolume": 802645.2873999999,
+   "basisMedian": null,
+   "basisN": 0,
+   "err": null
+  }
+ ]
+}
