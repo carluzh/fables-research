@@ -185,10 +185,52 @@ of the five despite sitting in the middle of the fee range. That is the signatur
 arriving late: the market has already moved, we are still quoting the previous regime's price, and
 the flow that shows up is the flow taking us at it.
 
-**The one change worth making:** tighten `push_delta_immediate`, currently 500 pips, which is a 5 bps
-deadband before the keeper reacts at all. That is a pure LP-protection improvement with no revenue
-cost, because sections 3 and 4 establish that flow does not respond to our price in either direction
-at these levels.
+### The mechanism, found in the keeper source
+
+This is not a calibration problem. It is a hard reaction-speed threshold, and it sits in
+`engine.py:125`:
+
+```python
+if desired > gate:                                    # poke_gate = 500
+    delta = abs(desired - self.current_onchain_fee)
+    if delta >= self.params.push_delta_immediate:     # 500 pips
+        target = desired                              # push NOW
+    elif elapsed >= self.params.heartbeat_s and delta >= self.params.push_delta_heartbeat:
+        target = desired                              # heartbeat_s = 900s
+```
+
+The pool rests at `min_fee` 450. So an immediate push needs `|desired - 450| >= 500`, which means
+**desired >= 950 pips**. Anything below that waits on the 15-minute heartbeat.
+
+Running that through the keeper's own `fee_pips = 0.40 x sigma_pct^2`:
+
+| desired fee | needs realised vol | what the keeper does |
+|---|---|---|
+| 450 | 33.5% | rests at the flat |
+| 600 | 38.7% | **waits up to 15 minutes** |
+| 700 | 41.8% | **waits up to 15 minutes** |
+| **950** | **48.7%** | first fee that pushes instantly |
+| 1,082 | 52.0% | instant |
+
+**The keeper does not react in real time until realised volatility crosses roughly 49% annualised.**
+Below that, every fee change in the entire 500 to 950 range is on a quarter-hour clock, and 500 to
+950 is exactly the range where the markouts show us under-collecting.
+
+It also explains why the two windows disagreed. Window A ran at **27.6%** and Window B at **52.0%**,
+one either side of the 48.7% threshold. In B the keeper was firing immediately and priced correctly
+in every band. In A it was on the heartbeat and the transition bands got picked off. That is not
+regime-dependent calibration, which is how I first read it. It is one threshold, and my two windows
+happened to straddle it.
+
+**The edit: `push_delta_immediate` 500 to 150.** That drops the instant-reaction threshold from 48.7%
+to 38.7% realised vol and covers the whole transition. Nothing else moves: `min_fee` stays 450,
+`max_fee` stays 3,000, `C` stays 40, the ladder is untouched.
+
+Pure LP protection with no revenue cost, because sections 3 and 4 establish that flow does not
+respond to our price in either direction at these levels. **It is also small**: the 500-700 band was
+27 of 169 hours and $955,611 of volume, under-collecting by 170 to 880 pips depending on the window,
+so it is worth roughly $160 to $840 a week. Worth doing because it is one constant and it cannot cost
+anything, not because it is large.
 
 **Withdrawn:** the earlier suggestion to drop the keeper's `min_fee` from 450 toward the chain's
 225 floor. In the calm window the 450 floor collects 8x its own adverse selection and cutting it is
