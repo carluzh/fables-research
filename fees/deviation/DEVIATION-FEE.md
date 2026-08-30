@@ -431,6 +431,14 @@ trip cost 1.50% out plus 0.15% back, which is **1.65%**, against 3.00% if both l
 counterparty here looks far more like one actor round-tripping the book than like honest arbitrage,
 and a cheap return leg is a discount to exactly the wrong person.
 
+> **Read this table for the round-trip column, not the revenue columns.** The revenue figures come
+> from replaying the actual volume path with an exogenous volume response, so charging more on the
+> inbound leg raises revenue close to by construction. The model has no trade diversion in it, does
+> not price the residual dislocation a higher repair fee leaves behind, and replays only a 381%
+> event, where our pool is 21% cheaper than the next venue and the repair flow arrives whatever we
+> charge. The regime where the inbound share actually matters, small-to-moderate deviation with a
+> thin price advantage, is untested. The round-trip column is arithmetic and does survive.
+
 | inbound share of the ramp | fees (cpmm) | fees (emp) | avg outbound | avg inbound | round trip at full ramp |
 |---|---|---|---|---|---|
 | 0%, base only | $36,291 | $13,176 | 0.98% | 0.15% | 1.65% |
@@ -439,8 +447,9 @@ and a cheap return leg is a discount to exactly the wrong person.
 | 100%, symmetric | $50,551 | $18,108 | 0.98% | 1.40% | 3.00% |
 
 A third is the compromise: the corrective leg still pays a little over half what the destabilising leg
-pays, so the incentive to fix the pool survives; the round trip costs 2.10% rather than 1.65%; and it
-recovers 13% of the revenue that pure asymmetry gives away.
+pays, so the incentive to fix the pool survives, and the round trip costs 2.10% rather than 1.65%.
+**0.33 is the locked value for GLD.** The revenue ranking in the table above is not the reason: see
+the note under it, and SYSTEM-SPEC section 7.1.
 
 The direction that "worsens the spread" is defined against the reference, not against a fixed side, so
 it flips automatically when the pool is cheap rather than rich. That matters: this event ran rich, but

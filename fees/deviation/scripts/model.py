@@ -7,6 +7,16 @@ Inputs, all produced by the fetchers in this directory:
     ../bars/y_GLD_1h.json  Yahoo GLD ETF hourly bars                                (fetch-bars.mjs)
 
 Each block prints the section of DEVIATION-FEE.md it backs. Run it and diff against the document.
+
+WHAT THIS MODEL CANNOT DO, stated up front because one of its outputs was over-read once already.
+It REPLAYS the actual historical volume path and reprices it. Volume is exogenous: the `cpmm`
+response only adjusts how far one arbitrageur walks the pool, and against a 381% mispricing a 1.5%
+fee barely changes that. So any comparison that charges more per unit of volume wins almost by
+construction. In particular the symmetric-versus-asymmetric revenue ranking in section 7 is NOT
+evidence about which is better. There is no trade diversion here, no cost for the residual
+dislocation a higher repair fee leaves behind, and only one event, a 381% one, in which our pool is
+21% cheaper than the next venue so the repair flow arrives whatever we charge. Answering the
+asymmetry question properly needs an equilibrium model with venue choice, which this is not.
 """
 import json, math, os, bisect, statistics as st, datetime as dt
 from zoneinfo import ZoneInfo

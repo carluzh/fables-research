@@ -334,12 +334,30 @@ changes go through the AccessManager delay: a standing setting, not an event lev
 | TTL | 7,200s calm / 43,200s triggered | |
 | push policy | the ETH keeper's, unchanged | |
 
-**On the asymmetry.** Symmetric measured *better* on this event, on both revenue ($50,551 against
-$41,085) and round-trip deterrence (3.00% against 2.10%). Locking the asymmetric version is a
-deliberate trade of about 23% of event revenue for not taxing the flow that repairs the pool, which
-is the stated product intent. If the counterparty in a future event again looks like a single
-round-tripper rather than honest arbitrage, raise `inboundShare` toward 1.0; that is a keeper config
-change, not a contract change.
+**On the asymmetry, and why the model does not settle it.** An earlier draft reported that symmetric
+"measured better" at $50,551 against $41,085 and used that to argue for shipping symmetric first.
+That comparison should not be relied on. `scripts/model.py` replays the **actual historical volume
+path** and reprices it: volume is exogenous, and the `cpmm` response only adjusts how far a single
+arbitrageur walks the pool, which against a 381% mispricing a 1.5% fee barely changes. Charging more
+on the inbound hours therefore yields more revenue almost by construction.
+
+Three things the model cannot see, all of which favour asymmetry:
+
+- **Trade diversion.** There is no choice between our pool and a rival anywhere in the model.
+- **Residual dislocation as a cost.** A higher repair fee makes the arbitrageur stop earlier, leaving
+  the pool further from fair, its LPs holding the wrong inventory, and the next trade executing at a
+  wrong price. The model scores fee revenue and is blind to all of it.
+- **The regime asymmetry is for was never tested.** The replay is one 381% dislocation, where our
+  pool is 21% cheaper than the next venue and the repair flow arrives regardless of our fee.
+  Competition cannot bind there. It binds at small-to-moderate deviation, where a 1.5% repair fee
+  sends corrective flow to a rival and leaves us dislocated while they collect. There is no
+  observation of that regime in any of this work.
+
+What survives model-free is the round-trip arithmetic: 3.00% symmetric against 2.10% asymmetric for a
+full out-and-back. That matters only if the counterparty is churning the pool rather than arbitraging
+it, which was never established, because the sender census did not complete.
+
+`inboundShare` is a keeper variable, so it is a config edit either way. Locked at **0.33**.
 
 Moving the closed tier from its current emergency 6,000 back to 1,500 is a `setPoolConfig` call and
 should happen **only once the keeper is live.**
