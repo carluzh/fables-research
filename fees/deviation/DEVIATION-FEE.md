@@ -3,6 +3,20 @@
 A proposal for how every Fables RWA pool prices the gap between itself and its reference market.
 Written 2026-08-30, using the GLD/USDG dislocation of 28 to 30 August as the worked example.
 
+> **Corrections, 2026-08-30.** Two claims below are superseded by `SYSTEM-SPEC.md`, which is the
+> build decision and wins wherever the two disagree.
+> 1. **Asymmetric fees ARE available on GLD, META and SPY/GLD** through the deployed two-sided
+>    `pokeFee`. Section 7's closing paragraph originally said they need new bytecode: that was
+>    written against a stale branch and is now corrected in place. The claim remains true for SPY,
+>    NVDA, TSLA, AAPL, NVDA/SPY and ETH, which carry only the legacy single-sided poke and can never
+>    gain asymmetry.
+> 2. **The equity base fees proposed in section 10 are an analogy from GLD, not a measurement.**
+>    `../pools/SPY-USDG.md` measures SPY's revenue peak near 400 to 450 pips against the 3,000
+>    proposed here. The measured number should win; see SYSTEM-SPEC section 9.
+>
+> A third trigger, deferred, is specified in SYSTEM-SPEC section 10: withdrawing the closed-hours
+> discount when the reference has moved away from the cash close.
+
 Fees are in pips throughout: **100 pips = 1 bps = 0.01%**, and 1,000,000 pips = 100%, which is v4's
 own unit. So 300 pips is 0.03%, 3,000 is 0.30%, 15,000 is 1.50%.
 
@@ -223,14 +237,19 @@ every RWA pool falls into one of them.
 in real time, and the trigger band only has to cover the *basis noise* between the proxy and the
 asset. GLD is Mode A via PAXG, and its basis noise has a p99 of 1.32%.
 
-**Mode B, anchored reference.** No continuous proxy exists, which is the case for every single-name
-US equity. The reference is the last print of the on-chain Robinhood feed, and deviation is measured
-against that anchor. The band must then cover the *gap risk*: how far the asset could honestly have
-moved while nobody was looking. That is a much wider number, and section 6.1 measures it per asset.
+**Mode B, anchored reference.** No continuous proxy exists. The reference is the last print of the
+on-chain Robinhood feed, and deviation is measured against that anchor. The band must then cover the
+*gap risk*: how far the asset could honestly have moved while nobody was looking. That is a much
+wider number, and section 6.1 measures it per asset.
 
-The difference between the two modes is roughly a factor of five in how tight the trigger can be. That
-is the argument for hunting a live reference for every asset we list, and, where none exists, for
-asking Robinhood to publish out-of-hours.
+The difference between the two modes is roughly a factor of five in how tight the trigger can be.
+
+> **Correction.** This section originally said Mode B "is the case for every single-name US equity."
+> It is not. Binance lists tokenised equities that trade 24/7 through the weekend at one token per
+> share, so **every Fables pool is Mode A** and none of them uses the anchored mode. Mode B is kept
+> here because it is the right design for an asset that genuinely has no continuous reference, and
+> because section 6.1's gap measurements are what make the close-anchor trigger sizeable (SYSTEM-SPEC
+> section 10). No pool we run today needs it.
 
 ---
 
@@ -408,10 +427,13 @@ The direction that "worsens the spread" is defined against the reference, not ag
 it flips automatically when the pool is cheap rather than rich. That matters: this event ran rich, but
 a stale anchor after a genuine gap down will run cheap, and the same rule handles it.
 
-**This is the one part of the proposal that needs new bytecode.** `pokeFee` stores a single fee for
-both directions. Making the fee directional means `FablesRWA._autonomousFee` reading
-`params.zeroForOne`, which its signature already receives and currently ignores, plus a per-pool
-deviation state the keeper writes. Everything else in this document ships through the existing poke.
+**Availability is per pool, and the pilot has it.** GLD, META and SPY/GLD carry the deployed
+asymmetric pipeline: a four-argument `pokeFee(poolId, fee0For1, fee1For0, ttl)` on the hot key, plus
+a standing `setPoolAsymmetry` premium on the delayed admin path. The two-sided poke is the right tool
+here, because which direction counts as outbound flips with the sign of the deviation and so cannot
+be a static config. SPY, NVDA, TSLA, AAPL, NVDA/SPY and ETH carry only the legacy single-sided poke
+and can never gain asymmetry, since hook code is immutable and the PoolKey binds the hook address.
+See SYSTEM-SPEC section 5 for the mechanics that bite.
 
 ---
 
@@ -533,26 +555,21 @@ at 250 to 300 pips right now, on a Sunday, with no deviation term at all.
 with per-asset parameters set by measurement and not by analogy. A pool that has no reference does not
 list.
 
-Proposed parameters, to be confirmed per pool before each one goes live:
+**The parameter table that stood here is superseded. Use `SYSTEM-SPEC.md` section 7.2.**
 
-| pool | mode | reference | kick | full | base in/out | cap | notes |
-|---|---|---|---|---|---|---|---|
-| GLD/USDG | A | PAXG x 0.091840, XAUT as guard | 2% | 10% | 0.30 / 0.15% | 15,000 | live today, ships first |
-| SPY/USDG | B | `RHSPY / USD` last print | 3% | 5% | 0.30 / 0.30% | 8,000 | weekend p99 2.40%, max 3.37% |
-| META/USDG | B | `Robinhood META / USD` | 5% | 8% | 0.30 / 0.30% | 8,000 | weekend p99 4.12%, max 5.63% |
-| NVDA/USDG | B | `RHNVDA / USD` | 7% | 10% | 0.30 / 0.30% | 8,000 | weekend p99 6.18%, max 8.63% |
-| AAPL/USDG | B | `Robinhood AAPL / USD` | 7% | 10% | 0.30 / 0.30% | 8,000 | weekend p99 6.11%, max 7.28% |
-| TSLA/USDG | B | `RHTSLA / USD` | 8% | 12% | 0.30 / 0.30% | 10,000 | weekend p99 6.94%, max 8.20% |
-| ETH/USDG | A | Binance ETHUSDT | 2% | 10% | flat 450 + keeper | 3,000 | deviation term on top of the existing vol keeper |
+It proposed a Mode B stale-anchor design for the equities, on the belief that no continuously traded
+reference existed for single-name US stocks. That belief was wrong. Binance lists tokenised equities
+(SPYB, NVDAB, METAB, AAPLB, TSLAB, QQQB and seven more) which trade 24/7 including the full weekend
+at one token per share, with a basis of 0.999 to 1.000 and a p99 tracking error of 0.27% to 2.05%.
 
-The Mode B kickers are wide, and that is the honest consequence of the anchor being stale. Two things
-would narrow them, and both are worth pursuing:
+**Every Fables equity pool is therefore a Mode A pool and the stale-anchor mode is not needed
+anywhere.** The consequence is large: the kickers in the superseded table were 3% to 8%, set by gap
+risk; the measured ones in SYSTEM-SPEC are 0.75% to 2.50%, set by basis noise. The two suggestions
+that followed the table, asking Robinhood to publish out-of-hours and hunting for a 24/7 proxy, are
+answered: the proxy already exists.
 
-1. **Get Robinhood to publish out-of-hours**, even hourly. A live feed moves a pool from Mode B to
-   Mode A and lets its kicker fall to basis noise, which is roughly a fivefold tightening.
-2. **Find a continuously traded proxy per name.** Gold had one. Single-name equities largely do not
-   today, but index exposure has ES=F for most of the week (weekend p99 1.58% against SPY's own
-   2.40%), and any liquid 24/7 tokenised equity venue would serve.
+What survives from this section is the principle, unchanged: **a pool with no live reference does not
+list**, and per-asset parameters come from measurement rather than analogy.
 
 **Rules that apply to every pool regardless of mode:**
 

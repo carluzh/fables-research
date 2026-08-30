@@ -12,7 +12,8 @@ closed tier prices 300 pips.
 
 ```
 DEVIATION-FEE.md   the proposal, the parameters and the argument for each of them
-SYSTEM-SPEC.md     the build decision: keeper, reference, what is and is not available, locked params
+SYSTEM-SPEC.md     the build decision: keeper, reference, per-pool availability, locked params.
+                   Wins over DEVIATION-FEE.md wherever the two disagree.
 scripts/           fetchers, on-chain probes, and the model
 data/              everything the fetchers wrote, committed so the tables can be checked offline
 bars/             Yahoo hourly bars, NOT committed (see .gitignore), rebuilt by fetch-bars.mjs
@@ -48,8 +49,10 @@ Independent of the model and of each other. Each answers one factual question th
 | `probe-rivals.mjs` | what the rival GLD venues price off their own `slot0`, so the dislocation is not ours alone |
 | `probe-config.mjs` | the pool's full `PoolConfigured` and `FeePoked` history |
 | `probe-lp.mjs` | `ModifyLiquidity` over the event, so LP flight can be separated from trading |
-| `probe-direction.mjs` | is any pool's fee direction-dependent (no: all seven symmetric, no delta flags) |
+| `probe-asymmetry.mjs` | which pools can price the two directions differently (GLD, META, SPY/GLD can; the rest never can) |
 | `reference-census.mjs` | which assets have a continuous reference, how tight it tracks, and the kicker it earns |
+| `gap-information.mjs` | does the 24/7 reference know anything while the cash market is shut (yes: mid-window slope near 1) |
+| `closed-window-moves.mjs` | how often anything actually happens in a closed window, per asset |
 
 All on-chain reads go to `https://rpc.mainnet.chain.robinhood.com`, which rate-limits: `lib.mjs`
 carries the serialising gate, the retry and the range-halving that the fee scripts already use.

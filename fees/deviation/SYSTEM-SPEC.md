@@ -5,11 +5,13 @@ What gets built, on which pools, with which numbers, and what is not available t
 `DEVIATION-FEE.md` is the economic argument and the GLD evidence. This file is the build decision.
 Read that one for *why*; read this one for *what*.
 
-Status: **specified, not built.** Every number here is measured, every availability question is
-answered against the live chain, and nothing is left to interpretation. Two capabilities we wanted
-turn out not to exist, and both have a fallback that is already decided below.
+Status: **specified, not built.** Fees in pips: 100 pips = 1 bps = 0.01%, 1,000,000 pips = 100%.
 
-Fees in pips: 100 pips = 1 bps = 0.01%, 1,000,000 pips = 100%.
+> **Revision 2026-08-30.** An earlier draft of this file claimed asymmetric fees were unavailable on
+> every pool. That was wrong: it was written against the `audit/cofounder-fixes` branch, which
+> predates `9b17b18` on main. **GLD and META carry the deployed asymmetric pipeline.** Section 5 is
+> rewritten. The keeper section is also rewritten: it is now read from the running service rather
+> than inferred from its on-chain output.
 
 ---
 
@@ -17,13 +19,13 @@ Fees in pips: 100 pips = 1 bps = 0.01%, 1,000,000 pips = 100%.
 
 | | |
 |---|---|
-| **Mechanism** | a deviation term poked on top of the existing session ladder, via `FablesBaseHook.pokeFee` |
-| **Reference** | Binance, 24/7. Tokenised equities for the five equity pools, PAXG for gold, ETHUSDT for ETH |
-| **Keeper** | modelled on the live ETH/USDG LVR keeper: same loop, same cadence, same TTL, different signal |
-| **Asymmetric fees** | **not available on any existing pool, ever.** Fallback: one symmetric fee. Section 5 |
-| **Protocol fee to treasury** | **not settable by us.** Fallback: `claimFeeBps`. Section 6 |
+| **Mechanism** | a deviation term poked on top of the existing session ladder, via `pokeFee` |
+| **Reference** | Binance, 24/7. Tokenised equities for the equity pools, PAXG for gold, ETHUSDT for ETH |
+| **Keeper** | the live ETH/USDG keeper's engine with the signal swapped. Source read, section 3 |
+| **Asymmetric fees** | **available on GLD, META and SPY/GLD.** Not on SPY, NVDA, TSLA, AAPL, NVDA/SPY, ETH. Section 5 |
+| **Protocol fee to treasury** | **UNKNOWN, blocked on Yanis.** Section 6 |
 | **Pilot** | GLD/USDG, parameters locked in section 7.1 |
-| **Scope of locked parameters** | every asset with a live reference. Section 7.2 |
+| **Close-anchor trigger** | a second, distinct trigger. Specified and **deferred**. Section 10 |
 
 ---
 
@@ -35,173 +37,181 @@ base(t)    = the pool's existing session floor, unchanged
 kick, full = per-pool, from the reference census (section 7.3)
 cap        = the pool's maxFee
 
-fee(d) = base(t)                                            if d <= kick
-       = base(t) + (cap - base(t)) * (d-kick)/(full-kick)   if kick < d < full
-       = cap                                                if d >= full
+ramp(d) = base(t)                                            if d <= kick
+        = base(t) + (cap - base(t)) * (d-kick)/(full-kick)   if kick < d < full
+        = cap                                                if d >= full
+
+outbound leg (the trade that increases |d|):  fee = ramp(d)
+inbound  leg (the trade that decreases |d|):  fee = base + (ramp(d) - base) * inboundShare
 ```
 
-One fee, both directions (see section 5). The keeper computes `fee(d)` and pokes it; the hook clamps
-it to `[max(pokeFloor, autonomous/2), cap]` and expires it on its own.
+On a pool without asymmetry, `inboundShare = 1` and this is one symmetric fee.
 
-Below `kick` the keeper pokes nothing and the pool behaves exactly as it does today. This is
-additive: no existing behaviour changes until a pool is measurably off its reference.
+Below `kick` the keeper pokes nothing and the pool behaves exactly as it does today.
 
 ---
 
 ## 3. The keeper
 
-### 3.1 The template
+### 3.1 The template, read from the running service
 
-The ETH/USDG pool already runs an LVR keeper in production. **Its source lives on the Google VM under
-the Fables projects and was not read for this spec**, so what follows is its observed behaviour,
-recovered from its own on-chain output. Anything marked *observed* is measured; anything marked
-*to confirm* must be checked against the real service before build.
+`fables-eth-usdg.service` on VM `lvrfee-engine`, project `fables-fi`, zone `europe-west3-a`.
+**Direct SSH times out; use `--tunnel-through-iap`.** Source at `/home/yanis/ETHPair/engine`:
+`main.py`, `engine.py` (745 lines), `volatility.py`, `depeg.py`, `config.py`.
 
-| property | value | how established |
+The real rule, from `engine.py:FeeComputer` and `config.py:FeeParams`:
+
+```python
+fee_bps     = C * sigma_annual**2            # C = 40.0, sigma as a FRACTION
+fee_onchain = round(fee_bps * 100)
+fee         = clamp(fee_onchain, min_fee, max_fee)
+```
+
+| parameter | value | meaning |
 |---|---|---|
-| fee rule | `f = round(0.40 * sigma_annual_pct^2)`, clamped `[450, 3000]` | *observed*: exact on all 119 unclamped pokes in `../data/lvr24h.json` |
-| repoke cadence | every ~9.5 minutes | *observed*: 609 pokes over 96.8h in `../data/lvr7d_new.json` |
-| poke TTL | **7200s (2 hours)** | *observed live*: ETH `pokeOf` read 2026-08-30 12:30 UTC showed expiry 14:30, 119.8 min out |
-| clamp behaviour | 29 cap hits, 111 floor hits in 609 pokes | *observed* |
-| signal source | Binance | *stated by Carl* |
-| retry, logging, alerting, restart | unknown | *to confirm* |
+| `C` | 40.0 | |
+| `ewma_alpha` | 0.06 | EWMA on 1-minute candle closes, annualised by 525,600 |
+| `min_fee` | 450 | = the on-chain `flatPips`. The keeper never pokes below the flat |
+| `max_fee` | 3000 | = the on-chain cap. **MUST equal it or `pokeFee` reverts `FeeAboveCap`** |
+| `push_delta_immediate` | 500 | a 5 bps change pushes at once |
+| `push_delta_heartbeat` | 100 | a 1 bp change pushes on the heartbeat |
+| `heartbeat_s` | 900 | 15 min |
+| `ttl_s` | 7200 | 2h poke lifetime |
+| `ttl_renew_s` | 5400 | 90 min forced renewal, so an elevated fee never lapses mid-vol |
+| `poke_gate` | 500 | below 5 bps desired, rest at the flat: **zero pokes, zero gas** |
+| `depeg_threshold` | 0.005 | USDG off peg by 0.5% pins the fee to the cap |
+| `depeg_poll_s` | 60 | |
 
-The deviation keeper should be the same service shape with the signal swapped. That is the point of
-copying it: the operational surface is already proven in production.
+The push decision is event-driven, not a fixed cadence. The ~9.5 minute average interval visible in
+`../data/lvr7d_new.json` is emergent, not configured.
+
+Two pieces of `volatility.py` worth copying rather than reinventing: the **intra-candle preview**,
+which previews what the EWMA would be if the candle closed now and takes `max(current, preview)` so a
+surcharge only ever raises the fee mid-candle; and the **gap scaling**, which divides a log return by
+`sqrt(gap)` for gaps of 2 to 60 minutes and discards anything longer.
+
+`depeg.py` is already a deviation monitor and is the pattern to follow: median of Kraken USDG/USD and
+OKX USDG/USDT, pins the fee to cap while off peg, holds last state when every source is down, and
+`active()` returns False on stale data so the core fee logic never depends on the monitor succeeding.
+
+`engine.py` also carries an RPC fallback (`_switch_rpc`), Telegram alerting, a fee webhook, analytics
+and state persistence to `engine_state_eth_usdg.json`. Reuse all of it.
 
 ### 3.2 The loop
 
 ```
-every TICK (9.5 min, matching the ETH keeper):
-  for each enabled pool:
-    P_ref   <- reference price      (section 4)
-    P_pool  <- sqrtPriceX96 from PoolManager.extsload, converted per pool orientation
-    d       <- | P_pool / (P_ref * basis) - 1 |
-    f_new   <- fee(d)                                        (section 2)
-    if guards fail:            hold, do not poke, alert       (section 4.3)
-    if |f_new - f_live| < EPS: skip                           (idempotency)
-    else:                      pokeFee(poolId, f_new, ttl)
+on each reference tick:
+  P_ref   <- reference price, Binance websocket, per section 4
+  P_pool  <- sqrtPriceX96 from PoolManager.extsload, converted per pool orientation
+  d       <- | P_pool / (P_ref * basis) - 1 |
+  desired <- ramp(d) per side
+  if guards fail:                 hold, do not poke, alert   (section 4.3)
+  apply the SAME push policy as the ETH keeper: immediate on push_delta_immediate,
+    heartbeat on push_delta_heartbeat, forced renewal at ttl_renew_s, and a poke_gate
+    below which the pool rests at its session floor with no live poke at all
 ```
 
-`f_live` is read from `currentFee(poolId, true)` rather than remembered, so a restart, a manual poke
-or a config change is picked up rather than fought.
-
-`EPS` exists so the keeper does not burn gas repoking a fee that has not meaningfully moved. Set it
-to 50 pips (0.005%) or 2% of the live fee, whichever is larger.
+Keep `poke_gate`. On a deviation keeper it maps to `d <= kick`: below the kicker there should be no
+live poke and no gas.
 
 ### 3.3 Reading the pool price
 
-This is the input the backtest does **not** exercise, and the one most likely to be got wrong. The
-model in `scripts/model.py` reads pool prices from the Uniswap gateway at hourly granularity, which is
-right for a replay and wrong for a keeper. The keeper must read chain state:
+The input the backtest does not exercise and the one most likely to be got wrong.
 
 ```
-slot   = keccak256(abi.encode(poolId, uint256(6)))     // pools mapping in PoolManager
-word   = PoolManager.extsload(slot)
-sqrtPriceX96 = word & (2^160 - 1)
-sp     = sqrtPriceX96 / 2^96
+slot         = keccak256(abi.encode(poolId, uint256(6)))   // pools mapping in PoolManager
+sqrtPriceX96 = extsload(slot) & (2^160 - 1)
+sp           = sqrtPriceX96 / 2^96
+
+USDG is token1 (SPY, ETH):              price = sp^2 * 10^(dec0 - dec1)
+USDG is token0 (GLD, NVDA, META, AAPL): price = 10^(dec1 - dec0) / sp^2
 ```
 
-Then, and this is the part that bites:
-
-```
-USDG is token1 (SPY, ETH):    price = sp^2 * 10^(dec0 - dec1)
-USDG is token0 (GLD, NVDA,
-                META, AAPL):  price = 10^(dec1 - dec0) / sp^2
-```
-
-The orientation is per pool and is not guessable. **This exact class of bug has already cost this
-team a round of the fee debate**: `ur_now.mjs` divided by `1e6` on every pool while USDG was token0 on
-three of them, which is open item 2 in `FEE-POSITION.md`. It also bit the author of this spec while
-writing it. Build a table, assert it against a known-good price at startup, and refuse to run a pool
-whose computed price is more than 5% from its reference at boot.
-
-`PoolManager` is `0x8366a39CC670B4001A1121B8F6A443A643e40951`. Verified working:
-reading SPY this way returns $775.48 against a live mark of $774.
+The orientation is per pool and is not guessable. **This exact bug already cost this team a round of
+the fee debate** (`ur_now.mjs`, open item 2 in `FEE-POSITION.md`) and it bit the author of this spec.
+Build a table, assert each pool's computed price against its reference at startup, and refuse to run
+a pool that is more than 5% off at boot. `PoolManager` is `0x8366a39CC670B4001A1121B8F6A443A643e40951`.
 
 ### 3.4 Poke policy
 
 | | |
 |---|---|
-| TTL while `d <= kick` | 7200s (2h), matching the ETH keeper |
+| TTL while `d <= kick` | 7200s, and no poke at all below the gate |
 | TTL while `d > kick` | 43200s (12h) |
-| max TTL the hook allows | 259200s (72h), `MAX_POKE_TTL` |
-| lower bound the hook enforces | `max(pokeFloor, autonomous/2)`, so a poke can never halve the session fee |
+| forced renewal | `ttl_renew_s`, always well under the live TTL |
+| hook maximum | 259200s (72h) |
+| lower bound enforced on chain | `max(pokeFloor, base_d * (1 - MAX_POKE_DISCOUNT_BPS))`, measured on the **premium-free** curve |
 | upper bound | the pool's `maxFee` |
 
-The TTL asymmetry is the important part. A short TTL in calm means a keeper failure lapses back to
-the calendar fee within two hours, which is the safe direction. A long TTL once triggered means a
-keeper failure **mid-event** does not hand the fee back down to the closed floor, which is the
-failure that cost GLD its book in the first place.
+The TTL asymmetry is the point: short in calm so a keeper failure lapses back within two hours, long
+once triggered so a keeper failure mid-event does not hand the fee back to the closed floor, which is
+the failure that cost GLD its book.
 
 ### 3.5 Failure modes
 
 | failure | behaviour |
 |---|---|
-| reference unreachable | hold the last poke, re-poke it at its TTL to keep it alive, alert. Never fall back to the session floor while the last known `d` was above `kick` |
-| two references disagree by more than the guard | hold, alert. Do not act on a number that cannot be corroborated |
-| RPC unreachable | hold, retry with backoff. The live poke keeps the fee up on its own |
-| pool price reads absurd (>5% from reference at boot, or a decimals mismatch) | refuse to start that pool, alert |
-| keeper dies | fee lapses to the autonomous fee at TTL. In calm that is correct; mid-event it is a 12h window in which someone must notice |
-| `pokeFee` reverts | log the revert reason. `FeeAboveCap`, `FeeBelowFloor` and `InvalidTtl` are all config errors, not transient |
+| reference unreachable | hold the last poke and renew it at TTL, alert. Never lapse to the floor while the last known `d` was above `kick` |
+| two references disagree past the guard | hold, alert |
+| RPC unreachable | `_switch_rpc` to the fallback, then hold and retry. The live poke keeps the fee up on its own |
+| pool price reads absurd at boot | refuse to start that pool, alert |
+| keeper dies | fee lapses at TTL. Correct in calm; mid-event it is a 12h window in which someone must notice |
+| `pokeFee` reverts | log the reason. `FeeAboveCap`, `FeeBelowFloor`, `InvalidTtl` are config errors, not transient |
 
 ### 3.6 Prerequisite nobody has checked
 
-`pokeFee` is `restricted` through the AccessManager at
-`0xa362d98b33a7bb5b5e2180a05f995a70fb404f30`. **Whether the ops key actually holds the poking role on
-each pool hook has not been verified.** `FeePoked` has never fired on GLD, so that path is unproven on
-that pool. Confirm before build, on every pool in the rollout, not just GLD.
+`pokeFee` is `restricted` through the AccessManager at `0xa362d98b33a7bb5b5e2180a05f995a70fb404f30`.
+**Whether the ops key holds the poking role on each pool hook is unverified**, and `FeePoked` has
+never fired on GLD. Note that the role scripts bind `pokeFee` under **both** its ABIs, so a hook
+carrying the 4-arg selector needs the 4-arg binding. Confirm before build, per pool.
 
 ---
 
 ## 4. The reference
 
-### 4.1 Coverage: Binance carries everything we need
+### 4.1 Coverage
 
-Binance lists tokenised equities that trade **24/7, including the full weekend**. Measured over 30
-days (`scripts/reference-census.mjs`):
+Binance carries every asset we need, trading 24/7 including the full weekend. Measured over 30 days
+by `scripts/reference-census.mjs`:
 
-| asset | Binance symbol | Saturday hours | Saturday volume | basis vs the real share | basis error p99 |
+| asset | symbol | Sat hours | Sat volume | basis | basis err p99 |
 |---|---|---|---|---|---|
 | SPY | SPYBUSDT | 120 | 12,022 | 0.999418 | 0.27% |
-| NVDA | NVDABUSDT | 120 | 12,644 | 0.999330 | 1.11% |
-| META | METABUSDT | 120 | 521 | 0.999027 | 1.19% |
-| AAPL | AAPLBUSDT | 120 | 7,907 | 0.999390 | 0.91% |
-| TSLA | TSLABUSDT | 120 | 8,137 | 0.999382 | 1.16% |
 | QQQ | QQQBUSDT | 120 | 17,383 | 0.999663 | 0.48% |
-| MSFT | MSFTBUSDT | 120 | 1,132 | 0.999425 | 1.19% |
 | AMZN | AMZNBUSDT | 120 | 754 | 0.999024 | 0.84% |
+| AAPL | AAPLBUSDT | 120 | 7,907 | 0.999390 | 0.91% |
+| NFLX | NFLXBUSDT | 96 | 3,117 | 0.999297 | 0.96% |
 | GOOGL | GOOGLBUSDT | 120 | 4,110 | 0.999326 | 1.02% |
+| GLD | PAXGUSDT | 120 | 4,991 | 0.091804 | 1.04% |
+| NVDA | NVDABUSDT | 120 | 12,644 | 0.999330 | 1.11% |
+| TSLA | TSLABUSDT | 120 | 8,137 | 0.999382 | 1.16% |
+| META | METABUSDT | 120 | 521 | 0.999027 | 1.19% |
+| MSFT | MSFTBUSDT | 120 | 1,132 | 0.999425 | 1.19% |
 | COIN | COINBUSDT | 120 | 5,743 | 0.998985 | 2.05% |
 | MSTR | MSTRBUSDT | 120 | 57,761 | 0.999272 | 2.80% |
-| NFLX | NFLXBUSDT | 96 | 3,117 | 0.999297 | 0.96% |
-| GLD | PAXGUSDT | 120 | 4,991 | 0.091804 | 1.04% |
-| ETH | ETHUSDT | 120 | 802,645 | 1.0 by construction | n/a |
+| ETH | ETHUSDT | 120 | 802,645 | 1.0 | n/a |
 
-Every equity is **1 token = 1 share**: the basis is 0.999 to 1.000, so there is no conversion, no
-scaling, no interpretation. That is what makes this a system rather than a fix for one pool.
+Every equity is **1 token = 1 share**: no conversion, no interpretation. Gold is the one exception
+and was accepted deliberately: PAXG is an *ounce*, converted to an ETF *share* by a fitted basis,
+because chain 4663 carries no gold oracle and Binance lists no GLD token. `XAUTUSDT` is the
+disagreement guard, currently 0.138% from PAXG.
 
-**Gold is the single exception and was accepted deliberately.** There is no GLD token on Binance, so
-gold comes in as PAXG, which is one *ounce*, converted to an ETF *share* by a fitted basis of
-0.091804. That is a unit conversion the equities do not need, and its error is 1.04% at p99 against
-0.27% for SPY. It is accepted because there is no alternative: chain 4663 carries no gold oracle
-either, so PAXG with a measured basis is the only gold reference that exists.
-
-`XAUTUSDT` is a second, independent gold market and is used as the disagreement guard, currently
-0.138% from PAXG.
+**The reference is not blind while the cash market is shut.** Regressing each cash gap on the
+reference's move measured at 04:00 ET, hours before the open (`scripts/gap-information.mjs`), every
+slope is near 1 with t-stats of 3.8 to 10.9: SPY 0.998, NVDA 0.895, AAPL 1.212, TSLA 1.730,
+META 1.106, QQQ 1.094, GLD/PAXG 1.139. The R-squared is only 0.28 to 0.43, but that says the gap has
+not finished forming at 04:00, which is equally true of fair value: it is not an error in the
+reference. Slope is the accuracy test and it passes.
 
 ### 4.2 Maintaining the basis
 
-The basis is not a constant. GLD's drifts with the ETF's expense ratio, and every equity's drifts
-with its token's own premium.
-
 ```
-basis = median( asset_price / reference_price ) over a 30-day rolling window,
+basis = median( asset_price / reference_price ) over a rolling 30 days,
         recut daily, on hours where BOTH legs are live
 ```
 
-Recomputing GLD against a 30-day rolling median rather than a fixed one changed its p99 error from
-1.32% to 1.31%, which is the check that the basis is stable rather than trending.
+Recomputing GLD against a rolling median rather than a fixed one moved its p99 error from 1.32% to
+1.31%, which is the check that the basis is stable rather than trending.
 
 ### 4.3 Guards
 
@@ -209,84 +219,101 @@ Recomputing GLD against a 30-day rolling median rather than a fixed one changed 
 |---|---|---|
 | staleness | reference print older than 15 min | hold, alert |
 | disagreement | two independent references more than 1% apart | hold, alert |
-| thin reference | Saturday volume under 2,000 shares | that pool requires a second reference before it goes live at all |
+| thin reference | Saturday volume under 2,000 shares | needs a second reference before that pool goes live |
 | basis drift | today's basis more than 3% from the 30-day median | hold, alert, do not recut |
 
-The thin-reference guard matters more than it looks. If the reference trades 521 shares on a Saturday
-(META) then pushing the *reference* is cheaper than pushing our pool, and an attacker who moves it
-makes us raise our own fee on honest flow. Three assets fail this today: META, MSFT and AMZN.
+META (521 Saturday shares), MSFT (1,132) and AMZN (754) fail the thin test. If the reference trades
+that little, pushing IT is cheaper than pushing our pool, and an attacker who moves it makes us raise
+our own fee on honest flow.
 
 ---
 
-## 5. Asymmetric fees: not available, on any existing pool
+## 5. Asymmetric fees: available on three pools
 
-**Answer: no pool has it, and no existing pool can ever have it.**
+**Which pools have it.** Probed directly against deployed runtime bytecode
+(`scripts/probe-asymmetry.mjs`):
 
-Three independent confirmations:
+| pool | two-sided `pokeFee` | `setPoolAsymmetry` / `poolAsymmetry` / `autonomousFee` | verdict |
+|---|---|---|---|
+| **GLD/USDG** | yes | yes | **asymmetric** |
+| **META/USDG** | yes | yes | **asymmetric** |
+| **SPY/GLD** | yes | yes | **asymmetric** |
+| SPY/USDG | no, legacy 3-arg | no | symmetric only |
+| NVDA/USDG | no | no | symmetric only |
+| TSLA/USDG | no | no | symmetric only |
+| AAPL/USDG | no | no | symmetric only |
+| NVDA/SPY | no | no | symmetric only |
+| ETH/USDG | no | no | symmetric only |
 
-1. **Empirical.** `currentFee(poolId, zeroForOne)` returns the identical value in both directions on
-   all seven pools: GLD 6000/6000, SPY 250/250, NVDA 300/300, META 250/250, TSLA 400/400,
-   AAPL 300/300, ETH 625/625.
-2. **Structural.** `pokeFee` stores a single `uint24`. There is no direction in the poke.
-3. **Permanent.** The pool's identity is its `PoolKey`, which includes the hook address. Hook code is
-   immutable. So changing the fee logic means a different hook address, which means a **different
-   pool** with no liquidity in it. There is no upgrade path for an existing pool.
+GLD, META and SPY/GLD are the wave-3 deploys (#29), which shipped after the asymmetric-fee commit
+(#28). Everything else is phase-1 or wave-2 and predates it. Hook code is immutable and the PoolKey
+binds the hook address, so **the symmetric pools can never gain it without a new pool.** That is the
+fallback, and it is not a bad one: on the GLD replay, symmetric earns more than asymmetric
+($50,551 against $41,085) and makes a round trip cost 3.00% rather than 2.10%.
 
-Hook permission bits are `0x2080` on all nine Fables hooks, which is `BEFORE_INITIALIZE_FLAG`
-(1 << 13) plus `BEFORE_SWAP_FLAG` (1 << 7) and nothing else. No delta flags anywhere.
+Both GLD and META currently read `premiumPips = 0`, the symmetric default, which is why a naive
+`currentFee` comparison in both directions cannot tell an asymmetric hook from a symmetric one. Do
+not use that test; probe the selectors.
 
-**Fallback, and it is the better trade anyway: one symmetric fee.** From the event replay, symmetric
-earns more than asymmetric ($50,551 against $41,085 on the physical volume model) and makes a round
-trip cost 3.00% rather than 2.10%, which is the stronger deterrent against the round-tripping that
-this event looked like. The thing symmetric gives up is that it also taxes the flow that repairs the
-pool. That is a real cost and it is the reason to want asymmetry eventually, but it is not a reason to
-delay.
+**Two ways to express asymmetry, and only one is right for this keeper.**
 
-**What it would take.** A new hook version whose `_autonomousFee` reads `params.zeroForOne`, which its
-signature already receives and currently ignores, plus per-pool deviation state the keeper writes on
-chain. It needs no new permission flag, because the fee override is a return value rather than a
-delta. But it needs a new deployment and a new pool, so it is a migration, not an upgrade. Deferred.
+`setPoolAsymmetry(key, premiumPips, premiumZeroForOne)` sets a *standing* directional premium through
+the delayed admin path. That is wrong here: which direction is "outbound" flips depending on whether
+the pool is rich or cheap against the reference, so it cannot be a static config.
 
-**Residual check for the fact-check:** the direction test was run on a Sunday with the closed tier
-live. ETH was read **with an active poke** (117 minutes remaining) and still priced both directions
-identically, so the poked path is covered. What is not yet covered is an **open session**, so re-run
-`scripts/probe-direction.mjs` on a weekday between 09:30 and 16:00 ET before treating "symmetric" as
-proven in every state. It is a two-minute check and it prints the market state it was read in.
+`pokeFee(poolId, fee0For1, fee1For0, ttl)` on the hot key is the right tool. Mechanics that matter:
+
+- A side of `0` is a **sentinel** meaning "no override this direction", which keeps charging the
+  autonomous fee including any standing premium. At least one side must be non-zero.
+- **Each call restates the whole two-sided poke.** To change one side, restate the other in the same
+  call or it reverts to autonomous.
+- Set-time bounds are per side: `pokeFloor <= side <= cap`.
+- Resolution-time floor is `max(pokeFloor, base_d * (1 - MAX_POKE_DISCOUNT_BPS))` measured on the
+  **premium-free** curve.
+- `autonomousFee(poolId, zeroForOne)` is the keeper's composition input and is **pre-poke and
+  pre-cap**. `currentFee` cannot serve that role, because during a live poke it returns the poked
+  clamped fee and the keeper could not recover its own baseline.
+- Because `autonomousFee` is pre-cap, **the keeper must clamp each composed side to
+  `min(side, maxFee)` before poking.** `pokeFee` rejects an over-cap side atomically, dropping the
+  other side's update with it.
+- Event is `FeePoked(poolId, fee0For1, fee1For0, expiry)`.
 
 ---
 
-## 6. Protocol fees: not settable by us
+## 6. Protocol fee to treasury: UNKNOWN, blocked
 
-**Answer: no, and not because of a multisig. It simply is not ours.**
+**This section is deliberately unresolved. Do not treat the analysis below as the answer.**
 
-v4's protocol fee is exactly the tool we wanted: `ProtocolFeeLibrary` packs a separate 12-bit fee for
-`zeroForOne` and `oneForZero`, capped at `MAX_PROTOCOL_FEE = 1000` pips (0.1%) each, taken from the
-input before the LP fee. Directional out of the box.
+What is established:
 
-On the chain 4663 PoolManager `0x8366a39CC670B4001A1121B8F6A443A643e40951`:
+- v4's protocol fee is directional by design: `ProtocolFeeLibrary` packs a separate 12-bit fee for
+  `zeroForOne` and `oneForZero`, each capped at `MAX_PROTOCOL_FEE = 1000` pips (0.1%), taken from the
+  input before the LP fee.
+- On the chain 4663 PoolManager, `protocolFeeController()` is `0x6d0009504d129cf5002dba61d9ae8575aa79314c`,
+  a 4,544-byte contract exposing `setProtocolFee`, `collectProtocolFees` and `transferOwnership`, whose
+  `owner()` is `0x2bad8182c09f50c8318d769245bea52c32be46cd`, a bare EOA that also owns the PoolManager.
+- That address appears nowhere in the Fables contracts, and `grep` finds no `protocolFee` anywhere in
+  `origin/main` outside `lib/`.
+- The GLD pool's protocol fee is currently 0 in both directions.
 
-| | |
-|---|---|
-| `protocolFeeController()` | `0x6d0009504d129cf5002dba61d9ae8575aa79314c`, a **contract**, 4,544 bytes |
-| that controller's `owner()` | `0x2bad8182c09f50c8318d769245bea52c32be46cd`, an **EOA with no code** |
-| PoolManager `owner()` | the same EOA, `0x2bad8182...46cd` |
-| Fables' own AccessManager | `0xa362d98b33a7bb5b5e2180a05f995a70fb404f30`, a different contract entirely |
-| GLD pool's protocol fee today | 0 in both directions |
+That reads as "not ours", but **Carl states this is wrong and that the answer is in
+`github.com/yanisepfl/fables`.** It has not been found. Rather than guess a second time, this is an
+open question with a named owner.
 
-So it is not a multisig, it is a single external key, and it belongs to whoever runs the chain, not to
-Fables. `setProtocolFee` reverts for anyone but that controller. Per the standing instruction: **forget
-it.**
+> **ACTION FOR THE REVIEWER.** If you know how Fables sets or overrides the protocol fee on chain
+> 4663, write it here. If you do not, **ask Yanis directly** and record the answer:
+> 1. Can Fables set a v4 protocol fee on its own pools, and through which address or role?
+> 2. Is `0x2bad8182…46cd` ours, Robinhood's, or a shared deployer key?
+> 3. Is there a Fables-side protocol fee or treasury cut on the swap path that this spec has missed?
+> 4. If it is settable, is it per direction, and does it compose with the two-sided poke?
+>
+> Until answered, the keeper ships with **no treasury cut on the swap path**.
 
-**Future work, one line:** ask Robinhood to either set a directional protocol fee on Fables pools or
-delegate the controller for them. If they ever do, it is 0.1% per direction and it composes with
-everything above without touching the hook.
-
-**Fallback, already available:** `FablesLedger.claimFeeBps`, max 2,000 (20%), routed to
-`FablesTreasurySplitter`. It skims a share of fees *collected*, and fees now scale with the premium,
-so the treasury take scales with the premium by construction. At 10% it would have taken $4,108 from
-the GLD event under the modelled schedule against $688 on what actually happened. Its limits: global
-across pools rather than per-pool, not directional, and changes go through the AccessManager execution
-delay. It is a standing setting, not an event lever.
+**The fallback that needs no answer:** `FablesLedger.claimFeeBps`, max 2,000 (20%), routed to
+`FablesTreasurySplitter`. It skims a share of fees *collected*, and fees scale with the premium, so
+the treasury take scales with the premium by construction. At 10% it would have taken $4,108 from the
+GLD event against $688 on what actually happened. It is global across pools, not directional, and
+changes go through the AccessManager delay: a standing setting, not an event lever.
 
 ---
 
@@ -294,65 +321,54 @@ delay. It is a standing setting, not an event lever.
 
 ### 7.1 GLD/USDG: LOCKED
 
-The pilot. These numbers do not move without a new measurement.
-
 | parameter | value | basis |
 |---|---|---|
-| reference | `PAXGUSDT` on Binance | only gold reference that exists, 24/7, 120 Saturday hours |
-| second reference | `XAUTUSDT`, guard at 1% | independent, currently 0.138% apart |
-| basis | **0.091804**, 30-day rolling median, recut daily | measured, n=1,394 hours |
-| base fee, market hours | **3,000 pips (0.30%)** | matches the largest GLD incumbent on chain |
-| base fee, out of hours | **1,500 pips (0.15%)** | defensible only because the reference is live |
-| kicker | **2.00%** | agreed. The census rule gives 2.25%; see the note below |
-| full | **10.00%** | above the worst weekend gold gap in 730 days (7.97%) and the worst basis error (5.49%) |
+| reference | `PAXGUSDT`, guard against `XAUTUSDT` at 1% | only gold reference that exists |
+| basis | **0.091804**, rolling 30-day median, recut daily | measured, n=1,394 hours |
+| base, market hours | **3,000 pips (0.30%)** | matches the largest GLD incumbent on chain |
+| base, out of hours | **1,500 pips (0.15%)** | defensible only because the reference is live |
+| kicker | **2.00%** | agreed. The census rule gives 2.25%; worth $653 on the replay and no change to the first-raise hour |
+| full | **10.00%** | above the worst weekend gold gap in 730d (7.97%) and the worst basis error (5.49%) |
 | cap | **15,000 pips (1.50%)** | the pool's live `maxFee`, no config change needed |
-| direction | **symmetric** | asymmetry unavailable, section 5 |
+| direction | **asymmetric, inbound share 0.33** | available on this hook. See the note below |
 | TTL | 7,200s calm / 43,200s triggered | |
-| tick | 9.5 min | matches the ETH keeper |
+| push policy | the ETH keeper's, unchanged | |
 
-**On the kicker.** The mechanical rule in 7.3 produces 2.25% for GLD from the 30-day census; we locked
-2.00%. The difference is worth $653 on the event replay ($41,085 against $40,432) and does not change
-the hour of the first raise. 2.00% stands as the agreed pilot value, and the census rule is what
-governs every other asset.
+**On the asymmetry.** Symmetric measured *better* on this event, on both revenue ($50,551 against
+$41,085) and round-trip deterrence (3.00% against 2.10%). Locking the asymmetric version is a
+deliberate trade of about 23% of event revenue for not taxing the flow that repairs the pool, which
+is the stated product intent. If the counterparty in a future event again looks like a single
+round-tripper rather than honest arbitrage, raise `inboundShare` toward 1.0; that is a keeper config
+change, not a contract change.
 
-Note the base fees differ from the pool's live config, which the emergency change on 2026-08-29 set to
-`3000/3000/6000`. Moving the closed tier from 6,000 back to 1,500 is a `setPoolConfig` call and should
-happen **only once the keeper is live**, not before.
+Moving the closed tier from its current emergency 6,000 back to 1,500 is a `setPoolConfig` call and
+should happen **only once the keeper is live.**
 
 ### 7.2 Every other asset with a live reference
 
-Produced mechanically by `scripts/reference-census.mjs`. `maxFee` is each pool's live cap where a pool
-exists; assets without a Fables pool inherit the cap decision at listing time.
+From `scripts/reference-census.mjs`, applying the rule in 7.3.
 
-| asset | reference | basis | kicker | full | cap | flags |
-|---|---|---|---|---|---|---|
-| SPY | SPYBUSDT | 0.999418 | **0.75%** | 4.00% | 8,000 | |
-| QQQ | QQQBUSDT | 0.999663 | **1.00%** | 4.00% | listing | no pool yet |
-| AMZN | AMZNBUSDT | 0.999024 | **1.75%** | 5.25% | listing | **thin reference** |
-| NFLX | NFLXBUSDT | 0.999297 | **2.00%** | 6.00% | listing | no pool yet |
-| AAPL | AAPLBUSDT | 0.999390 | **2.00%** | 6.00% | 8,000 | |
-| NVDA | NVDABUSDT | 0.999330 | **2.25%** | 6.75% | 8,000 | |
-| GLD | PAXGUSDT | 0.091804 | 2.25% rule, **2.00% locked** | 10.00% | 15,000 | unit conversion |
-| GOOGL | GOOGLBUSDT | 0.999326 | **2.25%** | 6.75% | listing | **outlier: max 5.44% vs p99 1.02%** |
-| META | METABUSDT | 0.999027 | **2.50%** | 7.50% | 8,000 | **thin reference**, **outlier: max 6.49%** |
-| TSLA | TSLABUSDT | 0.999382 | **2.50%** | 7.50% | 10,000 | |
-| MSFT | MSFTBUSDT | 0.999425 | **2.50%** | 7.50% | listing | **thin reference** |
-| COIN | COINBUSDT | 0.998985 | **4.25%** | 12.75% | listing | no pool yet |
-| MSTR | MSTRBUSDT | 0.999272 | **5.75%** | 17.25% | listing | widest basis of the set |
-| ETH | ETHUSDT | 1.0 | to set | to set | 3,000 | already has the volatility keeper, last in rollout |
+| asset | kicker | full | cap | direction | flags |
+|---|---|---|---|---|---|
+| SPY | 0.75% | 4.00% | 8,000 | symmetric only | base disputed, see section 9 |
+| QQQ | 1.00% | 4.00% | at listing | symmetric only | no pool yet |
+| AMZN | 1.75% | 5.25% | at listing | symmetric only | thin reference |
+| NFLX | 2.00% | 6.00% | at listing | symmetric only | no pool yet |
+| AAPL | 2.00% | 6.00% | 8,000 | symmetric only | |
+| NVDA | 2.25% | 6.75% | 8,000 | symmetric only | |
+| GLD | 2.00% locked (rule: 2.25%) | 10.00% | 15,000 | **asymmetric** | unit conversion |
+| GOOGL | 2.25% | 6.75% | at listing | symmetric only | outlier: max 5.44% vs p99 1.02% |
+| META | 2.50% | 7.50% | 8,000 | **asymmetric** | thin reference, outlier max 6.49% |
+| TSLA | 2.50% | 7.50% | 10,000 | symmetric only | |
+| MSFT | 2.50% | 7.50% | at listing | symmetric only | thin reference |
+| COIN | 4.25% | 12.75% | at listing | symmetric only | |
+| MSTR | 5.75% | 17.25% | at listing | symmetric only | widest basis of the set |
+| ETH | to set | to set | 3,000 | symmetric only | already runs the volatility keeper, last in rollout |
 
-Three assets carry a **thin reference** flag (Saturday volume under 2,000 shares) and two carry an
-**outlier** flag (a single hour where the basis blew out beyond 3x its own p99). Neither is
-disqualifying, but a flagged asset does not go live until a second reference is wired for the thin
-ones, or the outlier hour has been inspected for the others.
-
-Everything else Robinhood emits on chain 4663 (roughly 94 oracle feeds and 1,401 stock pools) has
-**no continuous reference**, and therefore gets no kicker and no deviation term. The rule is simply:
-**a pool with no live reference does not list.**
+Everything else Robinhood emits on chain 4663 has no continuous reference and therefore no kicker.
+**A pool with no live reference does not list.**
 
 ### 7.3 How to compute parameters for a new asset
-
-The procedure is the script, so there is nothing to interpret.
 
 ```
 1. add [ASSET, BINANCE_SYMBOL, YAHOO_SYMBOL, note] to CANDIDATES in scripts/reference-census.mjs
@@ -360,7 +376,7 @@ The procedure is the script, so there is nothing to interpret.
 3. node scripts/reference-census.mjs
 ```
 
-It applies, and prints, this rule:
+which applies:
 
 ```
 kicker = max( 2 * basisError_p99, 0.50% ), rounded UP to the next 0.25%
@@ -369,52 +385,113 @@ cap    = the pool's maxFee, bounded by its hook's ABSOLUTE_MAX_FEE
 base   = unchanged from the pool's existing session ladder
 ```
 
-and refuses to produce a kicker at all where no basis can be measured.
+p99 and not max, because max over 30 days is one bad hour. Assets whose max exceeds 3x their p99 are
+flagged for inspection, not silently widened. The 2x multiplier is conservative on a number that is
+already conservative, because the measured error compares two venues' hourly *closes* and carries
+timing noise the keeper will not see. The right refinement is to log the keeper's own realised basis
+error for two weeks and re-cut from that, not a cleverer multiplier.
 
-**Why p99 and not max.** Max over a 30-day window is one bad hour, and one bad hour must not set a
-parameter. Assets whose max exceeds 3x their p99 are flagged for inspection instead of silently
-widened.
-
-**Why 2x.** The measured error is an upper bound on true basis noise, because it compares two venues'
-hourly *closes* and so carries timing noise the keeper will not see, reading both sides at the same
-instant. 2x p99 is therefore already conservative on a number that is already conservative. The
-correct refinement is not a cleverer multiplier: it is to log the keeper's own realised basis error
-for two weeks and re-cut from that.
-
-**Gate on going live.** No asset goes live with a kicker until: a reference exists and clears the
-thin-reference floor, the basis has been measured over at least 30 days, the pool-price orientation
-has been asserted against a known-good mark, and the poking role has been confirmed on that pool.
+**Gate on going live:** a reference exists and clears the thin floor; the basis is measured over at
+least 30 days; the pool-price orientation is asserted against a known-good mark; the poking role is
+confirmed on that pool under the correct `pokeFee` ABI.
 
 ---
 
 ## 8. Build checklist
 
-Ordered. Nothing here is written yet.
+1. Confirm the poking role per pool, under the right `pokeFee` ABI. Blocks everything.
+2. Resolve section 6 with Yanis.
+3. Fork the ETH keeper. Keep `volatility.py` wholesale if a vol term is wanted later; keep
+   `depeg.py`'s guard pattern; keep the executor, RPC fallback, alerting and state persistence.
+4. Pool-price reader with the orientation table and the startup assertion (3.3).
+5. Reference ingest and the rolling basis, with the four guards (4.3).
+6. The ramp, with unit tests at every boundary: `d` either side of the kicker, the ramp midpoint,
+   past full, cap clamping, the base flipping across a session boundary, and the direction flip when
+   the pool is cheap rather than rich.
+7. Two-sided poke composition for GLD and META: clamp each side to `min(side, maxFee)`, restate both
+   sides every call, and never read `currentFee` as the baseline.
+8. Dry run (`--dry-run` already exists) against GLD for a week; compare to `scripts/model.py`.
+9. Ship GLD. Then SPY, AAPL, NVDA, TSLA, META. ETH last.
+10. Only after the keeper is live on GLD: `setPoolConfig` to move its closed tier back to 1,500.
 
-1. Confirm the poking role on each pool hook through the AccessManager. Blocks everything.
-2. Read the ETH keeper on the Google VM and reconcile section 3.1: the four *to confirm* rows, plus
-   its retry, logging and alerting, so this service can be its sibling rather than its cousin.
-3. Pool-price reader with the per-pool orientation table and the startup assertion in section 3.3.
-4. Reference ingest: Binance klines plus the basis recut, with the four guards in section 4.3.
-5. The fee function, with unit tests at the boundaries: `d` just under and just over the kicker, the
-   ramp midpoint, `d` past full, cap clamping, the base flipping across a session boundary, and the
-   sign flip when the pool is cheap rather than rich.
-6. The poke loop with the TTL policy and the idempotency epsilon.
-7. Dry-run mode: compute and log what it *would* poke, run it against GLD for a week, compare to the
-   replay in `scripts/model.py`.
-8. Go live on GLD. Then SPY, which has the tightest basis and the deepest book. Then AAPL, NVDA,
-   TSLA, META. ETH last, once the deviation term is shown not to fight the volatility keeper.
-9. Only after the keeper is live on GLD: `setPoolConfig` to move its closed tier from 6,000 back to
-   1,500.
+---
 
-## 9. What is still open
+## 9. Known conflict with the per-pool work
 
-- **The ETH keeper's internals.** Four rows of section 3.1 are inferred from on-chain output, not
-  copied from source. Reconcile before build.
-- **The poking role.** Unverified on every pool.
-- **One event.** Every revenue figure is a replay of a single weekend on a single pool, bracketed by
-  two volume models that disagree by 2.7x.
-- **The direction test** was run in one market state. Re-run it in an open session.
-- **Why chain 4663's GLD is dislocated at all**, which is upstream of this whole document and matters
-  more than the fee. Every venue on the chain prices GLD near $1,520 against a real ETF at $409, and
-  it has held for more than two days.
+`../pools/SPY-USDG.md` measures our own SPY demand curve over 167 hourly observations and finds
+revenue peaking near 400 to 450 pips, with a hard two-hop route ceiling at 600 pips
+(USDG to WETH at 100, WETH to SPY at 500). This document's earlier suggestion of a 0.30% (3,000 pip)
+base for the equity pools was an analogy from GLD, not a measurement, and **the measured number
+should win.** Whether that route ceiling also bounds the deviation *cap*, or only the calendar
+*base*, is being adjudicated separately. Until that resolves, treat SPY's base as open and its
+kicker (0.75%) and cap (8,000) as provisional.
+
+---
+
+## 10. Deferred: the close-anchor trigger
+
+**A second, distinct trigger. Specified here, not built.**
+
+Section 2's trigger asks *is the pool wrong against the world*. This one asks a different question:
+*is the closed-hours discount still justified?*
+
+The closed tier is cheap on the assumption that nothing moves while the cash market is shut. That
+assumption is usually right and occasionally very wrong, and when it is wrong the discount is a gift
+to whoever is repricing. Because the Binance reference **is** informative out of hours (section 4.1),
+we can tell the two cases apart live.
+
+```
+while the cash market is closed:
+    m = | P_reference / P_cash_close - 1 |            the move since the last cash close
+    if m > closeAnchorThreshold:  withdraw the closed-tier discount,
+                                  charge the in-hours base or higher
+```
+
+Note this is measured on the **reference against the cash close**, not on the pool. A pool tracking a
+genuinely repriced world is not mispriced, so section 2's trigger will not fire, yet its LPs are
+being handed a discount priced for a world that no longer exists.
+
+**How often the discount is justified** (`scripts/closed-window-moves.mjs`, 730d, close to next open):
+
+| asset | window | n | median | <1% | <2% | p99 | max |
+|---|---|---|---|---|---|---|---|
+| SPY | overnight | 566 | 0.37% | 88% | 99% | 2.13% | 4.06% |
+| SPY | weekend | 162 | 0.37% | 85% | 98% | 2.52% | 2.58% |
+| QQQ | overnight | 567 | 0.56% | 70% | 95% | 2.91% | 4.66% |
+| GLD | overnight | 566 | 0.60% | 70% | 93% | 4.12% | 6.91% |
+| AAPL | overnight | 567 | 0.61% | 69% | 90% | 5.33% | 9.62% |
+| META | overnight | 567 | 0.97% | 51% | 79% | 9.47% | 20.82% |
+| NVDA | overnight | 567 | 1.57% | 36% | 64% | 6.71% | 15.04% |
+| TSLA | overnight | 567 | 1.78% | 32% | 54% | 10.30% | 18.99% |
+
+**The claim that nothing usually happens is TRUE, and strongly asset-dependent.** On SPY, 88% of
+overnight windows move under 1% and the discount is right almost always: a trigger is the correct
+shape, because pricing the tail into every window would tax 88% of them for the sake of 1%.
+
+On NVDA and TSLA it is not true at all. Their **median** overnight move is 1.57% and 1.78%, and only
+32 to 36% of windows stay under 1%. A closed-tier discount on those names is not occasionally
+mispriced, it is systematically mispriced, and the right answer there may be **no discount at all**
+rather than a discount with a trigger.
+
+Proposed threshold, when this is built: `closeAnchorThreshold = the asset's overnight p90`, which
+fires on roughly one window in ten. That is 1.08% for SPY, 3.74% for NVDA, 4.36% for TSLA. Size it
+against realised markouts once those exist, since this trigger's value is exactly the adverse
+selection it avoids and that has never been measured on this chain.
+
+**Why deferred:** it needs a cash-close anchor per asset (a market-calendar dependency the deviation
+keeper does not otherwise have), it interacts with the session ladder rather than sitting on top of
+it, and the pilot should prove the simpler trigger first.
+
+---
+
+## 11. What is still open
+
+- **The protocol fee**, section 6, blocked on Yanis.
+- **SPY's base**, section 9, blocked on the reconciliation.
+- **The poking role** on every pool.
+- **One event.** Every revenue figure replays a single weekend on a single pool, bracketed by two
+  volume models that disagree by 2.7x.
+- **The direction probe** has been run on a Sunday closed session and on ETH with a live poke. Re-run
+  it in an open session.
+- **Why chain 4663's GLD is dislocated at all**, which is upstream of this document and matters more
+  than the fee.
