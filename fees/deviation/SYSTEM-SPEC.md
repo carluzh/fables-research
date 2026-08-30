@@ -294,7 +294,16 @@ What is established:
   `owner()` is `0x2bad8182c09f50c8318d769245bea52c32be46cd`, a bare EOA that also owns the PoolManager.
 - That address appears nowhere in the Fables contracts, and `grep` finds no `protocolFee` anywhere in
   `origin/main` outside `lib/`.
-- The GLD pool's protocol fee is currently 0 in both directions.
+- **Every Fables pool's protocol fee is currently 0 in both directions**, read from `PoolManager`
+  slot0 on 2026-08-30 (packed uint24: low 12 bits `zeroForOne`, high 12 `oneForZero`):
+
+  | pool | protocolFee 0->1 | protocolFee 1->0 |
+  |---|---|---|
+  | GLD, SPY, NVDA, META, TSLA, AAPL, NVDA/SPY, SPY/GLD, ETH | 0 | 0 |
+
+  So unlike asymmetry, this is **not** pool-dependent today: no pool has one set, and the ability to
+  set one is a property of the controller rather than of the hook, so it would apply uniformly across
+  all nine the moment the controller question is answered.
 
 That reads as "not ours", but **Carl states this is wrong and that the answer is in
 `github.com/yanisepfl/fables`.** It has not been found. Rather than guess a second time, this is an
