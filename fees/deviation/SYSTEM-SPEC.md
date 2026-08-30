@@ -523,8 +523,43 @@ confirmed on that pool under the correct `pokeFee` ABI.
    the pool is cheap rather than rich.
 7. Two-sided poke composition for GLD and META: clamp each side to `min(side, maxFee)`, restate both
    sides every call, and never read `currentFee` as the baseline.
-8. Dry run (`--dry-run` already exists) against GLD for a week; compare to `scripts/model.py`.
-9. Ship GLD. Then SPY, AAPL, NVDA, TSLA, META. ETH last.
+8. **Dry run ALL seven pools from day one** (`--dry-run` already exists and pokes nothing). This
+   costs nothing and carries no risk, so there is no reason to observe one pool at a time. Compare
+   GLD's output against `scripts/model.py`.
+9. Enable live poking progressively: GLD, then SPY, AAPL, NVDA, TSLA, META, and ETH last. Days
+   between steps, not weeks, gated on the dry run being clean per pool rather than on a calendar.
+
+### 8.1 Why not GLD only
+
+The exposure is identical on the other pools and they have nothing. As this is written, on a Sunday,
+SPY, NVDA, META, TSLA and AAPL are all resting at 250 to 400 pips with no deviation term, which is
+the same 0.025% to 0.04% in the same blind window that cost GLD its book. Nothing about GLD made it
+uniquely vulnerable; it simply went first.
+
+**Capacity is not a constraint.** Measured on `lvrfee-engine` (e2-medium, 2 vCPU, 3,924 MB):
+
+| | now, one pool | seven pools, extrapolated | headroom |
+|---|---|---|---|
+| RSS | 79.8 MB | 559 MB | 14% of RAM |
+| CPU | 0.4% | 2.8% | load average is currently 0.00 |
+| connections | 4 | 28 | |
+
+Binance is not a constraint either. The price feed is a **websocket**, which consumes no REST weight
+at all, and the limits are 6,000 request-weight per minute and 300,000 raw requests per five minutes
+per IP. The second-source guard is a ticker read, weight 1 to 2. Seven pools use a rounding error of
+that budget.
+
+**The blast radius of a keeper bug is bounded and expiring.** A poke resolves inside
+`[max(pokeFloor, autonomous/2), cap]` and lapses at its TTL, so the worst a bug can do is overcharge
+for up to two hours in calm or twelve once triggered. Our keeper only ever computes `ramp(d) >= base`
+and therefore never pokes downward: **assert that and refuse to poke below the session base**, and the
+downward half of the range becomes unreachable. Set against the failure it prevents, $4.79M of volume
+at three basis points, that is the cheaper risk.
+
+**One thing genuinely argues for doing them together rather than GLD alone.** GLD and META take the
+four-argument `pokeFee`; SPY, NVDA, TSLA, AAPL and ETH take the legacy three-argument one. A
+GLD-only build implements only the four-argument path and then has to be retrofitted. Building both
+from the start is less work, not more.
 10. Only after the keeper is live on GLD: `setPoolConfig` to move its closed tier back to 1,500.
 
 ---
