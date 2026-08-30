@@ -21,7 +21,7 @@ config. **The shipping set is now one tier: META closed, 250 to 450.** Everythin
 | [NVDA-USDG.md](NVDA-USDG.md) | **held** | none | corrected: the field is 592 pips not 845 once two dead venues are dropped, so we are ABOVE market at 1.09x, and the session tier earns 1.19x the field APR |
 | [META-USDG.md](META-USDG.md) | **SHIPS** | closed 250 -> 450 | worst discount on the board at 0.08x market fee in closed hours, but its measured demand curve slopes UP, so the raise is cut to a step |
 | [GLD-USDG.md](GLD-USDG.md) | no change, **not a valid control** | none | its own config changed inside the window, 2026-08-29 19:19 UTC. Still the only within-session fee experiment we have |
-| [ETH-USDG.md](ETH-USDG.md) | **handed off** | separate workstream, cutting the fee in low vol | the opposite error: 5.37x market fee, 0.52% share, and its keeper repriced it daily |
+| [ETH-USDG.md](ETH-USDG.md) | **handed off** | separate workstream; measured answer is NOT a cut, see [ETH-USDG-CORRECTION.md](ETH-USDG-CORRECTION.md) | the opposite error: 5.37x market fee, 0.52% share, and its keeper repriced it daily |
 | [TSLA-USDG.md](TSLA-USDG.md) | baseline frozen, **dust** | none, none proposed | $2,260 of TVL and $4.95 of fees in the whole week; 0.25x fee, 0.08x APR on a denominator too small to act on |
 | [AAPL-USDG.md](AAPL-USDG.md) | baseline frozen, **dust** | none, none proposed | $4,259 of TVL, $18.17 of fees; the entire zero-elasticity prize is $74.66, and adding a fourth mover would only add noise |
 | [NVDA-SPY.md](NVDA-SPY.md) | baseline frozen, **dust** | none | $4,395 of TVL, $2.25 of fees; worst APR ratio of any Fables pool at 0.05x, and its closed row at 0.03x is the lowest cell in the table |

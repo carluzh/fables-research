@@ -26,7 +26,7 @@ Everything else is held, and for reasons that are not "we need more data":
 | SPY | **hold** | depth-constrained, and depth is not ours to set. See below |
 | NVDA | **hold** | scale-constrained: we are 197x smaller than the incumbent, and it is already above market on the live config |
 | GLD | **hold** | an event, owned by the deviation work. One open decision, section below |
-| ETH | **handed off** | owned by a separate workstream, direction there is to CUT the fee in low-volatility regimes |
+| ETH | **handed off** | owned by a separate workstream. Direction now measured and it is NOT a cut, see [ETH-USDG-CORRECTION.md](ETH-USDG-CORRECTION.md) |
 | TSLA, AAPL, crosses | **hold** | $26.70 of fees between them for the week |
 
 ## Why the fee is not the project

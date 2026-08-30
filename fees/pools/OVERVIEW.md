@@ -216,16 +216,16 @@ keeper, not a fee tier and not a range.
 
 Everything else is held. Two decisions from 31 August drive this. **k is not ours to set**, which
 withdraws the SPY concentration lever rather than deferring it, and leaves SPY depth-constrained with
-no direct lever. And **ETH is handed to a separate workstream** taking its fee down in low-volatility
-regimes.
+no direct lever. And **ETH is handed to a separate workstream**, whose direction has since been
+measured: **not a cut.** See [ETH-USDG-CORRECTION.md](ETH-USDG-CORRECTION.md).
 
 | pool | state | reason |
 |---|---|---|
-| SPY | held | the two unchanged-tier raises are worth 42/wk against a ,651/wk gap; the binding constraint is depth and it is not ours |
-| NVDA | held | already above market on the live config; the closed raise is worth 3/wk; the constraint is scale, 197x |
+| SPY | held | the two unchanged-tier raises are worth $642/wk against a $3,651/wk gap; the binding constraint is depth and it is not ours |
+| NVDA | held | already above market on the live config; the closed raise is worth $13/wk; the constraint is scale, 197x |
 | GLD | held | an event. One open decision on the closed floor |
-| ETH | handed off | separate workstream. Largest single line in the gap at ,331/wk, and the least measured |
-| TSLA, AAPL, crosses | held | 6.70 of fees between them for the week |
+| ETH | handed off | separate workstream. Largest single line in the gap at $3,331/wk. No longer the least measured: see [ETH-USDG-CORRECTION.md](ETH-USDG-CORRECTION.md) |
+| TSLA, AAPL, crosses | held | $26.70 of fees between them for the week |
 
 The four cuts proposed on 30 August (SPY open, NVDA overnight, META open and overnight) were
 reversals of a config that landed on 28 August, written as raises because the measurement window is

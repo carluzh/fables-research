@@ -1,9 +1,15 @@
 # ETH/USDG
 
-**State 31 Aug: HANDED OFF to a separate workstream, which is taking the fee DOWN in low-volatility
-regimes.** Nothing in this folder should touch ETH. It is also **the largest single line in the gap at
-$3,331 a week** on 65% of our TVL, and the least examined thing here: its four largest venues were
-excluded from every scan, so there is no depth measurement for ETH at all.
+**State 31 Aug: HANDED OFF to a separate workstream. Its direction has now been MEASURED and it is
+NOT to cut the fee: see [ETH-USDG-CORRECTION.md](ETH-USDG-CORRECTION.md).** In calm markets the
+keeper's 450 floor collects 7.9x its own adverse selection and moving the fee either way is
+revenue-neutral, so a cut gives up profit and buys nothing. Nothing in this folder should touch ETH.
+
+Two of this file's headline numbers do not survive that check. The 5.37x market fee is 1.6x against
+the v4 field, because 90% of the field is one v3 pool at 100 pips. And the 27.8% APR is a snapshot
+artefact: the pool grew 18x during the measurement week, so the corrected figure is 68.2%.
+**The depth measurement that was said not to exist now does**, for every v4 venue on the pair, and
+ours is the highest in the field.
 
 It is also NOT a valid control: its keeper repriced it every day inside
 the frozen window (OPEN realised 2,119 / 1,122 / 899 / 1,053 / 2,065 across 08-24 to 08-28), so it
