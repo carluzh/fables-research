@@ -17,9 +17,15 @@ It ships because META is the **one pool where our own diagnosis says price is th
 (share 2.57x depth share, k rank 3 of 5), and because it is therefore the clean place to measure the
 demand curve we have failed to identify five times from observational data.
 
-**Ship it with a randomised `pokeFee` schedule, not a calendar-shaped one.** The hook sets a fee with
-a TTL that lapses on its own, so a randomised ladder across nights costs nothing, reverts itself, and
-produces the one number every recommendation in this folder depends on.
+**Ship it as one `setPoolConfig` and nothing else.** An earlier revision of this file proposed pairing
+it with a randomised `pokeFee` schedule to identify the demand curve. **That is withdrawn.** `pokeFee`
+restates the whole poke and the last write wins, so a randomiser would collide with the deviation
+keeper, which is real LP protection on a Mode B pool with a 4.12% weekend gap p99. Building a research
+apparatus that fights a safety mechanism, on a tier earning **$29.43 a week**, to sharpen a parameter
+feeding decisions worth $679 a week at best, is not a trade worth making. Caught by Yanis, 31 Aug.
+
+The step change is the observation. It is confounded, and at this size the precision does not matter:
+if share holds above the 7.12% break-even it worked, if it collapses, revert.
 
 | tier | **live on chain** | realised in window | **shipping** | market | vs live |
 |---|---|---|---|---|---|

@@ -15,9 +15,9 @@ keeper in `../deviation/`, which reads its base from chain every cycle, so a lad
 |---|---|---|---|---|
 | **META closed** | **250** | **450** | **0.08x** | the one pool where price is the binding constraint |
 
-That is one `setPoolConfig`, a whole-struct restatement, and it is as much an **experiment as a
-change**: META is the only asset where our own diagnosis says the fee is what is holding us back, so
-it is the clean place to finally measure the demand curve.
+That is one `setPoolConfig`, a whole-struct restatement, and **nothing else: no second poker.** META
+is the only asset where our own diagnosis says the fee is what is holding us back, so it is the one
+place a fee change is the right instrument. The deviation keeper keeps sole ownership of META's poke.
 
 Everything else is held, and for reasons that are not "we need more data":
 
@@ -124,8 +124,9 @@ above 3,000.
 
 - **The META ship is one pool's worth of evidence and its measured demand curve slopes up** (41.33%
   share at 900 pips against 21.14% at 250, which is the session confound). It ships because the level
-  gap is measured and large, not because the elasticity supports the size. Pair it with a randomised
-  `pokeFee` schedule, not a calendar-shaped one, or we will not learn anything from it either.
+  gap is measured and large, not because the elasticity supports the size. An earlier revision paired
+  it with a randomised `pokeFee` schedule; **withdrawn**, because that fights the deviation keeper for
+  the same lever and is not worth it on a tier earning $29.43 a week.
 - **Every high-fee observation on SPY, META and NVDA falls on Friday 2026-08-28**, which is also the
   48h scan's only cash session. The two windows are not independent evidence at the top of any curve.
 - **The window sits inside the points programme**, live since 2026-08-24 and paying on fees, so volume
