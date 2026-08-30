@@ -353,9 +353,21 @@ Three things the model cannot see, all of which favour asymmetry:
   sends corrective flow to a rival and leaves us dislocated while they collect. There is no
   observation of that regime in any of this work.
 
-What survives model-free is the round-trip arithmetic: 3.00% symmetric against 2.10% asymmetric for a
-full out-and-back. That matters only if the counterparty is churning the pool rather than arbitraging
-it, which was never established, because the sender census did not complete.
+The round-trip argument, which the earlier draft called model-free and therefore surviving, is
+**withdrawn as well, because it was backwards.** A round trip is LP-POSITIVE: on a constant-product
+curve reserves are a function of price alone, so an excursion that returns to its origin leaves the
+LP with their starting reserves plus every fee collected on both legs, while the round-tripper buys
+high, sells lower and pays twice. We should want that flow, not deter it. The only case where it
+hurts is a round-tripper who is also the LP, washing for fee-denominated points, and there the fee is
+paid to themselves so a higher round-trip cost deters nothing either.
+
+**What hurts LPs is a one-way excursion that does not come back.** That is the GLD case: two days on,
+the pool holds 28,869 USDG and 8.289 GLD, worth $41,545 at the on-chain mark and $32,259 at the real
+ETF price. The LP sold into a move that has not reverted, and the fee is their only compensation.
+
+Which is the actual argument for asymmetry, and it needs no simulation: **the outbound leg creates
+the LP's unwanted position and the inbound leg resolves it.** Charging more for the leg that does the
+damage is pricing, not fairness.
 
 `inboundShare` is a keeper variable, so it is a config edit either way. Locked at **0.33**.
 

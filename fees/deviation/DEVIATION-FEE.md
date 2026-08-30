@@ -425,11 +425,18 @@ Splitting the event by whether the deviation grew or shrank in each hour:
 | outbound, the pool walked further out | 25 | $4,563,959 | **80%** |
 | inbound, the pool brought back | 14 | $1,133,706 | 20% |
 
-The obvious version, where the inbound leg simply pays the base, has a hole. It makes a full round
-trip cost 1.50% out plus 0.15% back, which is **1.65%**, against 3.00% if both legs paid the cap. With
-171x churn on a $33k pool and the price oscillating between $1,200 and $1,971 for sixteen hours, the
-counterparty here looks far more like one actor round-tripping the book than like honest arbitrage,
-and a cheap return leg is a discount to exactly the wrong person.
+**A correction to what this section originally argued.** It claimed the inbound discount was a hole,
+because it makes a round trip cost 1.65% instead of 3.00% and the counterparty looked like a
+round-tripper. That reasoning is wrong. A round trip is **LP-positive**: reserves on a
+constant-product curve are a function of price alone, so an excursion returning to its origin leaves
+the LP with their starting reserves plus every fee collected on both legs, while the round-tripper
+buys high, sells lower, and pays twice. That is flow to welcome. The one case where it hurts is a
+round-tripper who is also the LP, washing for fee-denominated points, and there the fee returns to
+them so no round-trip cost deters it.
+
+The LP is hurt by a **one-way excursion that does not come back**, which is what GLD actually was.
+The outbound leg creates the position the LP did not want; the inbound leg resolves it. Charging more
+for the leg that does the damage is the whole argument for asymmetry, and it needs no model.
 
 > **Read this table for the round-trip column, not the revenue columns.** The revenue figures come
 > from replaying the actual volume path with an exogenous volume response, so charging more on the
