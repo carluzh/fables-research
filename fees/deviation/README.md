@@ -11,6 +11,7 @@ closed tier prices 300 pips.
 ## Layout
 
 ```
+REVIEW-BRIEF.md    start here: what this is, what is asked of the reviewer, what to attack
 DEVIATION-FEE.md   the proposal, the parameters and the argument for each of them
 SYSTEM-SPEC.md     the build decision: keeper, reference, per-pool availability, locked params.
                    Wins over DEVIATION-FEE.md wherever the two disagree.
