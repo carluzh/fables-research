@@ -684,13 +684,13 @@ $61.98M of virtual: weekly cover 1.21 on 27 Aug against 0.84 on 30 Aug, LVR $1,9
 $1,596/wk of fees. The base-fee argument concerns the open tier, which produced $266.71 of that
 week's $1,596.22. Depth is the binding lever on this pool and neither fee ladder touches it.
 
-**Resolution.** SPY's base stays **800 / 400 / 400** pending its own dated test window: the open tier
-is not reverted, because the 800 hours produced the week's highest fee take and the signed revert
-trigger (UniversalRouter dollar share against a 27.5% baseline) has not been computed. The out-of-
-hours raise from 350/250 to 400/400 is where the evidence is: out of hours is 83.3% of the pool's fees
-(open $266.71, overnight $495.25, closed $834.25), and in closed hours the v4 625 pool holds 9% more
-TVL than us and takes 18.6% share at 625 pips against our 10.3% at 250. A rival at comparable depth
-takes nearly double our share at 2.5x our price.
+**Resolution: superseded, and the base is not this document's call.** An interim adjudication here
+put SPY at 800 / 400 / 400. The per-pool work in `../pools/` has since measured every session against
+the volume-weighted whole field rather than a chosen rival, and ships **550 / 450 / 400**. That is
+newer, it is the calendar-ladder layer's own domain, and it wins. This document takes no position on
+any pool's base: it reads whatever the ladder is, from chain, every cycle.
+
+What remains this document's call for SPY is the deviation layer only.
 
 **SPY's kicker is widened from 0.75% to 1.50%, and full from 4.00% to 4.50%.** The census rule set
 0.75% from basis noise alone, but the pool's own measured deviation over an entirely normal weekend

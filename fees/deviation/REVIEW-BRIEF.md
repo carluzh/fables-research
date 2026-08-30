@@ -66,8 +66,8 @@ real resource test rather than a free one.
 The **deviation** parameters are done and in `SYSTEM-SPEC.md` section 7: GLD locked, and a kicker and
 full point for every asset with a live reference, from a rule a script applies.
 
-The parameters still landing are the **calendar ladder**, the per-session base fees, from the separate
-per-pool competitive work in `../pools/`. Those are a different layer and **the keeper does not depend
+The **calendar ladder**, the per-session base fees, is the separate per-pool work in `../pools/`,
+which has now landed and ships its own numbers. Those are a different layer and **the keeper does not depend
 on them**, precisely because it reads the base from chain every cycle rather than holding it: a later
 ladder change is a `setPoolConfig` and touches no keeper code. That is true only with the
 read-from-chain design above; the first draft of this spec held base as a constant and the claim would
@@ -123,7 +123,8 @@ section, so checking it is a diff.
 ## The three things worth hitting hardest
 
 - **The protocol fee**, because it is open.
-- **SPY's base.** An adversarial verifier broke the 600-pip route-ceiling premise that both prior
-  documents rested on: two thirds of open-session SPY volume trades above it. Section 9.
+- **Whether the ramp shape is right at all.** The kicker and cap are measured; the linear ramp
+  between them is a judgement call, and no data in here distinguishes it from any other monotonic
+  curve.
 - **n = 1.** Every revenue figure replays one weekend on one pool, bracketed by two volume models
   that disagree by 2.7x.
