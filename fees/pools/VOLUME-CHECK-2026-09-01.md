@@ -1,0 +1,129 @@
+# "Volume has calmed down": it has not, and here is the number that says it has
+
+**2026-09-01 07:40 UTC, Tuesday.** Answering Yanis. Reproduce with `scripts-eth/freshvol.mjs`,
+`whathesees.mjs`, `mktcontrol.mjs`, `glddev.mjs`, `allfees.mjs`.
+
+Daily volume is at a record. The rolling 24-hour figure is down 36%. Both are true, and the second
+one is what a dashboard shows.
+
+---
+
+## 1. Daily volume, which is not down
+
+From the indexer, the same source `census.mjs` uses.
+
+| day | | GLD | ETH | SPY | NVDA | META | **total** | fees |
+|---|---|---|---|---|---|---|---|---|
+| 08-25 | Tue | 246,925 | 322,245 | 205,285 | 23,647 | 4,769 | **803,455** | $504 |
+| 08-27 | Thu | 130,158 | 1,206,114 | 529,495 | 151,543 | 41,324 | **2,062,821** | $1,490 |
+| 08-28 | Fri | 338,977 | 1,755,766 | 961,088 | 78,056 | 28,764 | **3,180,696** | $2,761 |
+| 08-29 | Sat | 5,309,592 | 1,823,649 | 1,595,235 | 29,630 | 100,284 | **8,882,907** | $6,217 |
+| 08-30 | Sun | 1,354,114 | 3,996,048 | 6,774,070 | 31,180 | 47,393 | **12,222,084** | $14,462 |
+| **08-31** | **Mon** | 1,124,675 | 4,890,702 | 3,960,432 | 28,659 | 41,937 | **10,062,299** | **$10,204** |
+| 09-01 | Tue | 342,891 | 1,850,665 | 907,846 | 6,268 | 29,588 | **3,169,578** | $2,335 |
+
+The last row is 7.6 hours of a 24-hour day. Annualise it and Tuesday is running at **$10.0M/day
+against Monday's $10.06M**. Monday was the second-biggest day the book has ever had. Volume is up 3x
+on the week before and it is flat day over day.
+
+## 2. The number that is down, and why
+
+| rolling 24h ending | volume | fees | realised pips |
+|---|---|---|---|
+| 08-31 07:39 | $14,195,274 | $16,383 | 1,154 |
+| **09-01 07:39** | **$9,130,384** | **$8,378** | **918** |
+| | **-36%** | **-49%** | **-20%** |
+
+That is the drop. It is a **window effect**: yesterday's trailing 24 hours contained Sunday's peak
+hours and today's does not. Nothing changed in the pools between those two readings.
+
+The cleanest version, same clock hours so time of day cancels entirely:
+
+| 00:00 to 07:42 UTC | volume | fees |
+|---|---|---|
+| Sunday 08-30 | $2,128,475 | $2,239 |
+| Monday 08-31 | $4,101,665 | $4,161 |
+| Tuesday 09-01 | $3,169,750 | $2,335 |
+
+Today is **0.77x** yesterday and **1.49x** Sunday. Monday was the peak, today is off it, and both are
+well above the weekend.
+
+## 3. Fees fell twice as fast as volume, and that is the ladder working
+
+Realised fee went 1,154 pips to 918. That is not a market event, it is our own configuration.
+**GLD's CLOSED floor is 6,000 pips and its weekday floors are 3,000.** GLD is our highest-priced
+pool, so every Monday its price halves by design, and Monday's trailing window still held Sunday's
+6,000-pip hours.
+
+So the honest answer to "is it the start of the week" is **yes, but the opposite way round to how it
+sounds**. The weekend is our expensive window, not our quiet one. The week starting shows up as a
+fee decline, not a volume decline.
+
+## 4. Volatility did not calm on Monday either
+
+The ETH keeper's own EWMA, from its live log:
+
+| day | mean sigma | max |
+|---|---|---|
+| 08-27 Thu | 47.5% | 133.5% |
+| 08-28 Fri | 43.5% | 157.6% |
+| 08-29 Sat | 19.0% | 39.6% |
+| 08-30 Sun | 36.5% | 152.7% |
+| **08-31 Mon** | **45.3%** | 106.0% |
+| 09-01 Tue | 31.4% | 56.9% (7.7h only) |
+
+Monday sat at 45.3%, squarely inside the prior week's 43 to 51%. Today reads 31.4% but that is
+seven hours of pre-market, always the quietest stretch of the day.
+
+## 5. The chain is not quiet, it is the busiest it has been
+
+| day | rival v3 WETH/USDG 100 | rival v4 ETH/USDG 577 | our ETH |
+|---|---|---|---|
+| 08-28 Fri | $209,082,793 | $5,839,520 | $1,755,766 |
+| 08-30 Sun | $326,928,682 | $10,348,442 | $3,996,048 |
+| **08-31 Mon** | **$410,048,443** | $12,303,382 | $4,890,702 |
+| 09-01 Tue (7.6h) | $141,521,911 | $2,937,235 | $1,850,665 |
+
+The biggest venue on the chain had its highest day of the window on Monday and is tracking
+**$447M/day** today. Binance is softer over the same days (ETH $1.16bn last Monday to $0.65bn this
+Monday) but the chain is not following it.
+
+## 6. The one real, permanent decline: GLD's event is over
+
+Measured now: pool **408.41**, PAXG 4,430.29 times the 0.091804 basis gives fair **406.72**, so
+**d = 0.42%** against a 2.00% kicker. The pool that was 181% mispriced has fully re-converged.
+
+GLD did $5.31M on Saturday and about $1.1M a day now. It was 50% of our fee income and roughly 60% of
+volume on its peak day. **That decline is real, it is permanent, and it was always going to happen.**
+It is also the only genuine drop in this whole picture.
+
+## 7. Everything is healthy
+
+Read just now, both directions, using the correct 2-argument `currentFee(PoolId, bool)`:
+
+| pool | fee now | is that right |
+|---|---|---|
+| GLD | 3,000 | overnight floor, yes |
+| META | 750 | overnight floor, yes |
+| SPY | 350 | yes |
+| NVDA | 800 | yes |
+| TSLA | 500 | yes |
+| AAPL | 350 | yes |
+| ETH | 450 | keeper flat, yes |
+
+**No poke is live anywhere.** Both keepers are up: `fables-deviation.service` and
+`fables-eth-usdg.service`, `NRestarts=0`. The deviation keeper has fired zero pokes since boot,
+which is correct: every pool is below its kicker. The ETH keeper fired 174 in three days and is
+resting at its 450 flat with sigma around 25%.
+
+## 8. The one thing worth acting on
+
+**GLD's closed floor is still 6,000 from the 29 August emergency push, and the emergency is over.**
+Next weekend it will quote 0.60% on a pool sitting 0.42% from fair, into a market clearing at 0.39%.
+That is 1.5x the field on a pool with nothing left to defend against, and it will cost the weekend's
+volume for no protective benefit.
+
+This is the open decision already flagged in `LADDER-CORRECTION.md` section 6 and in the per-pool
+final-state commit. Recommendation unchanged: **take the closed tier to 3,000**, matching the other
+two tiers, which also keeps `pokeFloor` at 3,000 and never opens the 50% downward poke hole that
+going to 1,500 would. The deviation keeper is live now, so the condition that gated it is met.
