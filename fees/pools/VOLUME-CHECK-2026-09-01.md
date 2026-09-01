@@ -273,14 +273,82 @@ session no fee decision is identifiable**, and nothing here changes the hold.
 keeper reaction threshold. Everything the share numbers touch stays on the pre-registered gate: five
 clean cash sessions on the live ladder, so **Friday 2026-09-04 at the earliest**.
 
-## 11. The one thing worth acting on
+## 11. GLD's closed floor: cutting it to 3,000 is WRONG, and the fix is the kicker
 
-**GLD's closed floor is still 6,000 from the 29 August emergency push, and the emergency is over.**
-Next weekend it will quote 0.60% on a pool sitting 0.42% from fair, into a market clearing at 0.39%.
-That is 1.5x the field on a pool with nothing left to defend against, and it will cost the weekend's
-volume for no protective benefit.
+**I recommended taking GLD's closed tier from 6,000 to 3,000 in three separate places. Withdrawn.**
+Carl pushed back that it would leave us too cheap out of hours, and measuring it says he is right by
+a wide margin. `scripts-eth/gldclosed.mjs`.
 
-This is the open decision already flagged in `LADDER-CORRECTION.md` section 6 and in the per-pool
-final-state commit. Recommendation unchanged: **take the closed tier to 3,000**, matching the other
-two tiers, which also keeps `pokeFloor` at 3,000 and never opens the 50% downward poke hole that
-going to 1,500 would. The deviation keeper is live now, so the condition that gated it is met.
+**First, an error of my own that ran in the direction that flattered the cut.** I had been treating a
+CPMM's no-arb band as plus or minus twice the fee, on the reasoning that an arb pays it on both legs.
+That is wrong. The arbitrageur trades our pool **once** to realign it and sells into the real market,
+so they pay our fee once, and the band is plus or minus `f`. A 6,000-pip fee protects a 0.60% move,
+not a 1.20% one. The mistake halved the apparent exposure.
+
+**The weekend gold move distribution**, PAXG hourly, 104 weekends over two years, Friday 16:00 ET to
+Monday 09:30 ET:
+
+| | median | p75 | p90 | p99 | max |
+|---|---|---|---|---|---|
+| net move, close to close | **0.745%** | 1.419% | 2.209% | 3.040% | 3.194% |
+| max excursion inside the window | **1.360%** | 2.124% | 2.772% | 8.650% | 10.489% |
+
+Against what each base actually covers:
+
+| band | share of weekends, net | by excursion |
+|---|---|---|
+| under 0.30%, a 3,000 base covers it | 23.1% | **0.0%** |
+| 0.30% to 0.60%, only 6,000 covers | 17.3% | 8.7% |
+| **0.60% to 2.00%, NEITHER covers** | **47.1%** | **65.4%** |
+| over 2.00%, the keeper takes over | 12.5% | 26.0% |
+
+**The median weekend already moves further than 6,000 protects.** Cutting to 3,000 widens the
+unprotected set from 47.1% to 64.4% of weekends on net moves, and from 65.4% to 74.0% on excursions.
+That is the opposite of what I proposed.
+
+### But holding 6,000 does not fix it either, and that is the real finding
+
+The hole is **0.60% to 2.00%**, and it is where most weekends live. The base stops covering at 0.60%
+and the keeper does not start until its 2.00% kicker. **Two thirds of weekends land in the gap
+between them**, and no fee level closes it because the problem is not the level, it is the handoff.
+
+**Set GLD's kicker to 0.60%, matching the no-arb band its own closed base buys.** Then the base covers
+0 to 0.60% and the keeper covers everything above, continuously. The ramp is gentle where it now
+starts: with base 6,000, cap 15,000, full 10.00%, a 1.0% deviation prices at 6,383 pips and a 2.0% at
+7,340, so firing on more weekends does not mean charging much more on any of them.
+
+**The better version, and it is a keeper change rather than a config one.** The keeper already reads
+`base` from chain every cycle. Deriving the kicker from it, `kick = base_pips / 1e6`, makes the
+handoff exact on every pool and every session automatically: 0.60% when GLD is in its closed tier,
+0.30% when it drops to its weekday 3,000, and correspondingly on the equity pools. That is worth
+raising with Yanis rather than shipping as a constant.
+
+### So what happens to the closed tier
+
+**Leave it at 6,000 for now.** The argument I made for cutting it was that the keeper has replaced the
+need for a static defence. The measurement says the keeper as configured covers only the top 26% of
+weekends, so it has not replaced it. Revisit the level once the kicker is fixed, not before.
+
+The one thing that does still hold from the original note: **if it is ever cut, 3,000 not 1,500**,
+because 1,500 would drop `pokeFloor` from 3,000 and open a 50% downward poke hole. Going to 3,000
+leaves `pokeFloor` unchanged, since it is already `min(3000, 3000, 6000) = 3000`.
+
+## 12. ETH `push_delta_immediate`: the objection is right, and the fix is asymmetry
+
+Carl asked whether 150 would be too cheap. **The parameter is not a fee** and the fee floor does not
+move: `min_fee` stays 450, `max_fee` 3,000, `C` 40. It is the size of fee *change* that triggers an
+immediate on-chain push instead of waiting out the 900-second heartbeat.
+
+But the objection survives that clarification, because `engine.py:123` computes
+`delta = abs(desired - self.current_onchain_fee)`. **The deadband is symmetric.** Tightening it to 150
+speeds the keeper up on the way down as well as up, so it would give up the revenue we currently earn
+by sitting stale-high for up to fifteen minutes while volatility falls.
+
+The markout only ever indicted the upward lag: the 500-700 band under-collects because toxic flow
+arrives while we are still quoting the previous regime. Being late to come down is not a cost, it is
+income.
+
+**So make the deadband asymmetric rather than tighter**: push immediately on a **150-pip rise**, keep
+**500 pips on a fall**. That captures all of the protection the markout identified and gives up none
+of the stale-high revenue. It is a small code change, not a config edit, because the current
+expression takes an absolute value.

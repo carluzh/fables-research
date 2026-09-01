@@ -31,7 +31,21 @@ matters most. All three are below.
 | AAPL | **2026-08-20 07:46:49** | **500** | **350** | **300** | 0 | 0 | 0 | 0 / 0 / 0 | 8,000 |
 | ETH | never | `FablesLVR`, no calendar. Keeper-driven: `pokeFloor` 100, `flatFee` 450, `maxFee` 3,000 | | | | | | | |
 
-Bold rows are live now, confirmed by a direct `floorConfig(poolId)` read at head block 50,182,193.
+Bold rows were live at the time of writing, confirmed by a direct `floorConfig(poolId)` read at head
+block 50,182,193.
+
+> **ONE ROW HAS MOVED SINCE, 2026-08-31.** Rescanning `PoolConfigured` from block 50,100,000 to head
+> 51,001,838 returns exactly one event across all eight calendar hooks:
+>
+> | pool | set at (UTC) | open | o/n | closed | cap |
+> |---|---|---|---|---|---|
+> | META | **2026-08-30 21:49:39**, blk 50,341,839 | 900 | 750 | **450** | 8,000 |
+>
+> That is the one tier the per-pool work signed off, shipped as a single `setPoolConfig` twelve minutes
+> before the deviation keeper booted, and it is why the keeper's own boot log reads "META/USDG:
+> poke_floor moved 250 -> 450 on chain". META's row in the table above should be read as 900 / 750 /
+> **450**, not 250. Nothing else changed: SPY, NVDA, GLD, TSLA and AAPL are still on their 28 August
+> rows and section 6's GLD question is still open. Re-read with `fee-rerun-2026-08-30/cfghist.mjs`.
 
 **What the 28 August change actually did.** It was a broad raise on OPEN and OVERNIGHT and a small
 CUT on CLOSED:
@@ -198,8 +212,13 @@ in `../deviation/SYSTEM-SPEC.md` twice: section 7.1 says the revert "should happ
 keeper is live", and open item 10 says moving it to 1,500 drops `pokeFloor` from 3,000 to 1,500 and
 opens a 50% downward poke hole, so "do not ship it as written."
 
-What is missing is the number, so here it is. **Revert the closed tier to 3,000, not 1,500, and only
-after the keeper is live.** At 3,000 all three tiers are equal, `pokeFloor` stays at 3,000, and the 50%
+> **RETRACTED 2026-09-01. Do not cut it.** Measuring the weekend gold distribution shows a 6,000
+> base already fails to cover the median weekend, and cutting to 3,000 widens the unprotected set
+> from 47% to 64% of weekends. The real defect is the gap between the base's 0.60% no-arb band and
+> the keeper's 2.00% kicker. See [VOLUME-CHECK-2026-09-01.md](VOLUME-CHECK-2026-09-01.md) section 11.
+
+The original recommendation, kept for the record: **revert the closed tier to 3,000, not 1,500, and
+only after the keeper is live.** At 3,000 all three tiers are equal, `pokeFloor` stays at 3,000, and the 50%
 hole never opens. 1,500 was only ever an artefact of the pre-dislocation ladder.
 
 Leaving 6,000 in the meantime is the right default, not a failure: it is the manual stand-in for a

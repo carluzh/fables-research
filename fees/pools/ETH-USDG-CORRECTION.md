@@ -222,7 +222,11 @@ in every band. In A it was on the heartbeat and the transition bands got picked 
 regime-dependent calibration, which is how I first read it. It is one threshold, and my two windows
 happened to straddle it.
 
-**The edit: `push_delta_immediate` 500 to 150.** That drops the instant-reaction threshold from 48.7%
+**The edit, superseded: `push_delta_immediate` 500 to 150.** The deadband is symmetric
+(`abs(desired - current)`), so tightening it also speeds the keeper up on the way DOWN and gives up
+the stale-high revenue. Make it asymmetric instead, 150 up and 500 down: see
+[VOLUME-CHECK-2026-09-01.md](VOLUME-CHECK-2026-09-01.md) section 12. What follows is otherwise
+unchanged. That drops the instant-reaction threshold from 48.7%
 to 38.7% realised vol and covers the whole transition. Nothing else moves: `min_fee` stays 450,
 `max_fee` stays 3,000, `C` stays 40, the ladder is untouched.
 
