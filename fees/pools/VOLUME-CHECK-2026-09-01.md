@@ -199,7 +199,81 @@ on the three 500-pip days. Share says cut, dollars say hold, the confound is unb
 exactly the state `BASELINE-2026-08-30.md` section 4 pre-registered. **The randomised schedule is
 what settles it.**
 
-## 9. The one thing worth acting on
+## 9. META and NVDA, and the first read on the one change we shipped
+
+`scripts-eth/assetshare.mjs`. Share of each asset's whole on-chain field, by day and session, with
+META's CLOSED hours split either side of the `setPoolConfig` at 2026-08-30 21:49:39 UTC.
+
+### META: the 28 August raise is working, and clearly
+
+Volume-weighted across the week, same session, either side of that change:
+
+| session | at the old fee | at the new fee | share | revenue per unit of field volume |
+|---|---|---|---|---|
+| OPEN | 500 pips, **7.98%** | 900 pips, **5.50%** | -31% | **+24%** |
+| OVERNIGHT | ~410 pips, **9.14%** | ~737 pips, **6.98%** | -24% | **+37%** |
+
+**Share barely moved for an 80 and 114% price rise, so revenue rose on both tiers.** That is a
+genuine, if confounded, demand curve and it points the same way on two tiers independently.
+
+It also retires the four held cuts rather than merely deferring them. The case for cutting META's
+open and overnight back to 500 was that the 167h window showed us at 0.08x of market. The tiers have
+now run a week at the higher price and earned more for it.
+
+One honest wrinkle: the 500-pip OPEN days are 2.44%, 8.62% and 9.42%, and that first reading is an
+outlier on $1,814 of volume. Drop it and the 500-pip share is 9.02%, the fall becomes -39%, and the
+revenue gain shrinks to about +12%. Still positive, less emphatic.
+
+### META CLOSED: the shipped change is passing, on ten hours of data
+
+| | field volume | our share | realised |
+|---|---|---|---|
+| before, 08-28 to 08-30 | $1,829,077 | **8.01%** | 250 pips |
+| after, 08-30 21:49 onward | $128,773 | **5.20%** | 450 pips |
+
+Break-even is the old share times the fee ratio: `8.01% x 250/450 = 4.45%`. **We are at 5.20%, so it
+is passing, by 17%.**
+
+Do not bank it. The post-change window is **ten hours of Sunday evening**, the lowest-volume block of
+the week, and it is 7% of the field volume the pre-change reading rests on. The two readings inside
+it disagree with each other (7.70% and 4.49%). **The real test is next weekend**, which is the first
+full CLOSED block at 450.
+
+This also corrects the 7.12% break-even in [LADDER-CORRECTION.md](LADDER-CORRECTION.md) section 3.
+That number came off the 167h window's 12.81% CLOSED share; measured fresh on the same days as the
+post-change reading, the pre-change share is 8.01%, so 4.45% is the like-for-like bar.
+
+### NVDA: nothing measurable, which confirms the hold
+
+| session | range of daily share | our volume per session |
+|---|---|---|
+| OPEN | 0.07% to 0.24% | $6,242 to $42,026 |
+| OVERNIGHT | 0.08% to 0.27% | $8,084 to $128,980 |
+| CLOSED | 0.08% to 0.17% | $4,298 to $31,180 |
+
+Monday is the weakest day on all three tiers, but our absolute volume was roughly flat and NVDA's
+field grew: its OPEN field went $8.4M on the Tuesday to $16.5M on the Monday. **On $4k to $42k a
+session no fee decision is identifiable**, and nothing here changes the hold.
+
+## 10. Does any of this force a parameter change?
+
+**Two yes, and everything share-driven is still too early.**
+
+| change | verdict | why |
+|---|---|---|
+| **GLD closed 6,000 to 3,000** | **ship, deadline Saturday** | Not from this analysis at all: the dislocation is over at d = 0.42%. 6,000 is 1.5x its market with nothing left to defend, and the next CLOSED block starts Friday 16:00 ET |
+| **ETH keeper `push_delta_immediate` 500 to 150** | **ship** | Mechanism identified in source, worth $160-840/wk, no revenue risk since ETH flow does not respond to price |
+| META open, overnight | **hold, and now permanently** | The raise is earning more. The case for the cut is gone, not deferred |
+| META closed 450 | **hold, re-measure Monday** | Passing on ten hours. Next weekend is the first real block |
+| SPY open 800 | **hold, needs the randomised schedule** | Share says cut, dollars say hold, section 8 |
+| SPY overnight, closed; NVDA closed | **hold** | Unchanged since `LADDER-CORRECTION.md`. Nothing here moves them |
+| anything for ETH share | **no** | Share fell against a surging field, but the fee is not the lever. The routing test is |
+
+**Neither of the two ships is driven by the share data.** One is a dislocation that ended and one is a
+keeper reaction threshold. Everything the share numbers touch stays on the pre-registered gate: five
+clean cash sessions on the live ladder, so **Friday 2026-09-04 at the earliest**.
+
+## 11. The one thing worth acting on
 
 **GLD's closed floor is still 6,000 from the 29 August emergency push, and the emergency is over.**
 Next weekend it will quote 0.60% on a pool sitting 0.42% from fair, into a market clearing at 0.39%.
