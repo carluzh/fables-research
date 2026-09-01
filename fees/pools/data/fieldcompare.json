@@ -1,0 +1,1011 @@
+{
+ "anchor": 1788251020,
+ "wNow": [
+  1788164620,
+  1788251020
+ ],
+ "wPrev": [
+  1788078220,
+  1788164620
+ ],
+ "ours": {
+  "nowV": 9290705.30776167,
+  "prevV": 14357444.51850099,
+  "nowF": 8493.776101469495,
+  "prevF": 16403.58705166968
+ },
+ "rivals": {
+  "nowV": 598773793.5900565,
+  "prevV": 442956424.08346874,
+  "nowF": 142084.18593225823,
+  "prevF": 152883.5960855325
+ },
+ "all": {
+  "nowV": 608064498.8978181,
+  "prevV": 457313868.60196966,
+  "nowF": 150577.9620337277,
+  "prevF": 169287.18313720217
+ },
+ "perAsset": {
+  "ETH": {
+   "our": {
+    "nowV": 5289503.294530999,
+    "prevV": 5055780.742703,
+    "nowF": 3791.0782174649025,
+    "prevF": 4526.1129708329645
+   },
+   "field": {
+    "nowV": 523987440.416962,
+    "prevV": 382830596.4875449,
+    "nowF": 71319.31517350968,
+    "prevF": 56018.34674810824
+   }
+  },
+  "SPY": {
+   "our": {
+    "nowV": 2692736.7647407316,
+    "prevV": 7822353.86885067,
+    "nowF": 1122.837301594822,
+    "prevF": 2079.5113086394076
+   },
+   "field": {
+    "nowV": 30103399.748588033,
+    "prevV": 35558513.53987328,
+    "nowF": 25213.218804509834,
+    "prevF": 30268.388808819604
+   }
+  },
+  "GLD": {
+   "our": {
+    "nowV": 1156646.1992319373,
+    "prevV": 1400433.9700743193,
+    "nowF": 3468.2083034528578,
+    "prevF": 9770.99859074386
+   },
+   "field": {
+    "nowV": 7451817.265680415,
+    "prevV": 9956312.567042828,
+    "nowF": 18287.150304240145,
+    "prevF": 55350.120493718445
+   }
+  },
+  "NVDA": {
+   "our": {
+    "nowV": 29605.98601,
+    "prevV": 24099.236881999997,
+    "nowF": 35.407252681877,
+    "prevF": 8.644270836599999
+   },
+   "field": {
+    "nowV": 38526922.728357494,
+    "prevV": 22786779.528934598,
+    "nowF": 22057.69722561039,
+    "prevF": 13069.638985911326
+   }
+  },
+  "META": {
+   "our": {
+    "nowV": 73561.39064700001,
+    "prevV": 40396.922135999994,
+    "nowF": 57.81129501765,
+    "prevF": 13.8610339294
+   },
+   "field": {
+    "nowV": 702824.0477603807,
+    "prevV": 367194.4176084746,
+    "nowF": 2220.5433419212372,
+    "prevF": 1095.6990475808627
+   }
+  },
+  "TSLA": {
+   "our": {
+    "nowV": 589.578801,
+    "prevV": 1024.9148370000003,
+    "nowF": 0.9798968067849998,
+    "prevF": 0.42376257980000015
+   },
+   "field": {
+    "nowV": 1809006.370809844,
+    "prevV": 3614470.903886015,
+    "nowF": 5708.768702362485,
+    "prevF": 11375.692187005405
+   }
+  },
+  "AAPL": {
+   "our": {
+    "nowV": 48062.09379999999,
+    "prevV": 13354.863018,
+    "nowF": 17.4538344506,
+    "prevF": 4.035114107650001
+   },
+   "field": {
+    "nowV": 5483088.3196601,
+    "prevV": 2200001.157079649,
+    "nowF": 5771.268481573896,
+    "prevF": 2109.2968660583388
+   }
+  }
+ },
+ "rows": [
+  {
+   "id": "0xa7bb1ac63bbab0c44316e6c8c455213441689167",
+   "proto": "v3",
+   "pair": "SPY/USDG",
+   "tier": "500",
+   "ours": false,
+   "nowV": 765237.089775,
+   "nowF": 382.6185448875,
+   "prevV": 832116.624859,
+   "prevF": 416.05831242949995
+  },
+  {
+   "id": "0xa43b424bc609495aed4bcd88d654934b510b0ad9",
+   "proto": "v3",
+   "pair": "SPY/USDG",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 9304.743387999999,
+   "nowF": 27.914230164,
+   "prevV": 23299.764546000002,
+   "prevF": 69.899293638
+  },
+  {
+   "id": "0xddcbba3666f578e3f09516f21ff85bfee859ab5e",
+   "proto": "v3",
+   "pair": "WETH/SPY",
+   "tier": "500",
+   "ours": false,
+   "nowV": 18989497.60042071,
+   "nowF": 9494.748800210355,
+   "prevV": 16031108.657386998,
+   "prevF": 8015.554328693499
+  },
+  {
+   "id": "0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3",
+   "proto": "v3",
+   "pair": "USDG/NVDA",
+   "tier": "500",
+   "ours": false,
+   "nowV": 33971520.857776,
+   "nowF": 16985.760428888,
+   "prevV": 18918699.053697,
+   "prevF": 9459.3495268485
+  },
+  {
+   "id": "0xb944cec30bd4175855215d767adc81f39e5f7e2b",
+   "proto": "v3",
+   "pair": "USDG/NVDA",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 14038.468004,
+   "nowF": 42.11540401199999,
+   "prevV": 19577.510340000004,
+   "prevF": 58.73253102000001
+  },
+  {
+   "id": "0x62ab521f71431f78ac374cdbadc6cda3c8916b6c",
+   "proto": "v3",
+   "pair": "WETH/NVDA",
+   "tier": "500",
+   "ours": false,
+   "nowV": 2902339.3654864472,
+   "nowF": 1451.1696827432236,
+   "prevV": 1850058.115253346,
+   "prevF": 925.029057626673
+  },
+  {
+   "id": "0xc0be1cb0f674d9737c72b2a63fc542361185b807",
+   "proto": "v3",
+   "pair": "WETH/NVDA",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 577125.5644313372,
+   "nowF": 1731.3766932940116,
+   "prevV": 485451.37779428135,
+   "prevF": 1456.3541333828443
+  },
+  {
+   "id": "0xba2f1ed4ceb2169d538d1e614d847e83c5a55913",
+   "proto": "v3",
+   "pair": "USDG/GLD",
+   "tier": "500",
+   "ours": false,
+   "nowV": 2108031.348331,
+   "nowF": 1054.0156741655,
+   "prevV": 417731.14115100005,
+   "prevF": 208.86557057550004
+  },
+  {
+   "id": "0x7a6a053eccf1446a2633e05aa6d40d09381997ec",
+   "proto": "v3",
+   "pair": "USDG/GLD",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 4015210.122078999,
+   "nowF": 12045.630366237001,
+   "prevV": 5145232.125147998,
+   "prevF": 15435.696375444002
+  },
+  {
+   "id": "0x32cb909acf78354e08aa45639ff5cd33767e730a",
+   "proto": "v3",
+   "pair": "USDG/GLD",
+   "tier": "10000",
+   "ours": false,
+   "nowV": 1016.095416,
+   "nowF": 10.160954160000001,
+   "prevV": 360521.569991,
+   "prevF": 3605.2156999100002
+  },
+  {
+   "id": "0x98996e833ea35ec17c3645ca7b6dd40d188564c4",
+   "proto": "v3",
+   "pair": "WETH/GLD",
+   "tier": "10000",
+   "ours": false,
+   "nowV": 170913.50062247872,
+   "nowF": 1709.1350062247873,
+   "prevV": 2632354.5898645087,
+   "prevF": 26323.545898645087
+  },
+  {
+   "id": "0x107a7cb40d8665360ba10e59471af06150a50922",
+   "proto": "v3",
+   "pair": "USDG/META",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 43488.15448900001,
+   "nowF": 130.464463467,
+   "prevV": 19838.259571000002,
+   "prevF": 59.514778713
+  },
+  {
+   "id": "0x6fd62e9843ad2ac2c4fbf2b62647953ea29b3537",
+   "proto": "v3",
+   "pair": "USDG/META",
+   "tier": "10000",
+   "ours": false,
+   "nowV": 11498.216091999997,
+   "nowF": 114.98216092000001,
+   "prevV": 824.6804480000001,
+   "prevF": 8.246804480000002
+  },
+  {
+   "id": "0xa4bdb396a69617eb7f70e2cc1ef526f7340b1b0d",
+   "proto": "v3",
+   "pair": "WETH/META",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 185965.94993538063,
+   "nowF": 557.8978498061418,
+   "prevV": 122852.30842147456,
+   "prevF": 368.55692526442357
+  },
+  {
+   "id": "0xf4acdaeeb7022862a763c9b1b885e11191c889e3",
+   "proto": "v3",
+   "pair": "TSLA/USDG",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 829714.8950519998,
+   "nowF": 2489.144685156,
+   "prevV": 2131793.286921,
+   "prevF": 6395.379860763
+  },
+  {
+   "id": "0xb349fb08c2712f3a70bad40a4d006b68d67e888b",
+   "proto": "v3",
+   "pair": "TSLA/USDG",
+   "tier": "10000",
+   "ours": false,
+   "nowV": 8.15927,
+   "nowF": 0.0815927,
+   "prevV": 105.39423500000001,
+   "prevF": 1.05394235
+  },
+  {
+   "id": "0xa953ca88ff430e9487c60ca34d757414f4efda07",
+   "proto": "v3",
+   "pair": "WETH/TSLA",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 285366.1409728441,
+   "nowF": 856.0984229185323,
+   "prevV": 240749.69297001485,
+   "prevF": 722.2490789100444
+  },
+  {
+   "id": "0xaae0d815ee56e4092a5e5c2911e676fea50b2d6d",
+   "proto": "v3",
+   "pair": "USDG/AAPL",
+   "tier": "500",
+   "ours": false,
+   "nowV": 2074470.116231,
+   "nowF": 1037.2350581155,
+   "prevV": 1182333.016179,
+   "prevF": 591.1665080895002
+  },
+  {
+   "id": "0x783c9bbb765047cfdd2b84b92b2ca9f11d34b7ed",
+   "proto": "v3",
+   "pair": "USDG/AAPL",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 111253.447295,
+   "nowF": 333.760341885,
+   "prevV": 65654.24048900002,
+   "prevF": 196.96272146700002
+  },
+  {
+   "id": "0x3714aa8105de1f384481b425788af413748c1837",
+   "proto": "v3",
+   "pair": "USDG/AAPL",
+   "tier": "10000",
+   "ours": false,
+   "nowV": 68.754576,
+   "nowF": 0.6875457600000001,
+   "prevV": 50,
+   "prevF": 0.5
+  },
+  {
+   "id": "0x8bb3514e2204e1cdf3ac149efee7ff04d91b719f",
+   "proto": "v3",
+   "pair": "WETH/AAPL",
+   "tier": "500",
+   "ours": false,
+   "nowV": 2314217.2090661004,
+   "nowF": 1157.1086045330503,
+   "prevV": 645188.0517736495,
+   "prevF": 322.5940258868247
+  },
+  {
+   "id": "0x52e65b17fb6e5ba00ed806f37afcd2daa50271ca",
+   "proto": "v3",
+   "pair": "WETH/USDG",
+   "tier": "100",
+   "ours": false,
+   "nowV": 474417905.996876,
+   "nowF": 47441.79059968761,
+   "prevV": 335026942.95140594,
+   "prevF": 33502.694295140594
+  },
+  {
+   "id": "0x69bfaf19c9f377bb306a89aed9f6b07e2c1a8d9a",
+   "proto": "v3",
+   "pair": "WETH/USDG",
+   "tier": "500",
+   "ours": false,
+   "nowV": 19251752.57113,
+   "nowF": 9625.876285565,
+   "prevV": 13160767.370885998,
+   "prevF": 6580.383685443
+  },
+  {
+   "id": "0xa9188730fe85be88ad499d7d52b099e800fb0334",
+   "proto": "v3",
+   "pair": "WETH/USDG",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 256288.356513,
+   "nowF": 768.8650695390002,
+   "prevV": 769964.8981110001,
+   "prevF": 2309.8946943329997
+  },
+  {
+   "id": "0x5f009e071f07e92b6c624e83f52f17bbda34680d",
+   "proto": "v3",
+   "pair": "WETH/USDG",
+   "tier": "10000",
+   "ours": false,
+   "nowV": 357.02248099999997,
+   "nowF": 3.57022481,
+   "prevV": 253.70451000000003,
+   "prevF": 2.5370451000000003
+  },
+  {
+   "id": "0x55942b9b4c2f034062c13eeb40f5bb503b7a6c30",
+   "proto": "v3",
+   "pair": "SPY/NVDA",
+   "tier": "500",
+   "ours": false,
+   "nowV": 16666.79861973649,
+   "nowF": 8.333399309868245,
+   "prevV": 3947.7182156605586,
+   "prevF": 1.973859107830279
+  },
+  {
+   "id": "0x858569ce5824a49a9b6f66e1a4473ffc71469c37",
+   "proto": "v3",
+   "pair": "SPY/META",
+   "tier": "500",
+   "ours": false,
+   "nowV": 7259.501686415558,
+   "nowF": 3.629750843207779,
+   "prevV": 3478.453841679007,
+   "prevF": 1.7392269208395035
+  },
+  {
+   "id": "0x256b72f2cb1f761082827129d63bb0cc884c25c1",
+   "proto": "v3",
+   "pair": "SPY/AAPL",
+   "tier": "500",
+   "ours": false,
+   "nowV": 107382.02174857505,
+   "nowF": 53.69101087428752,
+   "prevV": 61087.63762171313,
+   "prevF": 30.54381881085657
+  },
+  {
+   "id": "0xfe2a80bb5618fd14984b92ca6d45bf5ba67443ddb1435e28b2e48df2fc1526cd",
+   "proto": "v4",
+   "pair": "SPY/USDG",
+   "tier": "3499",
+   "ours": false,
+   "nowV": 3302529.5956149995,
+   "nowF": 11555.551055056885,
+   "prevV": 4268194.371482,
+   "prevF": 14934.41210581552
+  },
+  {
+   "id": "0x3bb34a44f1b2b5f32c034c38a53065a521a47b199700fa9bd19d60985ff24bf1",
+   "proto": "v4",
+   "pair": "USDG/NVDA",
+   "tier": "3499",
+   "ours": false,
+   "nowV": 282364.02095700003,
+   "nowF": 987.991709328543,
+   "prevV": 127201.93222,
+   "prevF": 445.07956083778
+  },
+  {
+   "id": "0xe5923c8a8be481ec89a2ca784a2bbfa4235de6d88f92260fd66b660c4babf907",
+   "proto": "v4",
+   "pair": "SPY/USDG",
+   "tier": "625",
+   "ours": false,
+   "nowV": 2537889.468259,
+   "nowF": 1586.1809176618747,
+   "prevV": 3847691.505745,
+   "prevF": 2404.807191090625
+  },
+  {
+   "id": "0x8674c1c5544f3c9563565b5d4bd5916701d90b3559b072acf7cef5b4fc5b8dcd",
+   "proto": "v4",
+   "pair": "SPY/USDG",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 2689244.3690560004,
+   "nowF": 1121.3962981523002,
+   "prevV": 7818684.890470999,
+   "prevF": 2078.3788002672495
+  },
+  {
+   "id": "0xc748f4671a867db48b552f6b7650bf3255e05f80f00e3f7aad1b17ccb7898fdb",
+   "proto": "v4",
+   "pair": "USDG/AAPL",
+   "tier": "3499",
+   "ours": false,
+   "nowV": 912018.2735759999,
+   "nowF": 3191.151939242424,
+   "prevV": 282563.419304,
+   "prevF": 988.6894041446961
+  },
+  {
+   "id": "0x84bd4e2d8be11aeb0afc1195b38f587b61e90068548f1063fdbe448fb8cad0b6",
+   "proto": "v4",
+   "pair": "WETH/USDG",
+   "tier": "252",
+   "ours": false,
+   "nowV": 6292090.879849999,
+   "nowF": 1585.6069017222003,
+   "prevV": 5523808.844408999,
+   "prevF": 1391.999828791068
+  },
+  {
+   "id": "0x8517f8071ae5b831b738052f12125e8e3d6c158b78728aa44ce3b25e5104d32e",
+   "proto": "v4",
+   "pair": "TSLA/USDG",
+   "tier": "3499",
+   "ours": false,
+   "nowV": 663471.4452810001,
+   "nowF": 2321.4865870382187,
+   "prevV": 1208550.377962,
+   "prevF": 4228.717772489037
+  },
+  {
+   "id": "0x2ada73f1c143a8469b755877402302914156c9a1b8e9266041e4dc342f8b0366",
+   "proto": "v4",
+   "pair": "WETH/USDG",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 0,
+   "nowF": 0,
+   "prevV": 6593588.500518003,
+   "prevF": 0
+  },
+  {
+   "id": "0xa583fdfb7ba7959fd8285592fb78e71041ff29eb782ee6e92490c6e30f3c752c",
+   "proto": "v4",
+   "pair": "WETH/USDG",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 5350888.315458,
+   "nowF": 0,
+   "prevV": 3686457.0656849993,
+   "prevF": 0
+  },
+  {
+   "id": "0x6ba18d461bfe3df70a80b50a4700e330e49efdaf597901b931f210554a5035d2",
+   "proto": "v4",
+   "pair": "WETH/USDG",
+   "tier": "565",
+   "ours": false,
+   "nowV": 99538.85138699997,
+   "nowF": 56.239451033655016,
+   "prevV": 110451.427693,
+   "prevF": 62.405056646545
+  },
+  {
+   "id": "0xfcfae8fa0bd6da961bcf5d990f27690932deac4f093e99bf3e871691c6586593",
+   "proto": "v4",
+   "pair": "WETH/USDG",
+   "tier": "625",
+   "ours": false,
+   "nowV": 197368.451312,
+   "nowF": 123.35528207000003,
+   "prevV": 196009.774273,
+   "prevF": 122.50610892062501
+  },
+  {
+   "id": "0x14f8cf472104b8823340025c004d022de12ab0e4d7e8112a6dc73c1979e044ad",
+   "proto": "v4",
+   "pair": "WETH/USDG",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 219087.19800499998,
+   "nowF": 13.5199454571,
+   "prevV": 38036.9666,
+   "prevF": 3.4462671267000005
+  },
+  {
+   "id": "0x77c25b9386d47de62e0155c393696e9f43f7e6d036c6ca52f66735ccbb8808a7",
+   "proto": "v4",
+   "pair": "WETH/USDG",
+   "tier": "3499",
+   "ours": false,
+   "nowV": 2827.1585790000004,
+   "nowF": 9.892227867921001,
+   "prevV": 6929.740161999997,
+   "prevF": 24.247160826837998
+  },
+  {
+   "id": "0x647836c4965c512f0d82a2128abe7826eacf5a79d2dbed252a89ba5c591d1e87",
+   "proto": "v4",
+   "pair": "WETH/NVDA",
+   "tier": "1193",
+   "ours": false,
+   "nowV": 548066.5308088259,
+   "nowF": 653.843371254929,
+   "prevV": 427999.0623021079,
+   "prevF": 510.6028813264148
+  },
+  {
+   "id": "0x69d1983f3f5a36d2c7d445247c399faabc0f3a33bec8b40cd19283aae8e83a1f",
+   "proto": "v4",
+   "pair": "WETH/NVDA",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 107823.8533681852,
+   "nowF": 9.845678943351485,
+   "prevV": 152305.94114072094,
+   "prevF": 115.88797933259102
+  },
+  {
+   "id": "0xa821b3724b451b22476c5347471b2a96d185b86af8760f226273e34ab4b2b8a0",
+   "proto": "v4",
+   "pair": "SPY/TSLA",
+   "tier": "625",
+   "ours": false,
+   "nowV": 969253.6538157508,
+   "nowF": 605.7835336348442,
+   "prevV": 1559023.1942425668,
+   "prevF": 974.3894964016041
+  },
+  {
+   "id": "0xbc732a1a0baabce2574ec2bca24fccad8e2c38a061a37cefc17a2fd12809394f",
+   "proto": "v4",
+   "pair": "SPY/NVDA",
+   "tier": "625",
+   "ours": false,
+   "nowV": 289482.06426244817,
+   "nowF": 180.92629016403006,
+   "prevV": 480754.7297996132,
+   "prevF": 300.4717061247582
+  },
+  {
+   "id": "0xe6b713cf680868a40aafca45810b0c894eb5c696f5a2230d4816e6695e90e681",
+   "proto": "v4",
+   "pair": "SPY/META",
+   "tier": "625",
+   "ours": false,
+   "nowV": 290179.036366325,
+   "nowF": 181.36189772895307,
+   "prevV": 377925.6285995972,
+   "prevF": 236.20351787474823
+  },
+  {
+   "id": "0x2b397a8cfa01a41c0a2e5d326abd113a5d3fbb5b1ad2ae77294a6827065b316c",
+   "proto": "v4",
+   "pair": "SPY/USDG",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 34.143884,
+   "nowF": 0,
+   "prevV": 66941.00684300001,
+   "prevF": 789.197298995
+  },
+  {
+   "id": "0xcb410a0728986ba05737420556d5fe128ffd6739823cc92fc745d37bad4b313f",
+   "proto": "v4",
+   "pair": "SPY/USDG",
+   "tier": "75",
+   "ours": false,
+   "nowV": 125595.223093,
+   "nowF": 9.419641731975002,
+   "prevV": 180439.348859,
+   "prevF": 13.532951164425002
+  },
+  {
+   "id": "0x988f3b6ceec4795e0d6d28a054af87ffbcbdeee2566f72ae391da5f109bd485f",
+   "proto": "v4",
+   "pair": "SPY/NVDA",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 3492.395684731199,
+   "nowF": 1.4410034425218305,
+   "prevV": 3668.978379670309,
+   "prevF": 1.1325083721581848
+  },
+  {
+   "id": "0x118887805417a88865010dfe9ab3a516214e720aff2b01a19fcdb92b924c397f",
+   "proto": "v4",
+   "pair": "SPY/GLD",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 665.3963499372148,
+   "nowF": 0.2658948068584888,
+   "prevV": 2606.3068193190825,
+   "prevF": 0.7847304739509889
+  },
+  {
+   "id": "0x6a41bdbdf82850998dd5f30588cde7a38447ba6334258ba91775e090155eb796",
+   "proto": "v4",
+   "pair": "USDG/NVDA",
+   "tier": "10990",
+   "ours": false,
+   "nowV": 9.771141,
+   "nowF": 0.10738483959,
+   "prevV": 195.355459,
+   "prevF": 2.14695649441
+  },
+  {
+   "id": "0xdf5c0bcd967d54774c139a4ef803ec994779736346fb4c21b50ed241b1fd2682",
+   "proto": "v4",
+   "pair": "USDG/NVDA",
+   "tier": "475",
+   "ours": false,
+   "nowV": 42628.709218,
+   "nowF": 20.24863687855,
+   "prevV": 120494.66008100002,
+   "prevF": 57.23496353847501
+  },
+  {
+   "id": "0x8a4b200cfb9fb8a40d2778eda432bfaa36d21fdaa9ee8e529929f6afaf61a2bf",
+   "proto": "v4",
+   "pair": "USDG/NVDA",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 0,
+   "nowF": 0,
+   "prevV": 632842.6869659999,
+   "prevF": 8.939902348799999
+  },
+  {
+   "id": "0x7990aad9e8fb048f49a155a7df5603db0366f0657035b78eb4196395cccb3dcd",
+   "proto": "v4",
+   "pair": "USDG/NVDA",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 29605.98601,
+   "nowF": 35.407252681877,
+   "prevV": 24099.236881999997,
+   "prevF": 8.644270836599999
+  },
+  {
+   "id": "0x55c2dddc6c6b85897009759787655c6fad1e1c4d5c63d33e38bd7e18c55000d2",
+   "proto": "v4",
+   "pair": "USDG/NVDA",
+   "tier": "375",
+   "ours": false,
+   "nowV": 12177.646466999997,
+   "nowF": 4.566617425124999,
+   "prevV": 7624.46533,
+   "prevF": 2.85917449875
+  },
+  {
+   "id": "0x53e74184f024eb01ceb7bbde68866bff3cc3ddf378c78745eb52bdd9ad7bcd91",
+   "proto": "v4",
+   "pair": "USDG/NVDA",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 13.552259999999999,
+   "nowF": 0.103548967686,
+   "prevV": 13.643279000000003,
+   "prevF": 0.098245252079
+  },
+  {
+   "id": "0xddbda626d2f0707419489ad8c922d888e4a27e8f251bcbd2315a5377a8396e70",
+   "proto": "v4",
+   "pair": "WETH/NVDA",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 812.0783305139162,
+   "nowF": 0.8120783305139161,
+   "prevV": 19864.753113756153,
+   "prevF": 17.449081535159802
+  },
+  {
+   "id": "0xfcb1ad7c577599cd1831ae239da38cced8a833ad488f924e080a8066ab3f469f",
+   "proto": "v4",
+   "pair": "AAPL/NVDA",
+   "tier": "3499",
+   "ours": false,
+   "nowV": 38396.32409916805,
+   "nowF": 134.348738022989,
+   "prevV": 351.73507638010653,
+   "prevF": 1.2307210322539928
+  },
+  {
+   "id": "0xfe281bbfa9aa658c1aa9c2ad1b0c62c4286f96c7cb1074296b54e869935a7a3a",
+   "proto": "v4",
+   "pair": "USDG/GLD",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 1155980.802882,
+   "nowF": 3467.9424086459994,
+   "prevV": 1397827.6632550003,
+   "prevF": 9770.213860269909
+  },
+  {
+   "id": "0x8c21192a7e146ae59d8cb8657f4f57eb24552de9053975231d96c2a4d0edf60d",
+   "proto": "v4",
+   "pair": "USDG/GLD",
+   "tier": "100000",
+   "ours": false,
+   "nowV": 0,
+   "nowF": 0,
+   "prevV": 31.645706000000004,
+   "prevF": 3.1645706000000002
+  },
+  {
+   "id": "0xf9e718d9bcb2806507d7a24cc45e06fca354206fe0e95c1e03d02eb1d94b50d2",
+   "proto": "v4",
+   "pair": "USDG/GLD",
+   "tier": "350000",
+   "ours": false,
+   "nowV": 0,
+   "nowF": 0,
+   "prevV": 7.5251079999999995,
+   "prevF": 2.6337878
+  },
+  {
+   "id": "0x5875d407a42965b0e768c8925cea290e06fa50603ef34fc99eb92a1050e6ae36",
+   "proto": "v4",
+   "pair": "USDG/META",
+   "tier": "3499",
+   "ours": false,
+   "nowV": 387155.05191100005,
+   "nowF": 1354.6555266365892,
+   "prevV": 176222.074789,
+   "prevF": 616.601039686711
+  },
+  {
+   "id": "0x4ac4259eb99dce57268a856719d087fa1a53569b2fed6f330aabe32d9a4aa4f5",
+   "proto": "v4",
+   "pair": "USDG/META",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 73561.39064700001,
+   "nowF": 57.81129501765,
+   "prevV": 40396.922135999994,
+   "prevF": 13.8610339294
+  },
+  {
+   "id": "0x825482c14268df31245e2723450c0242d7beb7151ed2f0a95f03bf97699dbc99",
+   "proto": "v4",
+   "pair": "USDG/META",
+   "tier": "4096",
+   "ours": false,
+   "nowV": 1155.284686,
+   "nowF": 4.732046073856,
+   "prevV": 7060.172243000001,
+   "prevF": 28.918465507327998
+  },
+  {
+   "id": "0xff5e30e68690402ce94cd9466deab56ecc2014f8e2827c1a88fa6d77e9e90392",
+   "proto": "v4",
+   "pair": "TSLA/USDG",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 19761.517643,
+   "nowF": 19.761517643000005,
+   "prevV": 32219.410895999998,
+   "prevF": 27.765258196799998
+  },
+  {
+   "id": "0xd5effce87036cd858146c0c15fa825c231a9de1843200ca108e431e431331e8e",
+   "proto": "v4",
+   "pair": "TSLA/USDG",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 589.578801,
+   "nowF": 0.9798968067849998,
+   "prevV": 1024.9148370000003,
+   "prevF": 0.42376257980000015
+  },
+  {
+   "id": "0x92186dd5cb043661fc7ea0a5d4a5d8b91395624929f278bfc2488e82861232ed",
+   "proto": "v4",
+   "pair": "TSLA/USDG",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 10065.956328999999,
+   "nowF": 21.098537219693,
+   "prevV": 4.770639,
+   "prevF": 0.008076691827
+  },
+  {
+   "id": "0xc1cf542fee17d0cd6faa6d39eac14a1e1595403e24262aefb28a9f534e669206",
+   "proto": "v4",
+   "pair": "TSLA/USDG",
+   "tier": "4096",
+   "ours": false,
+   "nowV": 28.677460999999997,
+   "nowF": 0.117462880256,
+   "prevV": 23.055426,
+   "prevF": 0.094435024896
+  },
+  {
+   "id": "0xda4116b5894ee7479e64eae9276e1a2944ef0e5ce863a299d296a15618deee01",
+   "proto": "v4",
+   "pair": "USDG/AAPL",
+   "tier": "10990",
+   "ours": false,
+   "nowV": 2230.382944,
+   "nowF": 24.511908554559998,
+   "prevV": 49.975,
+   "prevF": 0.54922525
+  },
+  {
+   "id": "0x845b21902932be7f77f8ccbf793c17494f0ce7c6ffdcdb675d4dec701bc7601a",
+   "proto": "v4",
+   "pair": "USDG/AAPL",
+   "tier": "dyn",
+   "ours": false,
+   "nowV": 20213.323311,
+   "nowF": 8.0853293244,
+   "prevV": 10310.673145000004,
+   "prevF": 4.124269257999999
+  },
+  {
+   "id": "0xa2347ba69167e5602f74640ffbf737ee7cdd825e4726d3462564fc6533070147",
+   "proto": "v4",
+   "pair": "USDG/AAPL",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 48062.09379999999,
+   "nowF": 17.4538344506,
+   "prevV": 13354.863018,
+   "prevF": 4.035114107650001
+  },
+  {
+   "id": "0x3d5e454a7901ae6e46718fc0139c4a5982c64a187c81daffc4c9d2296ca50073",
+   "proto": "v4",
+   "pair": "USDG/AAPL",
+   "tier": "4096",
+   "ours": false,
+   "nowV": 265.82134099999996,
+   "nowF": 1.088804212736,
+   "prevV": 109.26778299999998,
+   "prevF": 0.4475608391680001
+  },
+  {
+   "id": "0xab946accc83201ad85dc0f44eebb7ba9140b5fb347845cdee057042008e959d8",
+   "proto": "v4",
+   "pair": "USDG/AAPL",
+   "tier": "375",
+   "ours": false,
+   "nowV": 166.051239,
+   "nowF": 0.062269214625,
+   "prevV": 255.38139600000002,
+   "prevF": 0.0957680235
+  },
+  {
+   "id": "0x496d48b9c1256a5b4f3c85f85776aff8e75cf847397cc8174242f97ae99b6d71",
+   "proto": "v4",
+   "pair": "USDG/AAPL",
+   "tier": "1000",
+   "ours": false,
+   "nowV": 122.846281,
+   "nowF": 0.12284628099999999,
+   "prevV": 132.268992,
+   "prevF": 0.132268992
+  },
+  {
+   "id": "0x2850228ca42a132645a1ffc73bef9a1fbe3b964ce70249973d3564ffba0f622a",
+   "proto": "v4",
+   "pair": "SPY/AAPL",
+   "tier": "625",
+   "ours": false,
+   "nowV": 350.9858216928192,
+   "nowF": 0.219366138558012,
+   "prevV": 151.02898078587324,
+   "prevF": 0.09439311299117077
+  },
+  {
+   "id": "0x6ca686acfdfae5b6fb7ed49e717e774fdc95dab2d48136d203bdc6d398a90e88",
+   "proto": "v4",
+   "pair": "SPY/AAPL",
+   "tier": "2899",
+   "ours": false,
+   "nowV": 1.0570916461220417,
+   "nowF": 0.0030645086821077987,
+   "prevV": 0,
+   "prevF": 0
+  },
+  {
+   "id": "0x8803c117ccae7B5146297876c2A25DF135141C4d",
+   "proto": "v2",
+   "pair": "WETH/USDG",
+   "tier": "3000",
+   "ours": false,
+   "nowV": 250224.32288100003,
+   "nowF": 750.6729686430001,
+   "prevV": 67008.322787,
+   "prevF": 201.02496836100002
+  },
+  {
+   "id": "0xbac3aa3b91584a53a579b3c999a56756e954e59247e497bad1d25a4334bde551",
+   "proto": "v4",
+   "pair": "ETH/USDG",
+   "tier": "dyn",
+   "ours": true,
+   "nowV": 5289503.294530999,
+   "nowF": 3791.0782174649025,
+   "prevV": 5055780.742703,
+   "prevF": 4526.1129708329645
+  },
+  {
+   "id": "0x54f7883914619af9105355bf83ed678bcf9f63560218ac61c9963b9503d0ba32",
+   "proto": "v4",
+   "pair": "ETH/USDG",
+   "tier": "577",
+   "ours": false,
+   "nowV": 11998062.480731001,
+   "nowF": 6922.882051381789,
+   "prevV": 12094332.177924002,
+   "prevF": 6978.4296666621485
+  },
+  {
+   "id": "0x387bf619da4d3fb62bb276482693dba1b9b3520f573cabdfe033384a24125982",
+   "proto": "v4",
+   "pair": "ETH/USDG",
+   "tier": "625",
+   "ours": false,
+   "nowV": 361545.51722800004,
+   "nowF": 225.9659482675,
+   "prevV": 500263.999878,
+   "prevF": 312.6649999237501
+  }
+ ]
+}

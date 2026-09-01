@@ -137,7 +137,69 @@ Read just now, both directions, using the correct 2-argument `currentFee(PoolId,
 which is correct: every pool is below its kicker. The ETH keeper fired 174 in three days and is
 resting at its 450 flat with sigma around 25%.
 
-## 8. The one thing worth acting on
+## 8. Against the competition, which is the question I should have asked first
+
+Everything above measures us against ourselves. Carl asked for the field, and the first cut of it
+looks alarming:
+
+| rolling 24h | prev | now | change |
+|---|---|---|---|
+| **us, 9 pools** | $14,357,445 | $9,290,705 | **-35.3%** |
+| **everyone else on the chain** | $442,956,424 | $598,773,794 | **+35.2%** |
+| whole chain | $457,313,869 | $608,064,499 | +33.0% |
+
+**Our share of chain volume went 3.140% to 1.528%, a halving.** We fell while the chain rose by the
+same proportion. That reads as losing badly, and section 2's "it is only a window effect" does not
+cover it.
+
+**It is the same artefact one level up.** The two windows do not hold session constant either: the
+previous one is mostly Sunday CLOSED and the current one is mostly weekday OPEN and OVERNIGHT. Our
+share is session-dependent by construction, because the equity pools are one of the few venues open
+when the real market is shut. Holding session fixed, `scripts-eth/spyshare.mjs` on SPY, the pool that
+drives the whole move:
+
+| session | 08-25 | 08-26 | 08-27 | 08-28 | **08-31 Mon** | 09-01 Tue |
+|---|---|---|---|---|---|---|
+| OVERNIGHT | 7.94% | 5.75% | 6.52% | 10.62% | **15.76%** | **12.89%** |
+| CLOSED | | | | 13.60% | **22.35%** | |
+| OPEN | 4.37% | 3.70% | 5.27% | 1.58% | **3.10%** | |
+
+**In OVERNIGHT and CLOSED our share is at its best of the week, not its worst.** Monday's 15.76%
+overnight is double the 5.75 to 7.94% of Tuesday through Thursday. The apparent collapse is entirely
+session mix: the prior window sat in the sessions where we hold 19 to 22%, and the current one sits
+in the sessions where we hold 3 to 16%.
+
+Per asset, same two windows:
+
+| asset | ours | field | share prev | share now |
+|---|---|---|---|---|
+| ETH | **+4.6%** | **+36.9%** | 1.32% | **1.01%** |
+| SPY | -65.6% | -15.3% | 22.00% | 8.94% |
+| GLD | -17.4% | -25.2% | 14.07% | **15.52%** |
+| NVDA | +22.9% | +69.1% | 0.11% | 0.08% |
+| META | +82.1% | +91.4% | 11.00% | 10.47% |
+| AAPL | +259.9% | +149.2% | 0.61% | 0.88% |
+
+### Two things in here are real and neither is the headline
+
+**ETH did not keep up with a chain-wide surge.** No session effect exists on ETH, so its share going
+1.32% to 1.01% is clean. The field grew 36.9% and we grew 4.6%. When flow surges on this chain it
+goes to the venues in the route, and we are not one of them. That is the same conclusion
+[ETH-USDG-CORRECTION.md](ETH-USDG-CORRECTION.md) section 6 reached from a completely different
+direction, and this is the first time it has shown up as a live cost rather than a static ranking.
+
+**SPY's OPEN tier at 800 pips is the one weak session.** Three days at 500 pips gave 4.37, 3.70 and
+5.27%. Two days at 800 gave 1.58 and 3.10%. Share roughly halves for a 1.6x price rise, which is the
+first thing resembling a real demand curve anyone has measured on this pool.
+
+It still does not settle the held SPY open cut, and it must not be quoted as if it does. Measured
+dollars run the other way, because the field's own OPEN volume grew 5x across the same days: at 800
+pips we earned **$45.03/h** on the Monday and $8.91/h on the Friday, against $6.09, $4.73 and $8.65/h
+on the three 500-pip days. Share says cut, dollars say hold, the confound is unbroken, and that is
+exactly the state `BASELINE-2026-08-30.md` section 4 pre-registered. **The randomised schedule is
+what settles it.**
+
+## 9. The one thing worth acting on
 
 **GLD's closed floor is still 6,000 from the 29 August emergency push, and the emergency is over.**
 Next weekend it will quote 0.60% on a pool sitting 0.42% from fair, into a market clearing at 0.39%.
