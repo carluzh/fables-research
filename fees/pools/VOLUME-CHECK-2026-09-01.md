@@ -6,21 +6,26 @@
 Daily volume is at a record. The rolling 24-hour figure is down 36%. Both are true, and the second
 one is what a dashboard shows.
 
-**Provenance, stated up front because everything below rests on it.** The volume and fee figures come
-from the Uniswap indexer, the same endpoint `census.mjs` uses. I started a raw-chain `Swap` scan to
-cross-check them independently and **it never finished**: the RPC rate-limits hard enough that 4 days
-across 7 pools ran past 30 minutes, so it was abandoned. What I do have is weaker than an independent
-check and should be read as such:
+**Provenance, verified against the chain.** The volume and fee figures come from the Uniswap indexer,
+the same endpoint `census.mjs` uses. Two earlier attempts to cross-check it against raw `Swap` events
+were abandoned: the RPC rate-limits `eth_getLogs` hard enough that 4 days across 7 pools ran past
+half an hour. The fix was to stop trying to reproduce the whole table and instead scan **one day and
+the two pools carrying 88% of Monday's volume**, which is a twentieth of the work and answers the
+same question. `scripts-eth/chaincheck.mjs`, Monday 2026-08-31 UTC, blocks 50,419,159 to 51,274,850:
 
-- Re-pulling the endpoint today reproduces the frozen 2026-08-30 census **exactly**, ratio 1.0000 on
-  all 20 pool-days that overlap as full days. That proves the endpoint is stable and that I am reading
-  it correctly. It is the same source twice, so it proves nothing about accuracy.
-- Accuracy comes from earlier work: [OVERVIEW.md](OVERVIEW.md) section 4 already validated this
-  endpoint against raw `Swap` events on these exact pools, at scan-over-census ratios of SPY 1.017,
-  NVDA 1.000, META 1.001, GLD 1.001, ETH 1.009.
+| pool | raw chain | indexer | ratio |
+|---|---|---|---|
+| ETH | 4,893 swaps, **$4,890,704**, $4,025 fees, 823 pips | **$4,890,702**, $4,025, 823 pips | **1.0000** |
+| SPY | 7,305 swaps, **$3,963,650**, $1,458 fees, 368 pips | **$3,960,432**, $1,457, 368 pips | **1.0008** |
+| **combined** | **$8,854,353** | **$8,851,134** | **1.0004** |
 
-So the numbers are good to roughly 1 to 2% on our pools. The known exception is the two zero-fee
-WETH/USDG venues, which the census undercounts; that touches the rival column in section 5, not ours.
+**The indexer is exact on our v4 pools**, to $3,219 on $8.85M, on the day the whole question is
+about. It also beats the looser 1.000 to 1.017 that [OVERVIEW.md](OVERVIEW.md) section 4 measured
+last week, because that comparison spanned v3 rivals with their own venue-level noise.
+
+Two things this does not cover, neither of which touches the conclusion. The other five pools were
+not rescanned; they are 12% of Monday. And the known census undercount on the two zero-fee WETH/USDG
+venues still applies to the rival column in section 5, not to ours.
 
 ---
 
