@@ -6,6 +6,22 @@
 Daily volume is at a record. The rolling 24-hour figure is down 36%. Both are true, and the second
 one is what a dashboard shows.
 
+**Provenance, stated up front because everything below rests on it.** The volume and fee figures come
+from the Uniswap indexer, the same endpoint `census.mjs` uses. I started a raw-chain `Swap` scan to
+cross-check them independently and **it never finished**: the RPC rate-limits hard enough that 4 days
+across 7 pools ran past 30 minutes, so it was abandoned. What I do have is weaker than an independent
+check and should be read as such:
+
+- Re-pulling the endpoint today reproduces the frozen 2026-08-30 census **exactly**, ratio 1.0000 on
+  all 20 pool-days that overlap as full days. That proves the endpoint is stable and that I am reading
+  it correctly. It is the same source twice, so it proves nothing about accuracy.
+- Accuracy comes from earlier work: [OVERVIEW.md](OVERVIEW.md) section 4 already validated this
+  endpoint against raw `Swap` events on these exact pools, at scan-over-census ratios of SPY 1.017,
+  NVDA 1.000, META 1.001, GLD 1.001, ETH 1.009.
+
+So the numbers are good to roughly 1 to 2% on our pools. The known exception is the two zero-fee
+WETH/USDG venues, which the census undercounts; that touches the rival column in section 5, not ours.
+
 ---
 
 ## 1. Daily volume, which is not down
